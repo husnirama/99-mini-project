@@ -263,8 +263,9 @@ The MVP must include:
 * 📈 Production observability setup guide
 
 # Reference :
-Components : https://ui.shadcn.com/
-Full UI Design (beta) : https://stitch.withgoogle.com/projects/13584918531067192384
+* Components : https://ui.shadcn.com/
+
+* Full UI Design (beta) : https://stitch.withgoogle.com/projects/13584918531067192384
 
 # Notes :
 
