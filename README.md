@@ -273,3 +273,6 @@ The MVP must include:
 # Notes :
 
 - This project will follow monorepo file structure -> one repo for frontend and backend
+
+## Design prototype
+- figma : https://www.figma.com/make/1D5T5VaYD3BBnh7b2Ifi2D/Event-Management-Platform-Prototype?t=zeOapZgtZ41aIZVv-1
