@@ -33,7 +33,7 @@ The MVP must include:
 
 #### ✅ Setup
 
-- [ ] Initialize repository
+- [x] Initialize repository
 - [ ] Setup folder structure
 - [ ] Setup environment variables
 - [ ] Setup database (Postgres - Supabase)
