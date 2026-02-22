@@ -32,6 +32,7 @@ model User {
      deletedAt DateTime?
 
      sessions Session[]
+     event Event[]
    }
 
 model Session {
@@ -45,3 +46,70 @@ model Session {
   user User @relation(fields: [userId], references: [id])
   @@index([userId])
 }
+
+enum eventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+}
+
+model Event {
+  id Int @id @default(autoincrement())
+  organizeBy Int
+  title String @unique
+  eventDateStart DateTime
+  eventDateEnd DateTime
+  status eventStatus @default(DRAFT)
+  eventDescription String
+  eventTnC String
+  createdAt DateTime
+  updatedAt DateTime
+  deletedAt DateTime
+
+  venue Venue[]
+  ticket TicketType[]
+  user User @relation(fields: [organizeBy], references: [id])
+  @@index([organizeBy])
+}
+
+
+model Venue{
+  id Int @id @default(autoincrement())
+  eventId Int
+  name String
+  addressLine String
+  city String
+  region String
+  country String
+  latitude Decimal
+  longitude Decimal
+
+  event Event @relation(fields: [eventId], references: [id])
+  @@index([eventId])
+}
+
+enum ticketStatus{
+  ACTIVE
+  SOLD_OUT
+  HIDDEN
+}
+
+model TicketType{
+  id Int @id @default(autoincrement())
+  eventId Int
+  name String
+  price Decimal
+  quota Int
+  description String
+  salesStartAt DateTime
+  salesEndAt DateTime
+  status ticketStatus @default(ACTIVE)
+  contactPerson String
+  emailContactPerson String
+  phoneContactPerson String
+
+  event Event @relation(fields: [eventId], references: [id])
+  @@index([eventId])
+}
+
+

@@ -52,7 +52,10 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
-  Session: 'Session'
+  Session: 'Session',
+  Event: 'Event',
+  Venue: 'Venue',
+  TicketType: 'TicketType'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -98,6 +101,56 @@ export const SessionScalarFieldEnum = {
 } as const
 
 export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
+
+
+export const EventScalarFieldEnum = {
+  id: 'id',
+  organizeBy: 'organizeBy',
+  title: 'title',
+  eventDateStart: 'eventDateStart',
+  eventDateEnd: 'eventDateEnd',
+  status: 'status',
+  eventDescription: 'eventDescription',
+  eventTnC: 'eventTnC',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
+
+
+export const VenueScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  name: 'name',
+  addressLine: 'addressLine',
+  city: 'city',
+  region: 'region',
+  country: 'country',
+  latitude: 'latitude',
+  longitude: 'longitude'
+} as const
+
+export type VenueScalarFieldEnum = (typeof VenueScalarFieldEnum)[keyof typeof VenueScalarFieldEnum]
+
+
+export const TicketTypeScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  name: 'name',
+  price: 'price',
+  quota: 'quota',
+  description: 'description',
+  salesStartAt: 'salesStartAt',
+  salesEndAt: 'salesEndAt',
+  status: 'status',
+  contactPerson: 'contactPerson',
+  emailContactPerson: 'emailContactPerson',
+  phoneContactPerson: 'phoneContactPerson'
+} as const
+
+export type TicketTypeScalarFieldEnum = (typeof TicketTypeScalarFieldEnum)[keyof typeof TicketTypeScalarFieldEnum]
 
 
 export const SortOrder = {
