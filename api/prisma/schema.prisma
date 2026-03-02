@@ -56,20 +56,21 @@ enum eventStatus {
 model Event {
   id Int @id @default(autoincrement())
   organizeBy Int
-  title String @unique
+  title String 
   eventDateStart DateTime
   eventDateEnd DateTime
   status eventStatus @default(DRAFT)
-  eventDescription String
-  eventTnC String
-  createdAt DateTime
-  updatedAt DateTime
-  deletedAt DateTime
+  eventDescription String?
+  eventTnC String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
 
   venue Venue[]
   ticket TicketType[]
   user User @relation(fields: [organizeBy], references: [id])
   @@index([organizeBy])
+  @@unique([organizeBy, title])
 }
 
 
@@ -79,10 +80,10 @@ model Venue{
   name String
   addressLine String
   city String
-  region String
+  region String?
   country String
-  latitude Decimal
-  longitude Decimal
+  latitude Decimal?
+  longitude Decimal?
 
   event Event @relation(fields: [eventId], references: [id])
   @@index([eventId])
@@ -100,10 +101,10 @@ model TicketType{
   name String
   price Decimal
   quota Int
-  description String
+  description String?
   salesStartAt DateTime
   salesEndAt DateTime
-  status ticketStatus @default(ACTIVE)
+  status ticketStatus @default(HIDDEN)
   contactPerson String
   emailContactPerson String
   phoneContactPerson String

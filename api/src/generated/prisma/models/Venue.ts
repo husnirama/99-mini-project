@@ -221,10 +221,10 @@ export type VenueGroupByOutputType = {
   name: string
   addressLine: string
   city: string
-  region: string
+  region: string | null
   country: string
-  latitude: runtime.Decimal
-  longitude: runtime.Decimal
+  latitude: runtime.Decimal | null
+  longitude: runtime.Decimal | null
   _count: VenueCountAggregateOutputType | null
   _avg: VenueAvgAggregateOutputType | null
   _sum: VenueSumAggregateOutputType | null
@@ -256,10 +256,10 @@ export type VenueWhereInput = {
   name?: Prisma.StringFilter<"Venue"> | string
   addressLine?: Prisma.StringFilter<"Venue"> | string
   city?: Prisma.StringFilter<"Venue"> | string
-  region?: Prisma.StringFilter<"Venue"> | string
+  region?: Prisma.StringNullableFilter<"Venue"> | string | null
   country?: Prisma.StringFilter<"Venue"> | string
-  latitude?: Prisma.DecimalFilter<"Venue"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  longitude?: Prisma.DecimalFilter<"Venue"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  latitude?: Prisma.DecimalNullableFilter<"Venue"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.DecimalNullableFilter<"Venue"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   event?: Prisma.XOR<Prisma.EventScalarRelationFilter, Prisma.EventWhereInput>
 }
 
@@ -269,10 +269,10 @@ export type VenueOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   addressLine?: Prisma.SortOrder
   city?: Prisma.SortOrder
-  region?: Prisma.SortOrder
+  region?: Prisma.SortOrderInput | Prisma.SortOrder
   country?: Prisma.SortOrder
-  latitude?: Prisma.SortOrder
-  longitude?: Prisma.SortOrder
+  latitude?: Prisma.SortOrderInput | Prisma.SortOrder
+  longitude?: Prisma.SortOrderInput | Prisma.SortOrder
   event?: Prisma.EventOrderByWithRelationInput
 }
 
@@ -285,10 +285,10 @@ export type VenueWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Venue"> | string
   addressLine?: Prisma.StringFilter<"Venue"> | string
   city?: Prisma.StringFilter<"Venue"> | string
-  region?: Prisma.StringFilter<"Venue"> | string
+  region?: Prisma.StringNullableFilter<"Venue"> | string | null
   country?: Prisma.StringFilter<"Venue"> | string
-  latitude?: Prisma.DecimalFilter<"Venue"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  longitude?: Prisma.DecimalFilter<"Venue"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  latitude?: Prisma.DecimalNullableFilter<"Venue"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.DecimalNullableFilter<"Venue"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   event?: Prisma.XOR<Prisma.EventScalarRelationFilter, Prisma.EventWhereInput>
 }, "id">
 
@@ -298,10 +298,10 @@ export type VenueOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   addressLine?: Prisma.SortOrder
   city?: Prisma.SortOrder
-  region?: Prisma.SortOrder
+  region?: Prisma.SortOrderInput | Prisma.SortOrder
   country?: Prisma.SortOrder
-  latitude?: Prisma.SortOrder
-  longitude?: Prisma.SortOrder
+  latitude?: Prisma.SortOrderInput | Prisma.SortOrder
+  longitude?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.VenueCountOrderByAggregateInput
   _avg?: Prisma.VenueAvgOrderByAggregateInput
   _max?: Prisma.VenueMaxOrderByAggregateInput
@@ -318,20 +318,20 @@ export type VenueScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Venue"> | string
   addressLine?: Prisma.StringWithAggregatesFilter<"Venue"> | string
   city?: Prisma.StringWithAggregatesFilter<"Venue"> | string
-  region?: Prisma.StringWithAggregatesFilter<"Venue"> | string
+  region?: Prisma.StringNullableWithAggregatesFilter<"Venue"> | string | null
   country?: Prisma.StringWithAggregatesFilter<"Venue"> | string
-  latitude?: Prisma.DecimalWithAggregatesFilter<"Venue"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  longitude?: Prisma.DecimalWithAggregatesFilter<"Venue"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  latitude?: Prisma.DecimalNullableWithAggregatesFilter<"Venue"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.DecimalNullableWithAggregatesFilter<"Venue"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type VenueCreateInput = {
   name: string
   addressLine: string
   city: string
-  region: string
+  region?: string | null
   country: string
-  latitude: runtime.Decimal | runtime.DecimalJsLike | number | string
-  longitude: runtime.Decimal | runtime.DecimalJsLike | number | string
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   event: Prisma.EventCreateNestedOneWithoutVenueInput
 }
 
@@ -341,20 +341,20 @@ export type VenueUncheckedCreateInput = {
   name: string
   addressLine: string
   city: string
-  region: string
+  region?: string | null
   country: string
-  latitude: runtime.Decimal | runtime.DecimalJsLike | number | string
-  longitude: runtime.Decimal | runtime.DecimalJsLike | number | string
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type VenueUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   addressLine?: Prisma.StringFieldUpdateOperationsInput | string
   city?: Prisma.StringFieldUpdateOperationsInput | string
-  region?: Prisma.StringFieldUpdateOperationsInput | string
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.StringFieldUpdateOperationsInput | string
-  latitude?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  longitude?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   event?: Prisma.EventUpdateOneRequiredWithoutVenueNestedInput
 }
 
@@ -364,10 +364,10 @@ export type VenueUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   addressLine?: Prisma.StringFieldUpdateOperationsInput | string
   city?: Prisma.StringFieldUpdateOperationsInput | string
-  region?: Prisma.StringFieldUpdateOperationsInput | string
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.StringFieldUpdateOperationsInput | string
-  latitude?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  longitude?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type VenueCreateManyInput = {
@@ -376,20 +376,20 @@ export type VenueCreateManyInput = {
   name: string
   addressLine: string
   city: string
-  region: string
+  region?: string | null
   country: string
-  latitude: runtime.Decimal | runtime.DecimalJsLike | number | string
-  longitude: runtime.Decimal | runtime.DecimalJsLike | number | string
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type VenueUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   addressLine?: Prisma.StringFieldUpdateOperationsInput | string
   city?: Prisma.StringFieldUpdateOperationsInput | string
-  region?: Prisma.StringFieldUpdateOperationsInput | string
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.StringFieldUpdateOperationsInput | string
-  latitude?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  longitude?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type VenueUncheckedUpdateManyInput = {
@@ -398,10 +398,10 @@ export type VenueUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   addressLine?: Prisma.StringFieldUpdateOperationsInput | string
   city?: Prisma.StringFieldUpdateOperationsInput | string
-  region?: Prisma.StringFieldUpdateOperationsInput | string
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.StringFieldUpdateOperationsInput | string
-  latitude?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  longitude?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type VenueListRelationFilter = {
@@ -506,8 +506,8 @@ export type VenueUncheckedUpdateManyWithoutEventNestedInput = {
   deleteMany?: Prisma.VenueScalarWhereInput | Prisma.VenueScalarWhereInput[]
 }
 
-export type DecimalFieldUpdateOperationsInput = {
-  set?: runtime.Decimal | runtime.DecimalJsLike | number | string
+export type NullableDecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
   decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
   multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -518,10 +518,10 @@ export type VenueCreateWithoutEventInput = {
   name: string
   addressLine: string
   city: string
-  region: string
+  region?: string | null
   country: string
-  latitude: runtime.Decimal | runtime.DecimalJsLike | number | string
-  longitude: runtime.Decimal | runtime.DecimalJsLike | number | string
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type VenueUncheckedCreateWithoutEventInput = {
@@ -529,10 +529,10 @@ export type VenueUncheckedCreateWithoutEventInput = {
   name: string
   addressLine: string
   city: string
-  region: string
+  region?: string | null
   country: string
-  latitude: runtime.Decimal | runtime.DecimalJsLike | number | string
-  longitude: runtime.Decimal | runtime.DecimalJsLike | number | string
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type VenueCreateOrConnectWithoutEventInput = {
@@ -570,10 +570,10 @@ export type VenueScalarWhereInput = {
   name?: Prisma.StringFilter<"Venue"> | string
   addressLine?: Prisma.StringFilter<"Venue"> | string
   city?: Prisma.StringFilter<"Venue"> | string
-  region?: Prisma.StringFilter<"Venue"> | string
+  region?: Prisma.StringNullableFilter<"Venue"> | string | null
   country?: Prisma.StringFilter<"Venue"> | string
-  latitude?: Prisma.DecimalFilter<"Venue"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  longitude?: Prisma.DecimalFilter<"Venue"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  latitude?: Prisma.DecimalNullableFilter<"Venue"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.DecimalNullableFilter<"Venue"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type VenueCreateManyEventInput = {
@@ -581,20 +581,20 @@ export type VenueCreateManyEventInput = {
   name: string
   addressLine: string
   city: string
-  region: string
+  region?: string | null
   country: string
-  latitude: runtime.Decimal | runtime.DecimalJsLike | number | string
-  longitude: runtime.Decimal | runtime.DecimalJsLike | number | string
+  latitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type VenueUpdateWithoutEventInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   addressLine?: Prisma.StringFieldUpdateOperationsInput | string
   city?: Prisma.StringFieldUpdateOperationsInput | string
-  region?: Prisma.StringFieldUpdateOperationsInput | string
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.StringFieldUpdateOperationsInput | string
-  latitude?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  longitude?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type VenueUncheckedUpdateWithoutEventInput = {
@@ -602,10 +602,10 @@ export type VenueUncheckedUpdateWithoutEventInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   addressLine?: Prisma.StringFieldUpdateOperationsInput | string
   city?: Prisma.StringFieldUpdateOperationsInput | string
-  region?: Prisma.StringFieldUpdateOperationsInput | string
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.StringFieldUpdateOperationsInput | string
-  latitude?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  longitude?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type VenueUncheckedUpdateManyWithoutEventInput = {
@@ -613,10 +613,10 @@ export type VenueUncheckedUpdateManyWithoutEventInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   addressLine?: Prisma.StringFieldUpdateOperationsInput | string
   city?: Prisma.StringFieldUpdateOperationsInput | string
-  region?: Prisma.StringFieldUpdateOperationsInput | string
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.StringFieldUpdateOperationsInput | string
-  latitude?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  longitude?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  latitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  longitude?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 
@@ -694,10 +694,10 @@ export type $VenuePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     name: string
     addressLine: string
     city: string
-    region: string
+    region: string | null
     country: string
-    latitude: runtime.Decimal
-    longitude: runtime.Decimal
+    latitude: runtime.Decimal | null
+    longitude: runtime.Decimal | null
   }, ExtArgs["result"]["venue"]>
   composites: {}
 }
