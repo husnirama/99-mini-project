@@ -56,7 +56,8 @@ enum eventStatus {
 model Event {
   id Int @id @default(autoincrement())
   organizeBy Int
-  title String 
+  title String
+  image String? 
   eventDateStart DateTime
   eventDateEnd DateTime
   status eventStatus @default(DRAFT)
@@ -68,9 +69,24 @@ model Event {
 
   venue Venue[]
   ticket TicketType[]
+  eventImage EventImage[]
   user User @relation(fields: [organizeBy], references: [id])
   @@index([organizeBy])
   @@unique([organizeBy, title])
+}
+
+model EventImage{
+  id Int @id @default(autoincrement())
+  eventId Int @unique
+  imageURL String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  event Event @relation(fields:[eventId], references: [id])
+  @@index([eventId])
+
 }
 
 

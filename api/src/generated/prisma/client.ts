@@ -55,6 +55,11 @@ export type Session = Prisma.SessionModel
  */
 export type Event = Prisma.EventModel
 /**
+ * Model EventImage
+ * 
+ */
+export type EventImage = Prisma.EventImageModel
+/**
  * Model Venue
  * 
  */

@@ -31,7 +31,7 @@
 
 export interface CreateEventInput {
   title: string;
-  eventDate: Date;
   eventDateStart: Date;
   eventDateEnd: Date;
+  image?: string;
 }

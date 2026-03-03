@@ -9,6 +9,7 @@ export const createEventSchema = z
     eventDateEnd: z.coerce.date({
       message: "Event date end must be formatted YYYY-MM-DDTHH:mm:ssZ",
     }),
+    image: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.eventDateEnd <= data.eventDateStart) {

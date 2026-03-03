@@ -54,6 +54,7 @@ export const ModelName = {
   User: 'User',
   Session: 'Session',
   Event: 'Event',
+  EventImage: 'EventImage',
   Venue: 'Venue',
   TicketType: 'TicketType'
 } as const
@@ -107,6 +108,7 @@ export const EventScalarFieldEnum = {
   id: 'id',
   organizeBy: 'organizeBy',
   title: 'title',
+  image: 'image',
   eventDateStart: 'eventDateStart',
   eventDateEnd: 'eventDateEnd',
   status: 'status',
@@ -118,6 +120,18 @@ export const EventScalarFieldEnum = {
 } as const
 
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
+
+
+export const EventImageScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  imageURL: 'imageURL',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type EventImageScalarFieldEnum = (typeof EventImageScalarFieldEnum)[keyof typeof EventImageScalarFieldEnum]
 
 
 export const VenueScalarFieldEnum = {

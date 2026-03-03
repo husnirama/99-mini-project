@@ -10,10 +10,17 @@ export async function handleCreateEvent(
     const organizerId = req.user!.userId;
     const payload = req.body;
 
-    const event = await createDraftEvent(organizerId, payload);
+    const files = req.files as Express.Multer.File[];
+
+    console.log(req.file);
+    console.log("body:", req.body);
+    console.log("files:", req.files);
+    console.log("content-type:", req.headers["content-type"]);
+    const result = await createDraftEvent(organizerId, payload, files);
+
     return res.status(201).json({
       message: "Event created successfully",
-      data: event,
+      data: result,
     });
   } catch (error) {
     next(error);
