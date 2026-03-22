@@ -35,6 +35,7 @@ export const useAuthStore = create<AuthState>()(
             email,
             password,
           });
+          // console.log(data);
 
           set({
             accessToken: data.token,

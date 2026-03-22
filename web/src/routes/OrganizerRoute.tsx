@@ -7,12 +7,12 @@ export default function OrganizerRoute() {
 
   if (!user || !user.role) return <Navigate to="/auth/login" />;
 
-  if (user.role !== "EVENT_ORGANIZER")
-    return <Navigate to="/organizer/create-event" />;
+  if (user.role !== "EVENT_ORGANIZER") return <Navigate to="/" />;
 
-  return;
-  <>
-    <Toaster />
-    <Outlet />
-  </>;
+  return (
+    <>
+      <Toaster />
+      <Outlet />
+    </>
+  );
 }

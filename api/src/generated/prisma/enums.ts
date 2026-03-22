@@ -33,3 +33,50 @@ export const ticketStatus = {
 } as const
 
 export type ticketStatus = (typeof ticketStatus)[keyof typeof ticketStatus]
+
+
+export const promotionDiscountType = {
+  PERCENTAGE: 'PERCENTAGE',
+  FIXED: 'FIXED'
+} as const
+
+export type promotionDiscountType = (typeof promotionDiscountType)[keyof typeof promotionDiscountType]
+
+
+export const transactionStatus = {
+  WAITING_FOR_PAYMENT: 'WAITING_FOR_PAYMENT',
+  WAITING_FOR_ADMIN_CONFIRMATION: 'WAITING_FOR_ADMIN_CONFIRMATION',
+  DONE: 'DONE',
+  REJECTED: 'REJECTED',
+  EXPIRED: 'EXPIRED',
+  CANCELED: 'CANCELED'
+} as const
+
+export type transactionStatus = (typeof transactionStatus)[keyof typeof transactionStatus]
+
+
+export const orderStatus = {
+  PENDING: 'PENDING',
+  COMPLETED: 'COMPLETED',
+  EXPIRED: 'EXPIRED',
+  CANCELED: 'CANCELED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type orderStatus = (typeof orderStatus)[keyof typeof orderStatus]
+
+
+export const paymentMethod = {
+  CARD: 'CARD',
+  BANK_TRANSFER: 'BANK_TRANSFER'
+} as const
+
+export type paymentMethod = (typeof paymentMethod)[keyof typeof paymentMethod]
+
+
+export const cancelActor = {
+  USER: 'USER',
+  ADMIN: 'ADMIN'
+} as const
+
+export type cancelActor = (typeof cancelActor)[keyof typeof cancelActor]

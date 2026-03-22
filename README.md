@@ -33,7 +33,7 @@ The MVP must include:
 
 #### ✅ Setup
 
-- [x] Initialize repository
+- [ ] Initialize repository
 - [ ] Setup folder structure
 - [ ] Setup environment variables
 - [ ] Setup database (Postgres - Supabase)
@@ -43,7 +43,7 @@ The MVP must include:
 
 #### 🔐 Authentication
 
-- [ ] User registration
+- [x] User registration
 - [ ] Login
 - [ ] Password hashing
 - [ ] JWT authentication
@@ -275,4 +275,5 @@ The MVP must include:
 - This project will follow monorepo file structure -> one repo for frontend and backend
 
 ## Design prototype
+
 - figma : https://www.figma.com/make/1D5T5VaYD3BBnh7b2Ifi2D/Event-Management-Platform-Prototype?t=zeOapZgtZ41aIZVv-1

@@ -47,3 +47,18 @@ export type Venue = Prisma.VenueModel
  * 
  */
 export type TicketType = Prisma.TicketTypeModel
+/**
+ * Model Promotion
+ * 
+ */
+export type Promotion = Prisma.PromotionModel
+/**
+ * Model Order
+ * 
+ */
+export type Order = Prisma.OrderModel
+/**
+ * Model Transaction
+ * 
+ */
+export type Transaction = Prisma.TransactionModel

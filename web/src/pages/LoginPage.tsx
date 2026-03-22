@@ -18,25 +18,15 @@ export default function LoginPage() {
     onSubmit: async (values) => {
       try {
         await login(values);
-        toast.info("Loggin successful");
+        toast("Login successful", { position: "top-center" });
         setSuccess(true);
       } catch (error) {
-        toast.info("Loggin failed");
+        toast("Loggin failed", { position: "top-center" });
         console.error(error);
       }
     },
   });
 
-  // async function handleSubmit(event: React.SubmitEvent) {
-  //   event.preventDefault();
-
-  //   try {
-  //     login({ email, password });
-  //     setSuccess(true);
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // }
   if (success) return <Navigate to="/" replace />;
   return (
     <>
@@ -45,9 +35,11 @@ export default function LoginPage() {
           <div className="size-8 bg-primary text-white rounded-lg flex items-center justify-center">
             <span className="material-symbols-outlined">event</span>
           </div>
-          <h2 className="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight tracking-tight">
-            EventHub
-          </h2>
+          <Link to="/">
+            <h2 className="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight tracking-tight">
+              EventHub
+            </h2>
+          </Link>
         </div>
         <nav className="hidden md:flex items-center gap-8">
           <a

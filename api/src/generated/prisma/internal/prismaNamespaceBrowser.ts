@@ -56,7 +56,10 @@ export const ModelName = {
   Event: 'Event',
   EventImage: 'EventImage',
   Venue: 'Venue',
-  TicketType: 'TicketType'
+  TicketType: 'TicketType',
+  Promotion: 'Promotion',
+  Order: 'Order',
+  Transaction: 'Transaction'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -108,12 +111,14 @@ export const EventScalarFieldEnum = {
   id: 'id',
   organizeBy: 'organizeBy',
   title: 'title',
+  category: 'category',
   image: 'image',
   eventDateStart: 'eventDateStart',
   eventDateEnd: 'eventDateEnd',
   status: 'status',
   eventDescription: 'eventDescription',
   eventTnC: 'eventTnC',
+  termsAccepted: 'termsAccepted',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -155,6 +160,8 @@ export const TicketTypeScalarFieldEnum = {
   name: 'name',
   price: 'price',
   quota: 'quota',
+  sold: 'sold',
+  reserved: 'reserved',
   description: 'description',
   salesStartAt: 'salesStartAt',
   salesEndAt: 'salesEndAt',
@@ -165,6 +172,71 @@ export const TicketTypeScalarFieldEnum = {
 } as const
 
 export type TicketTypeScalarFieldEnum = (typeof TicketTypeScalarFieldEnum)[keyof typeof TicketTypeScalarFieldEnum]
+
+
+export const PromotionScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  name: 'name',
+  code: 'code',
+  discountType: 'discountType',
+  discountValue: 'discountValue',
+  maxDiscount: 'maxDiscount',
+  minPurchase: 'minPurchase',
+  quota: 'quota',
+  usedCount: 'usedCount',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type PromotionScalarFieldEnum = (typeof PromotionScalarFieldEnum)[keyof typeof PromotionScalarFieldEnum]
+
+
+export const OrderScalarFieldEnum = {
+  id: 'id',
+  customerId: 'customerId',
+  eventId: 'eventId',
+  ticketTypeId: 'ticketTypeId',
+  quantity: 'quantity',
+  unitPrice: 'unitPrice',
+  subTotalAmount: 'subTotalAmount',
+  discountAmount: 'discountAmount',
+  totalAmount: 'totalAmount',
+  promotionId: 'promotionId',
+  voucherCode: 'voucherCode',
+  buyerName: 'buyerName',
+  buyerEmail: 'buyerEmail',
+  buyerPhone: 'buyerPhone',
+  guestTokenHash: 'guestTokenHash',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  expiresAt: 'expiresAt'
+} as const
+
+export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+export const TransactionScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  paymentMethod: 'paymentMethod',
+  paymentProof: 'paymentProof',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  paidAt: 'paidAt',
+  verifiedBy: 'verifiedBy',
+  verifiedAt: 'verifiedAt',
+  canceledAt: 'canceledAt',
+  canceledBy: 'canceledBy',
+  rejectedReason: 'rejectedReason'
+} as const
+
+export type TransactionScalarFieldEnum = (typeof TransactionScalarFieldEnum)[keyof typeof TransactionScalarFieldEnum]
 
 
 export const SortOrder = {

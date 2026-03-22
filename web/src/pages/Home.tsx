@@ -1,4 +1,278 @@
+import { apiClient } from "@/api/clients";
+import { API_ENDPOINTS } from "@/api/endpoint";
+import EventCard from "@/components/EventCard";
+import FeatureEventCard from "@/components/FeatureCard";
+import type { EventItem } from "@/types/eventListTypes";
+import { formatPrice, getLowestPrice } from "@/utils/eventList.utils";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router";
+import { toast } from "sonner";
+
+type DatePreset = "ANY" | "TODAY" | "THIS_WEEKEND" | "NEXT_WEEK";
+type SortOption = "RECOMMENDED" | "NEWEST" | "PRICE_LOW" | "PRICE_HIGH";
+
+const DEFAULT_TAGS = ["Music", "Technology", "Business", "Workshop"];
+
+function toDateAtDayBoundary(value: string, boundary: "start" | "end") {
+  if (!value) return null;
+  const parts = value.split("-").map(Number);
+  if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+
+  const [year, month, day] = parts;
+  if (boundary === "start") {
+    return new Date(year, month - 1, day, 0, 0, 0, 0);
+  }
+  return new Date(year, month - 1, day, 23, 59, 59, 999);
+}
+
+function getPresetRange(preset: DatePreset, reference: Date = new Date()) {
+  const todayStart = new Date(reference);
+  todayStart.setHours(0, 0, 0, 0);
+
+  const todayEnd = new Date(reference);
+  todayEnd.setHours(23, 59, 59, 999);
+
+  if (preset === "TODAY") {
+    return { start: todayStart, end: todayEnd };
+  }
+
+  if (preset === "THIS_WEEKEND") {
+    const day = todayStart.getDay();
+    const dayFromMonday = (day + 6) % 7;
+    const monday = new Date(todayStart);
+    monday.setDate(todayStart.getDate() - dayFromMonday);
+
+    const saturday = new Date(monday);
+    saturday.setDate(monday.getDate() + 5);
+    saturday.setHours(0, 0, 0, 0);
+
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+
+    return { start: saturday, end: sunday };
+  }
+
+  if (preset === "NEXT_WEEK") {
+    const day = todayStart.getDay();
+    const dayFromMonday = (day + 6) % 7;
+    const monday = new Date(todayStart);
+    monday.setDate(todayStart.getDate() - dayFromMonday);
+
+    const nextMonday = new Date(monday);
+    nextMonday.setDate(monday.getDate() + 7);
+    nextMonday.setHours(0, 0, 0, 0);
+
+    const nextSunday = new Date(nextMonday);
+    nextSunday.setDate(nextMonday.getDate() + 6);
+    nextSunday.setHours(23, 59, 59, 999);
+
+    return { start: nextMonday, end: nextSunday };
+  }
+
+  return { start: null, end: null };
+}
+
+function getEventCategories(event: EventItem) {
+  if (!event.category) return [];
+  return event.category
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function getEventLocationText(event: EventItem) {
+  const firstVenue = event.venue?.[0];
+  if (!firstVenue) return "";
+
+  return [firstVenue.name, firstVenue.city, firstVenue.region, firstVenue.country]
+    .filter(Boolean)
+    .join(", ");
+}
+
 export default function Home() {
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [locationQuery, setLocationQuery] = useState("");
+  const [selectedDatePreset, setSelectedDatePreset] = useState<DatePreset>("ANY");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [minPriceInput, setMinPriceInput] = useState("");
+  const [maxPriceInput, setMaxPriceInput] = useState("");
+  const [customDateStart, setCustomDateStart] = useState("");
+  const [customDateEnd, setCustomDateEnd] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("RECOMMENDED");
+  const location = useLocation();
+  const queryFromUrl = useMemo(() => {
+    const searchParams = new URLSearchParams(location.search);
+    return searchParams.get("q") ?? "";
+  }, [location.search]);
+
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        const response = await apiClient.get(API_ENDPOINTS.EVENTS.SHOW);
+        setEvents(response.data.data);
+      } catch (error) {
+        console.error(error);
+        toast.error("Can not fetch Events");
+      }
+    }
+
+    fetchEvents();
+  }, []);
+
+  const availableCategories = useMemo(() => {
+    const categorySet = new Set<string>();
+
+    events.forEach((event) => {
+      getEventCategories(event).forEach((category) => categorySet.add(category));
+    });
+
+    return Array.from(categorySet).sort((a, b) => a.localeCompare(b));
+  }, [events]);
+
+  const tagButtons = availableCategories.length
+    ? availableCategories.slice(0, 4)
+    : DEFAULT_TAGS;
+
+  const maxKnownPrice = useMemo(() => {
+    const highestPrice = events.reduce((currentMax, event) => {
+      const lowestTicketPrice = getLowestPrice(event.ticket);
+      if (lowestTicketPrice === null) return currentMax;
+      return Math.max(currentMax, lowestTicketPrice);
+    }, 0);
+
+    if (highestPrice <= 0) return 100_000;
+    return Math.ceil(highestPrice / 50_000) * 50_000;
+  }, [events]);
+
+  const filteredEvents = useMemo(() => {
+    const normalizedSearch = (searchQuery.trim() || queryFromUrl.trim()).toLowerCase();
+    const normalizedLocation = locationQuery.trim().toLowerCase();
+    const selectedCategorySet = new Set(
+      selectedCategories.map((category) => category.toLowerCase()),
+    );
+
+    const minPrice = minPriceInput === "" ? null : Number(minPriceInput);
+    const maxPrice = maxPriceInput === "" ? null : Number(maxPriceInput);
+    const hasMinPrice = minPrice !== null && Number.isFinite(minPrice);
+    const hasMaxPrice = maxPrice !== null && Number.isFinite(maxPrice);
+
+    const presetRange = getPresetRange(selectedDatePreset);
+    const customStart = toDateAtDayBoundary(customDateStart, "start");
+    const customEnd = toDateAtDayBoundary(customDateEnd, "end");
+    const hasCustomDate = Boolean(customStart || customEnd);
+    const activeStart = hasCustomDate ? customStart : presetRange.start;
+    const activeEnd = hasCustomDate ? customEnd : presetRange.end;
+
+    const list = events.filter((event) => {
+      const locationText = getEventLocationText(event).toLowerCase();
+      const categories = getEventCategories(event).map((category) =>
+        category.toLowerCase(),
+      );
+      const searchableText = `${event.title} ${event.category ?? ""} ${locationText}`.toLowerCase();
+
+      if (normalizedSearch && !searchableText.includes(normalizedSearch)) {
+        return false;
+      }
+
+      if (normalizedLocation && !locationText.includes(normalizedLocation)) {
+        return false;
+      }
+
+      if (selectedCategorySet.size > 0) {
+        const hasAtLeastOneCategory = categories.some((category) =>
+          selectedCategorySet.has(category),
+        );
+        if (!hasAtLeastOneCategory) {
+          return false;
+        }
+      }
+
+      const lowestPrice = getLowestPrice(event.ticket);
+      if (hasMinPrice && (lowestPrice === null || lowestPrice < minPrice)) {
+        return false;
+      }
+      if (hasMaxPrice && (lowestPrice === null || lowestPrice > maxPrice)) {
+        return false;
+      }
+
+      const eventDate = new Date(event.eventDateStart);
+      if (activeStart && eventDate < activeStart) {
+        return false;
+      }
+      if (activeEnd && eventDate > activeEnd) {
+        return false;
+      }
+
+      return true;
+    });
+
+    if (sortBy === "NEWEST") {
+      return list.sort(
+        (a, b) =>
+          new Date(b.eventDateStart).getTime() - new Date(a.eventDateStart).getTime(),
+      );
+    }
+
+    if (sortBy === "PRICE_LOW") {
+      return list.sort((a, b) => {
+        const aPrice = getLowestPrice(a.ticket);
+        const bPrice = getLowestPrice(b.ticket);
+        const normalizedA = aPrice === null ? Number.POSITIVE_INFINITY : aPrice;
+        const normalizedB = bPrice === null ? Number.POSITIVE_INFINITY : bPrice;
+        return normalizedA - normalizedB;
+      });
+    }
+
+    if (sortBy === "PRICE_HIGH") {
+      return list.sort((a, b) => {
+        const aPrice = getLowestPrice(a.ticket);
+        const bPrice = getLowestPrice(b.ticket);
+        const normalizedA = aPrice === null ? Number.NEGATIVE_INFINITY : aPrice;
+        const normalizedB = bPrice === null ? Number.NEGATIVE_INFINITY : bPrice;
+        return normalizedB - normalizedA;
+      });
+    }
+
+    return list;
+  }, [
+    customDateEnd,
+    customDateStart,
+    events,
+    locationQuery,
+    maxPriceInput,
+    minPriceInput,
+    queryFromUrl,
+    searchQuery,
+    selectedCategories,
+    selectedDatePreset,
+    sortBy,
+  ]);
+
+  const featuredEvents = filteredEvents.slice(0, 3);
+  const eventList = filteredEvents.slice(0, 12);
+
+  function toggleCategory(category: string) {
+    setSelectedCategories((previous) =>
+      previous.includes(category)
+        ? previous.filter((item) => item !== category)
+        : [...previous, category],
+    );
+  }
+
+  function resetAllFilters() {
+    setSearchQuery("");
+    setLocationQuery("");
+    setSelectedDatePreset("ANY");
+    setSelectedCategories([]);
+    setMinPriceInput("");
+    setMaxPriceInput("");
+    setCustomDateStart("");
+    setCustomDateEnd("");
+    setSortBy("RECOMMENDED");
+  }
+
   return (
     <>
       <header className="relative py-24 overflow-hidden bg-white dark:bg-slate-950">
@@ -14,24 +288,27 @@ export default function Home() {
             Discover the best events in your city, from intimate jazz sessions
             to global tech summits.
           </p>
+
           <div className="max-w-5xl mx-auto bg-white dark:bg-slate-900 p-2 rounded-2xl shadow-2xl shadow-slate-200/50 dark:shadow-none flex flex-col md:flex-row items-center gap-1 border border-slate-200 dark:border-slate-800">
             <div className="flex items-center flex-1 w-full px-4 py-3 md:py-0">
               <span className="material-icons text-primary mr-3">search</span>
               <input
                 className="bg-transparent border-none focus:ring-0 w-full text-base font-medium placeholder:text-slate-400"
-                placeholder="What are you looking for?"
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search events, artist, or keyword"
                 type="text"
+                value={searchQuery || queryFromUrl}
               />
             </div>
             <div className="hidden md:block w-px h-10 bg-slate-100 dark:bg-slate-800"></div>
             <div className="flex items-center flex-1 w-full px-4 py-3 md:py-0">
-              <span className="material-icons text-primary mr-3">
-                location_on
-              </span>
+              <span className="material-icons text-primary mr-3">location_on</span>
               <input
                 className="bg-transparent border-none focus:ring-0 w-full text-base font-medium"
+                onChange={(event) => setLocationQuery(event.target.value)}
+                placeholder="City, venue, or country"
                 type="text"
-                value="Jakarta, Indonesia"
+                value={locationQuery}
               />
             </div>
             <div className="hidden md:block w-px h-10 bg-slate-100 dark:bg-slate-800"></div>
@@ -39,36 +316,58 @@ export default function Home() {
               <span className="material-symbols-outlined text-primary mr-3">
                 calendar_month
               </span>
-              <select className="bg-transparent border-none focus:ring-0 w-full text-base font-medium appearance-none cursor-pointer">
-                <option>Any Date</option>
-                <option>Today</option>
-                <option>This Weekend</option>
-                <option>Next Week</option>
+              <select
+                className="bg-transparent border-none focus:ring-0 w-full text-base font-medium appearance-none cursor-pointer"
+                onChange={(event) =>
+                  setSelectedDatePreset(event.target.value as DatePreset)
+                }
+                value={selectedDatePreset}
+              >
+                <option value="ANY">Any Date</option>
+                <option value="TODAY">Today</option>
+                <option value="THIS_WEEKEND">This Weekend</option>
+                <option value="NEXT_WEEK">Next Week</option>
               </select>
             </div>
-            <button className="w-full md:w-auto bg-primary text-white font-bold px-10 py-4 rounded-xl hover:bg-primary-dark transition-all transform active:scale-[0.98] shadow-lg shadow-primary/20">
+            <button
+              className="w-full md:w-auto bg-primary text-white font-bold px-10 py-4 rounded-xl hover:bg-primary-dark transition-all transform active:scale-[0.98] shadow-lg shadow-primary/20"
+              onClick={() =>
+                document.getElementById("event-results")?.scrollIntoView({
+                  behavior: "smooth",
+                  block: "start",
+                })
+              }
+              type="button"
+            >
               Search
             </button>
           </div>
+
           <div className="mt-10 flex flex-wrap justify-center gap-3">
             <span className="text-xs font-bold text-slate-400 uppercase tracking-widest self-center mr-2">
               Trending
             </span>
-            <span className="px-5 py-2 bg-slate-100 dark:bg-slate-800 rounded-full text-sm font-semibold hover:bg-primary hover:text-white cursor-pointer transition-all border border-transparent">
-              #MusicFestival
-            </span>
-            <span className="px-5 py-2 bg-slate-100 dark:bg-slate-800 rounded-full text-sm font-semibold hover:bg-primary hover:text-white cursor-pointer transition-all border border-transparent">
-              #StartupPitch
-            </span>
-            <span className="px-5 py-2 bg-slate-100 dark:bg-slate-800 rounded-full text-sm font-semibold hover:bg-primary hover:text-white cursor-pointer transition-all border border-transparent">
-              #FineArts
-            </span>
-            <span className="px-5 py-2 bg-slate-100 dark:bg-slate-800 rounded-full text-sm font-semibold hover:bg-primary hover:text-white cursor-pointer transition-all border border-transparent">
-              #YogaWorkshop
-            </span>
+            {tagButtons.map((tag) => {
+              const isActive = selectedCategories.includes(tag);
+              return (
+                <button
+                  className={`px-5 py-2 rounded-full text-sm font-semibold transition-all border ${
+                    isActive
+                      ? "bg-primary text-white border-primary"
+                      : "bg-slate-100 dark:bg-slate-800 hover:bg-primary hover:text-white border-transparent"
+                  }`}
+                  key={tag}
+                  onClick={() => toggleCategory(tag)}
+                  type="button"
+                >
+                  #{tag}
+                </button>
+              );
+            })}
           </div>
         </div>
       </header>
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <section className="mb-20">
           <div className="flex justify-between items-end mb-10">
@@ -77,253 +376,145 @@ export default function Home() {
                 Featured Experiences
               </h2>
               <p className="text-neutral-muted text-base mt-2">
-                Curated events that are currently trending in Jakarta.
+                Curated events from your current search and filter settings.
               </p>
             </div>
-            <a
-              className="group text-primary font-bold text-sm flex items-center gap-2 hover:gap-3 transition-all"
-              href="#"
-            >
-              Explore all events{" "}
-              <span className="material-icons text-sm">arrow_forward</span>
-            </a>
+            <span className="text-primary font-bold text-sm">
+              {featuredEvents.length} featured
+            </span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="group bg-white dark:bg-slate-900 rounded-card-lg overflow-hidden border border-slate-200 dark:border-slate-800 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300">
-              <div className="relative h-64 overflow-hidden">
-                <img
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbDsVEmI6j-9zHTvB9TSWpXk90-HhNEmYamjP0SsqmB0J2nr4Dh_Eeeiis5eeYGZA3lGyxFqIoTurG-2eE5sSNQ5_yNJEiPteYE4LwaRfKImlMDTGU_v6UhEqiOkK1u4iSabcYcT9hM2VbU6mqk4Ktw3SeFcEOViKOORK-jglShaSqyLj6JC2MV7aZ42MLy-BuKXXVMFchM9FfhR2nEskFS4uMxa8ZB82anEvf17wkT2mcIRW-rVcpnwqBSj9v4EGXwKwzX7bnN6fE"
-                />
-                <div className="absolute top-4 left-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm px-3 py-1.5 rounded-lg text-center shadow-lg">
-                  <span className="block text-[10px] font-extrabold text-primary uppercase tracking-tighter">
-                    Dec
-                  </span>
-                  <span className="block text-xl font-black leading-none text-slate-900 dark:text-white">
-                    15
-                  </span>
-                </div>
-                <button className="absolute top-4 right-4 w-10 h-10 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-colors">
-                  <span className="material-symbols-outlined font-light">
-                    favorite
-                  </span>
-                </button>
-                <div className="absolute bottom-4 left-4">
-                  <span className="bg-primary text-white text-[10px] font-bold px-2.5 py-1 rounded shadow-lg uppercase tracking-wider">
-                    Selling Fast
-                  </span>
-                </div>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-extrabold mb-2 group-hover:text-primary transition-colors leading-tight">
-                  Java Jazz Festival 2024
-                </h3>
-                <div className="flex items-center text-sm text-neutral-muted mb-5">
-                  <span className="material-icons text-base mr-1.5 text-slate-400">
-                    location_on
-                  </span>
-                  <span>JIExpo Kemayoran, Jakarta</span>
-                </div>
-                <div className="flex justify-between items-center pt-5 border-t border-slate-100 dark:border-slate-800">
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">
-                      Tickets from
-                    </span>
-                    <span className="text-lg font-extrabold text-slate-900 dark:text-white">
-                      IDR 850.000
-                    </span>
-                  </div>
-                  <button className="bg-primary/10 text-primary font-bold px-5 py-2.5 rounded-lg hover:bg-primary hover:text-white transition-all transform active:scale-95">
-                    Get Tickets
-                  </button>
-                </div>
-              </div>
+          {featuredEvents.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredEvents.map((event) => (
+                <FeatureEventCard event={event} key={event.id} />
+              ))}
             </div>
-            <div className="group bg-white dark:bg-slate-900 rounded-card-lg overflow-hidden border border-slate-200 dark:border-slate-800 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300">
-              <div className="relative h-64 overflow-hidden">
-                <img
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuTuuUGBYTUHWwETdNXXl5d42d5UqvYBGN9gS7iE-cIGew8B1DfHz1WVyqe4HG2Jr7QoT7SxgEHDB12TZQ4byq9OnkkW1iumGyYOYBQHkNJVHuV--jwlRexSxL7HJWqsK1cIqhefzXR1J0IFCWnYIon-Fh7HkRLE3DK1qk7nji-dcAXTg2D25YVdcAgiFacbmdPCR3qC92oxADI9b3cAF9Dn9HLRaUeNKdBXBzDhFi8HsRNpGtX6PQWWPrZsEqVgnZLDFCGJ9GncaL"
-                />
-                <div className="absolute top-4 left-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm px-3 py-1.5 rounded-lg text-center shadow-lg">
-                  <span className="block text-[10px] font-extrabold text-primary uppercase tracking-tighter">
-                    Jan
-                  </span>
-                  <span className="block text-xl font-black leading-none text-slate-900 dark:text-white">
-                    22
-                  </span>
-                </div>
-                <button className="absolute top-4 right-4 w-10 h-10 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-colors">
-                  <span className="material-symbols-outlined font-light">
-                    favorite
-                  </span>
-                </button>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-extrabold mb-2 group-hover:text-primary transition-colors leading-tight">
-                  Global Tech Summit
-                </h3>
-                <div className="flex items-center text-sm text-neutral-muted mb-5">
-                  <span className="material-icons text-base mr-1.5 text-slate-400">
-                    location_on
-                  </span>
-                  <span>ICE BSD, Tangerang</span>
-                </div>
-                <div className="flex justify-between items-center pt-5 border-t border-slate-100 dark:border-slate-800">
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">
-                      Standard Ticket
-                    </span>
-                    <span className="text-lg font-extrabold text-slate-900 dark:text-white">
-                      IDR 1.200.000
-                    </span>
-                  </div>
-                  <button className="bg-primary/10 text-primary font-bold px-5 py-2.5 rounded-lg hover:bg-primary hover:text-white transition-all transform active:scale-95">
-                    Get Tickets
-                  </button>
-                </div>
-              </div>
+          ) : (
+            <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-sm text-slate-500">
+              No featured events match your filters.
             </div>
-            <div className="group bg-white dark:bg-slate-900 rounded-card-lg overflow-hidden border border-slate-200 dark:border-slate-800 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300">
-              <div className="relative h-64 overflow-hidden">
-                <img
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFL7akRIYjZ9nu7sar-gVavmkuop0nZ736o107UulRJRIi4cpytBDqu5kVZxRNz6vwYpCvqwOf7oNAU0ibf8SxMoRRrh0I3t5mA3SfnMvUti9P1qOLnifKC_wDWMvR5ieLoZNFeC5i81ECGh2w5DNRNjrWm6HyovftRpXpFIlkjioCy6SWq5En_xOmaqTh6pRpdGSAliQZ0InFAWZdt-RnTH1Au8KEuiiagczuzwlpAh_bGvEYCvudwlNNizvnPsal28pPcDR2okHp"
-                />
-                <div className="absolute top-4 left-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm px-3 py-1.5 rounded-lg text-center shadow-lg">
-                  <span className="block text-[10px] font-extrabold text-primary uppercase tracking-tighter">
-                    Feb
-                  </span>
-                  <span className="block text-xl font-black leading-none text-slate-900 dark:text-white">
-                    05
-                  </span>
-                </div>
-                <button className="absolute top-4 right-4 w-10 h-10 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-colors">
-                  <span className="material-symbols-outlined font-light">
-                    favorite
-                  </span>
-                </button>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-extrabold mb-2 group-hover:text-primary transition-colors leading-tight">
-                  Culinary Workshop Bandung
-                </h3>
-                <div className="flex items-center text-sm text-neutral-muted mb-5">
-                  <span className="material-icons text-base mr-1.5 text-slate-400">
-                    location_on
-                  </span>
-                  <span>Dago, Bandung</span>
-                </div>
-                <div className="flex justify-between items-center pt-5 border-t border-slate-100 dark:border-slate-800">
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">
-                      Registration
-                    </span>
-                    <span className="text-lg font-extrabold text-accent-green">
-                      FREE
-                    </span>
-                  </div>
-                  <button className="bg-primary text-white font-bold px-6 py-2.5 rounded-lg hover:bg-primary-dark transition-all transform active:scale-95 shadow-md shadow-primary/10">
-                    Register
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+          )}
         </section>
+
         <div className="flex flex-col lg:flex-row gap-12">
           <aside className="w-full lg:w-72 shrink-0">
             <div className="sticky top-24 space-y-8 bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800">
               <div>
                 <h3 className="text-sm font-extrabold uppercase tracking-widest text-slate-900 dark:text-white mb-6 flex items-center justify-between">
                   Categories
-                  <button className="text-primary text-[10px] font-bold hover:underline">
-                    RESET
+                  <button
+                    className="text-primary text-[10px] font-bold hover:underline"
+                    onClick={resetAllFilters}
+                    type="button"
+                  >
+                    RESET ALL
                   </button>
                 </h3>
                 <div className="space-y-4">
-                  <label className="flex items-center group cursor-pointer">
-                    <input
-                      // checked=""
-                      className="w-5 h-5 rounded text-primary border-slate-300 dark:border-slate-700 focus:ring-primary/20 bg-white dark:bg-slate-800"
-                      type="checkbox"
-                    />
-                    <span className="ml-3 text-sm font-semibold text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">
-                      Music &amp; Concerts
-                    </span>
-                  </label>
-                  <label className="flex items-center group cursor-pointer">
-                    <input
-                      className="w-5 h-5 rounded text-primary border-slate-300 dark:border-slate-700 focus:ring-primary/20 bg-white dark:bg-slate-800"
-                      type="checkbox"
-                    />
-                    <span className="ml-3 text-sm font-semibold text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">
-                      Tech &amp; Business
-                    </span>
-                  </label>
-                  <label className="flex items-center group cursor-pointer">
-                    <input
-                      className="w-5 h-5 rounded text-primary border-slate-300 dark:border-slate-700 focus:ring-primary/20 bg-white dark:bg-slate-800"
-                      type="checkbox"
-                    />
-                    <span className="ml-3 text-sm font-semibold text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">
-                      Food &amp; Drinks
-                    </span>
-                  </label>
-                  <label className="flex items-center group cursor-pointer">
-                    <input
-                      className="w-5 h-5 rounded text-primary border-slate-300 dark:border-slate-700 focus:ring-primary/20 bg-white dark:bg-slate-800"
-                      type="checkbox"
-                    />
-                    <span className="ml-3 text-sm font-semibold text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">
-                      Arts &amp; Culture
-                    </span>
-                  </label>
+                  {availableCategories.length > 0 ? (
+                    availableCategories.map((category) => (
+                      <label className="flex items-center group cursor-pointer" key={category}>
+                        <input
+                          checked={selectedCategories.includes(category)}
+                          className="w-5 h-5 rounded text-primary border-slate-300 dark:border-slate-700 focus:ring-primary/20 bg-white dark:bg-slate-800"
+                          onChange={() => toggleCategory(category)}
+                          type="checkbox"
+                        />
+                        <span className="ml-3 text-sm font-semibold text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors">
+                          {category}
+                        </span>
+                      </label>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-500">No categories available yet.</p>
+                  )}
                 </div>
               </div>
+
               <div className="pt-6 border-t border-slate-200 dark:border-slate-800">
                 <h3 className="text-sm font-extrabold uppercase tracking-widest text-slate-900 dark:text-white mb-6">
                   Price Range
                 </h3>
                 <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm"
+                      min={0}
+                      onChange={(event) => setMinPriceInput(event.target.value)}
+                      placeholder="Min (IDR)"
+                      type="number"
+                      value={minPriceInput}
+                    />
+                    <input
+                      className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm"
+                      min={0}
+                      onChange={(event) => setMaxPriceInput(event.target.value)}
+                      placeholder="Max (IDR)"
+                      type="number"
+                      value={maxPriceInput}
+                    />
+                  </div>
                   <input
                     className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary"
+                    max={maxKnownPrice}
+                    min={0}
+                    onChange={(event) => setMaxPriceInput(event.target.value)}
+                    step={10_000}
                     type="range"
+                    value={maxPriceInput === "" ? maxKnownPrice : Number(maxPriceInput)}
                   />
                   <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase">
-                    <span>Free</span>
-                    <span>IDR 10.000.000+</span>
+                    <span>
+                      Min{" "}
+                      {minPriceInput === ""
+                        ? "IDR 0"
+                        : `IDR ${formatPrice(Number(minPriceInput))}`}
+                    </span>
+                    <span>
+                      Max{" "}
+                      {maxPriceInput === ""
+                        ? `IDR ${formatPrice(maxKnownPrice)}`
+                        : `IDR ${formatPrice(Number(maxPriceInput))}`}
+                    </span>
                   </div>
                 </div>
               </div>
+
               <div className="pt-6 border-t border-slate-200 dark:border-slate-800">
                 <h3 className="text-sm font-extrabold uppercase tracking-widest text-slate-900 dark:text-white mb-6">
-                  Format
+                  Date Range
                 </h3>
-                <div className="space-y-4">
-                  <label className="flex items-center group cursor-pointer">
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <label className="text-xs text-slate-500" htmlFor="start-date-filter">
+                      From
+                    </label>
                     <input
-                      // checked=""
-                      className="w-5 h-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary/20 bg-white dark:bg-slate-800"
-                      name="format"
-                      type="radio"
+                      className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm"
+                      id="start-date-filter"
+                      onChange={(event) => setCustomDateStart(event.target.value)}
+                      type="date"
+                      value={customDateStart}
                     />
-                    <span className="ml-3 text-sm font-semibold text-slate-600 dark:text-slate-400">
-                      In-person
-                    </span>
-                  </label>
-                  <label className="flex items-center group cursor-pointer">
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs text-slate-500" htmlFor="end-date-filter">
+                      To
+                    </label>
                     <input
-                      className="w-5 h-5 text-primary border-slate-300 dark:border-slate-700 focus:ring-primary/20 bg-white dark:bg-slate-800"
-                      name="format"
-                      type="radio"
+                      className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm"
+                      id="end-date-filter"
+                      onChange={(event) => setCustomDateEnd(event.target.value)}
+                      type="date"
+                      value={customDateEnd}
                     />
-                    <span className="ml-3 text-sm font-semibold text-slate-600 dark:text-slate-400">
-                      Online Event
-                    </span>
-                  </label>
+                  </div>
+                  <p className="text-xs text-slate-500">
+                    Custom dates override the quick date filter above.
+                  </p>
                 </div>
               </div>
+
               <div className="p-6 bg-primary/5 rounded-2xl border border-primary/10">
                 <h4 className="font-bold text-primary mb-2">Host your event</h4>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mb-5 leading-relaxed">
@@ -335,261 +526,57 @@ export default function Home() {
               </div>
             </div>
           </aside>
-          <div className="flex-1">
+
+          <div className="flex-1" id="event-results">
             <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
               <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white w-full tracking-tight">
-                Events in <span className="text-primary">Jakarta</span>
+                {locationQuery.trim() ? (
+                  <>
+                    Events in <span className="text-primary">{locationQuery.trim()}</span>
+                  </>
+                ) : (
+                  <>
+                    Events in <span className="text-primary">All Locations</span>
+                  </>
+                )}
               </h2>
               <div className="flex items-center gap-4 w-full md:w-auto">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">
                   Sort by
                 </span>
-                <select className="text-sm font-bold bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary outline-none py-2.5 pl-4 pr-10 cursor-pointer shadow-sm">
-                  <option>Recommended</option>
-                  <option>Newest</option>
-                  <option>Price: Low to High</option>
-                  <option>Price: High to Low</option>
+                <select
+                  className="text-sm font-bold bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary outline-none py-2.5 pl-4 pr-10 cursor-pointer shadow-sm"
+                  onChange={(event) => setSortBy(event.target.value as SortOption)}
+                  value={sortBy}
+                >
+                  <option value="RECOMMENDED">Recommended</option>
+                  <option value="NEWEST">Newest</option>
+                  <option value="PRICE_LOW">Price: Low to High</option>
+                  <option value="PRICE_HIGH">Price: High to Low</option>
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-              <div className="bg-white dark:bg-slate-900 rounded-card-md overflow-hidden border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all cursor-pointer group hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none">
-                <div className="relative h-48">
-                  <img
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPkHgVQf6P_PwibvYItP9EgshD3Zpa-7Kj_lYRg-hcaSSYKWeD24jS2-q_O8PB-W9M7K1l0nBF3IVcu-UzB-aOMo7QsXwG4s0W9xfUm6cxcpFhMN19Bmmj5PWT_VmY_Hcb95zabfsiYaj28c0KxH3uA3AbGdGnSm4t5RrDn3lHfKRfK_IwS6hTWPlKGI07iQulgFoV4j0_dCmwBUmzpzA_EyJqKKMHy_MyB5xiarI-041F-SHuEemF_88n6eSqVkGnOxJcMXY7uZA9"
-                  />
-                  <button className="absolute top-3 right-3 w-8 h-8 bg-white/90 dark:bg-slate-900/90 hover:bg-white rounded-full flex items-center justify-center text-slate-900 dark:text-white shadow-md transition-all">
-                    <span className="material-symbols-outlined text-base font-light">
-                      favorite
-                    </span>
-                  </button>
-                </div>
-                <div className="p-5">
-                  <p className="text-[10px] font-extrabold text-primary uppercase tracking-widest mb-1.5">
-                    Sat, Mar 12 • 7:00 PM
-                  </p>
-                  <h4 className="font-bold text-lg mb-2 text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1">
-                    Rooftop Networking Night
-                  </h4>
-                  <p className="text-sm text-neutral-muted mb-5 flex items-center">
-                    <span className="material-icons text-sm mr-1.5 text-slate-400">
-                      location_on
-                    </span>{" "}
-                    Thamrin, Jakarta
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <span className="font-extrabold text-slate-900 dark:text-white">
-                      IDR 250.000
-                    </span>
-                    <span className="text-[10px] px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 rounded font-bold uppercase tracking-tighter text-slate-500">
-                      124 attending
-                    </span>
-                  </div>
-                </div>
+
+            {eventList.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                {eventList.map((event) => (
+                  <EventCard event={event} key={event.id} />
+                ))}
               </div>
-              <div className="bg-white dark:bg-slate-900 rounded-card-md overflow-hidden border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all cursor-pointer group hover:shadow-xl">
-                <div className="relative h-48">
-                  <img
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBP7Rc6qZok9HMtr-gFQqmq-lkliYDeeEX_XebnxxZqt4NRhUPr6szZOmjVbsqRZkiHyyO8j2hEOHTlN9K-b3ZIGPr6M_fuF1fmxVP9S1T7ktwxiDFhx3jS77XDgJYwxAarlo9BOSe1AKCHY02EdrIPu1qlx7Iz6I-P02rJKP7M3c1-9rRVwEvr2Sp_wRwN3RLTEKltLIhuX0zeggmIWjHFj236g-BXscnR0DmbxpIjbS1NtsD_eTjNqbKj52upcIjWmb2COZIndFeH"
-                  />
-                  <button className="absolute top-3 right-3 w-8 h-8 bg-white/90 dark:bg-slate-900/90 hover:bg-white rounded-full flex items-center justify-center text-slate-900 dark:text-white shadow-md transition-all">
-                    <span className="material-symbols-outlined text-base font-light">
-                      favorite
-                    </span>
-                  </button>
-                </div>
-                <div className="p-5">
-                  <p className="text-[10px] font-extrabold text-primary uppercase tracking-widest mb-1.5">
-                    Sun, Mar 13 • 10:00 AM
-                  </p>
-                  <h4 className="font-bold text-lg mb-2 text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1">
-                    Modern Art Exhibition
-                  </h4>
-                  <p className="text-sm text-neutral-muted mb-5 flex items-center">
-                    <span className="material-icons text-sm mr-1.5 text-slate-400">
-                      location_on
-                    </span>{" "}
-                    Kemang, Jakarta
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <span className="font-extrabold text-accent-green">
-                      FREE
-                    </span>
-                    <span className="text-[10px] px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 rounded font-bold uppercase tracking-tighter text-slate-500">
-                      500+ interested
-                    </span>
-                  </div>
-                </div>
+            ) : (
+              <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-sm text-slate-500">
+                No events matched your search and filters.
               </div>
-              <div className="bg-white dark:bg-slate-900 rounded-card-md overflow-hidden border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all cursor-pointer group hover:shadow-xl">
-                <div className="relative h-48">
-                  <img
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVhM9BEPnpIaMU7x3aDd2vQqriEzwreYiUUKheJR0NjkSHqv_LrGCFo2huWS37KZrSiP5CF9g7Ufo6NXOPjhyS9dxRBDohZqjnDsJQfqPOwAOJpE6Bu7MO3iSxI-WvqgnQUTRnQeST_DRJ2H_baop4LQVkAugVUgYGJweigwpKEw4PV3JjfV8WWoLidxG-CuJlmRK3-_DOGndFfz3y8BHdpj6iA00WfowJr7SKoBHRkcOwrDix_eB14fxNtxvK5gyz01OHXXGRE9CV"
-                  />
-                  <button className="absolute top-3 right-3 w-8 h-8 bg-white/90 dark:bg-slate-900/90 hover:bg-white rounded-full flex items-center justify-center text-slate-900 dark:text-white shadow-md transition-all">
-                    <span className="material-symbols-outlined text-base font-light">
-                      favorite
-                    </span>
-                  </button>
-                </div>
-                <div className="p-5">
-                  <p className="text-[10px] font-extrabold text-primary uppercase tracking-widest mb-1.5">
-                    Wed, Mar 16 • 2:00 PM
-                  </p>
-                  <h4 className="font-bold text-lg mb-2 text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1">
-                    UX Design Fundamentals
-                  </h4>
-                  <p className="text-sm text-neutral-muted mb-5 flex items-center">
-                    <span className="material-icons text-sm mr-1.5 text-slate-400">
-                      laptop
-                    </span>{" "}
-                    Online Event
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <span className="font-extrabold text-slate-900 dark:text-white">
-                      IDR 150.000
-                    </span>
-                    <span className="text-[10px] px-2.5 py-1.5 bg-red-50 text-red-500 rounded font-bold uppercase tracking-tighter">
-                      15 spots left
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white dark:bg-slate-900 rounded-card-md overflow-hidden border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all cursor-pointer group hover:shadow-xl">
-                <div className="relative h-48">
-                  <img
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSKvE8O67GjR5nOzKrNBTb2VjZuhoUyF3NSg3tCGASIZ7jkIXuNqkReFF-3ybX0NqkxC4nB1uHgFNO_LbrAoiRKVN5ePM-RXNtYvm7U0ExuVKSZcJQT7XofxCIGPnE1Z6VkxbGtAYuEvDYzquw-IivJphfZhP3QLH-T1FbuklP4yKaxCBX7IzEnIqSl6z0s03uqmvocEyFxiX82jAmz2j4seq2cBm8GxySEAq7ftON142eG6vWErUCxlSq_pf0ydGqbYOvqPq42SMV"
-                  />
-                  <button className="absolute top-3 right-3 w-8 h-8 bg-white/90 dark:bg-slate-900/90 hover:bg-white rounded-full flex items-center justify-center text-slate-900 dark:text-white shadow-md transition-all">
-                    <span className="material-symbols-outlined text-base font-light">
-                      favorite
-                    </span>
-                  </button>
-                </div>
-                <div className="p-5">
-                  <p className="text-[10px] font-extrabold text-primary uppercase tracking-widest mb-1.5">
-                    Fri, Mar 18 • 9:00 PM
-                  </p>
-                  <h4 className="font-bold text-lg mb-2 text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1">
-                    Jakarta Jazz Session
-                  </h4>
-                  <p className="text-sm text-neutral-muted mb-5 flex items-center">
-                    <span className="material-icons text-sm mr-1.5 text-slate-400">
-                      location_on
-                    </span>{" "}
-                    Senayan, Jakarta
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <span className="font-extrabold text-slate-900 dark:text-white">
-                      IDR 450.000
-                    </span>
-                    <span className="text-[10px] px-2.5 py-1.5 bg-orange-50 text-orange-500 rounded font-bold uppercase tracking-tighter">
-                      Almost Full
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white dark:bg-slate-900 rounded-card-md overflow-hidden border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all cursor-pointer group hover:shadow-xl">
-                <div className="relative h-48">
-                  <img
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2ZLoc2nwKRwSBQ0BKCZPXDdWvjdA4huKHcVAbLVUhPa8W6SEPpxi3Wi_3T-Sa991za4sUoyFFZ6w_8JvKeHp_W13eaKjbMm44xxOFlXvMMDDrDi-rDJPVUUX2d8Ypt3ywZngEl4PsYj6vClG5-kwaVepOZUy4qI2ececk6nRVTl6re_JqeLmWJ-3EFWH8apvs9Y_h2JRtXyxvzP6M9q9OJkKfAOnvqWHMeqRvhcsHFHp4hrE5jSc5rvgPmCEq_mP544j8Xj7nZelf"
-                  />
-                  <button className="absolute top-3 right-3 w-8 h-8 bg-white/90 dark:bg-slate-900/90 hover:bg-white rounded-full flex items-center justify-center text-slate-900 dark:text-white shadow-md transition-all">
-                    <span className="material-symbols-outlined text-base font-light">
-                      favorite
-                    </span>
-                  </button>
-                </div>
-                <div className="p-5">
-                  <p className="text-[10px] font-extrabold text-primary uppercase tracking-widest mb-1.5">
-                    Mon, Mar 21 • 1:00 PM
-                  </p>
-                  <h4 className="font-bold text-lg mb-2 text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1">
-                    Founder's Breakfast
-                  </h4>
-                  <p className="text-sm text-neutral-muted mb-5 flex items-center">
-                    <span className="material-icons text-sm mr-1.5 text-slate-400">
-                      location_on
-                    </span>{" "}
-                    SCBD, Jakarta
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <span className="font-extrabold text-slate-900 dark:text-white">
-                      IDR 200.000
-                    </span>
-                    <span className="text-[10px] px-2.5 py-1.5 bg-blue-50 text-blue-500 rounded font-bold uppercase tracking-tighter">
-                      Invite Only
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white dark:bg-slate-900 rounded-card-md overflow-hidden border border-slate-200 dark:border-slate-800 hover:border-primary/50 transition-all cursor-pointer group hover:shadow-xl">
-                <div className="relative h-48">
-                  <img
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbslqZsevpKHmfFyYRmwogx6vmBvkkYZMg4u0Wcdf6cijqvQma7-g-_Fv9d3iUgHnZEc3mFRGm2qLRPgyaAqKatWl2b4qsPXAFhIo9O6FMkeiPe9SdRqT3kMiNSkARWhcJOsBmnzrhhxKxAeWyJkj_LTdogCkbRObpVJDXIOKuDJYD9o-2gng2Y1hF0EGrJ9ChCEQ1i32aLmqBqEsdEbRf9crodWzLT7yWjTdqgIiYmYmogmZzHMLNSojrN0tEr4IzukSSvNcrqJ3I"
-                  />
-                  <button className="absolute top-3 right-3 w-8 h-8 bg-white/90 dark:bg-slate-900/90 hover:bg-white rounded-full flex items-center justify-center text-slate-900 dark:text-white shadow-md transition-all">
-                    <span className="material-symbols-outlined text-base font-light">
-                      favorite
-                    </span>
-                  </button>
-                </div>
-                <div className="p-5">
-                  <p className="text-[10px] font-extrabold text-primary uppercase tracking-widest mb-1.5">
-                    Sat, Mar 26 • 6:00 PM
-                  </p>
-                  <h4 className="font-bold text-lg mb-2 text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1">
-                    Wine Tasting Soiree
-                  </h4>
-                  <p className="text-sm text-neutral-muted mb-5 flex items-center">
-                    <span className="material-icons text-sm mr-1.5 text-slate-400">
-                      location_on
-                    </span>{" "}
-                    Menteng, Jakarta
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <span className="font-extrabold text-slate-900 dark:text-white">
-                      IDR 750.000
-                    </span>
-                    <span className="text-[10px] px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 rounded font-bold uppercase tracking-tighter">
-                      Premium
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="mt-16 flex justify-center">
-              <nav className="inline-flex items-center gap-2">
-                <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                  <span className="material-icons">chevron_left</span>
-                </button>
-                <button className="w-12 h-12 flex items-center justify-center rounded-xl bg-primary text-white font-extrabold shadow-lg shadow-primary/20">
-                  1
-                </button>
-                <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors font-bold">
-                  2
-                </button>
-                <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors font-bold">
-                  3
-                </button>
-                <span className="px-4 text-slate-300">...</span>
-                <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors font-bold">
-                  12
-                </button>
-                <button className="w-12 h-12 flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                  <span className="material-icons">chevron_right</span>
-                </button>
-              </nav>
-            </div>
+            )}
+
+            <p className="mt-8 text-sm text-slate-500">
+              Showing {eventList.length} of {filteredEvents.length} matched events ({events.length}{" "}
+              total from database).
+            </p>
           </div>
         </div>
       </main>
+
       <section className="bg-primary text-white py-20 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 pointer-events-none">
           <svg className="h-full w-full" fill="none" viewBox="0 0 100 100">
@@ -603,7 +590,7 @@ export default function Home() {
                 d="M 20 0 L 0 0 0 20"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="0.5"
+                strokeWidth="0.5"
               ></path>
             </pattern>
             <rect fill="url(#grid)" height="100%" width="100%"></rect>
@@ -617,8 +604,8 @@ export default function Home() {
                 unforgettable moment.
               </h2>
               <p className="text-blue-100 text-xl font-medium opacity-90">
-                Get weekly curated event recommendations and exclusive
-                early-bird access to tickets.
+                Get weekly curated event recommendations and exclusive early-bird
+                access to tickets.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">

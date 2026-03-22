@@ -19,5 +19,5 @@ export function error(
     });
   }
   res.status(500).json({ message: "Unexpected Error", error });
-  // next();
+  next();
 }

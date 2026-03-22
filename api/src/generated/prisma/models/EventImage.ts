@@ -243,16 +243,16 @@ export type EventImageOrderByWithRelationInput = {
 
 export type EventImageWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  eventId?: number
   AND?: Prisma.EventImageWhereInput | Prisma.EventImageWhereInput[]
   OR?: Prisma.EventImageWhereInput[]
   NOT?: Prisma.EventImageWhereInput | Prisma.EventImageWhereInput[]
+  eventId?: Prisma.IntFilter<"EventImage"> | number
   imageURL?: Prisma.StringFilter<"EventImage"> | string
   createdAt?: Prisma.DateTimeFilter<"EventImage"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"EventImage"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"EventImage"> | Date | string | null
   event?: Prisma.XOR<Prisma.EventScalarRelationFilter, Prisma.EventWhereInput>
-}, "id" | "eventId">
+}, "id">
 
 export type EventImageOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
