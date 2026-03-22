@@ -1,278 +1,55 @@
-# 📊 Event Management Platform
+# MINI PROJECT
 
-## Project Monitoring & Sprint Checklist
+link ui from google sticth : https://stitch.withgoogle.com/projects/13584918531067192384
 
-This document tracks development progress for the **Event Management Platform MVP**.
+## FEATURE 1
 
----
+### 1 Event Discovery, Details, Creation, and Promotion (4 point)
 
-# 🎯 Project Scope Overview
+- [x] Landing Page: Display a list of upcoming events
+- [x] Event Browsing: Customers can browse events, filter by category/location, and view event details.
+- [x] Search Bar: Implement a search bar with debounce functionality.
+- [x] Responsiveness is a must.
+- [x] Event Creation: Event organizers can create events with details such as name, price, start date, end date, available seats, description, ticket types (if applicable), etc.
+- [x] Pricing: Events can be free or paid. If paid, customers are charged accordingly.
+- [x] Promotions: Event organizers can create limited-time voucher promotions specific to events, with defined start and end dates.
 
-The MVP must include:
+### 1.2 Event Transaction (4 point)
 
-- Event discovery & filtering
-- Event creation & promotion
-- Ticket purchasing & transaction system
-- Voucher & coupon system
-- Referral & point expiration system
-- Organizer dashboard with statistics
-- Reviews & ratings
-- Protected routes
-- SQL transactional integrity
-- Unit testing for core flows
+- [x] Purchasing: Customers can create transactions to buy event tickets.
+- [x] Transaction Statuses: There are six statuses: waiting for payment, waiting for admin confirmation, done, rejected, expired and canceled.
+- [x] Payment Proof: After choosing a ticket and checking out, a 2-hour countdown is shown for uploading the payment proof.
+- [x] Automatic Status Changes: Transactions expire if no payment proof is uploaded within 2 hours. If the organizer doesn't accept/reject within 3 days, the transaction is automatically canceled.
+- [x] Rollbacks and Seat Restoration: Points, vouchers, or coupons used in transactions are returned if the transaction is canceled or expired. Additionally, available seats are restored
+- [ ] Point Usage: Customers can use points to reduce payment amounts.(ex: event tickets price is IDR 300.000 while your points balance is 20.000, you could use it and get IDR 280.000 as the final price)
+- [x] Uses only IDR in each prices of items
 
----
+### 1.3 Event Reviews and Ratings (2 point)
 
-# 🗓️ Sprint Roadmap
+- [ ] Reviews: Customers can leave reviews and ratings only after attending the event.
+- [ ] Organizer Profile: Show ratings and reviews on the event organizer's profile.
 
----
+## FEATURE 2
 
-# 🧱 Sprint 1 – Project Setup & Architecture
+### 1. User Authentication and Authorization (2 point)
 
-### 🎯 Goal: Foundation & Infrastructure
+- [x] Account Creation: Customers must create an account to attend events
+- [x] Roles: There are two roles: customer and event organizer
+- [x] Referral Registration: Customers can register using a referral number
+- [x] Referral Generation: Referral numbers are generated for new users and cannot be changed
+- [x] Role-Based Access: Protect pages based on user roles.
 
-#### ✅ Setup
+### 2. Referral System, Profile, and Prizes (4 point)
 
-- [ ] Initialize repository
-- [ ] Setup folder structure
-- [ ] Setup environment variables
-- [ ] Setup database (Postgres - Supabase)
-- [ ] Create ERD
-- [ ] Create initial migrations
-- [ ] Seed dummy data
+- [ ] Referral Rewards: Users registering with a referral get a discount coupon, and the referrer gets 10,000 points.
+- [ ] Points Expiration: Points expire 3 months after being credited. (ex: today is 28 Dec 2023 and there are 3 people using your referral number, your balance would be 30.000 and available until 28 March 2024.
+- [ ] Coupon Expiration: Discount coupons after registering with referral are valid for 3 months.
+- [ ] Profile: Customers and Event organizers can edit their profiles, including updating their profile picture, changing their password, and resetting their password if forgotten.
 
-#### 🔐 Authentication
+### 3. Event Management Dashboard (4 point)
 
-- [ ] User registration
-- [ ] Login
-- [ ] Password hashing
-- [ ] JWT authentication
-- [ ] Role-based middleware -> Still Exploring
-- [ ] Protected routes implementation
-
-#### 🧪 Tests
-
-- [ ] Auth unit tests
-- [ ] Role middleware test
-
----
-
-# 🏠 Sprint 2 – Event Module
-
-### 🎯 Goal: Event browsing & management
-
-#### 🎟️ Event CRUD
-
-- [ ] Create event (Organizer only)
-- [ ] Edit event
-- [ ] Delete event
-- [ ] Upload event image
-- [ ] Category management
-
-#### 🔍 Discovery
-
-- [ ] Landing page event list
-- [ ] Filtering (category/location)
-- [ ] Debounced search bar
-- [ ] Pagination
-- [ ] Empty state handling
-
-#### 📱 UI
-
-- [ ] Responsive design
-- [ ] Mobile layout verified
-- [ ] Confirmation popup for modification
-
-#### 🧪 Tests
-
-- [ ] Event CRUD test
-- [ ] Search debounce test
-
----
-
-# 💳 Sprint 3 – Transaction & Payment Flow
-
-### 🎯 Goal: Full purchase lifecycle
-
-#### 🛒 Checkout Flow
-
-- [ ] Create transaction
-- [ ] Add transaction items
-- [ ] Apply voucher
-- [ ] Apply coupon
-- [ ] Apply points
-- [ ] Calculate final price (IDR only)
-
-#### ⏳ Expiration Logic
-
-- [ ] 2-hour payment upload deadline
-- [ ] 3-day organizer response deadline
-- [ ] Cron / background job for expiration
-
-#### 📤 Payment Proof
-
-- [ ] Upload proof
-- [ ] Change status → WAITING_ADMIN_CONFIRMATION
-
-#### 🔄 Auto Rollback
-
-- [ ] Restore seats on cancel/expire
-- [ ] Restore points
-- [ ] Restore coupon state
-- [ ] Restore voucher usage
-
-#### 🧪 Tests
-
-- [ ] Transaction lifecycle test
-- [ ] Expiration logic test
-- [ ] Rollback consistency test
-- [ ] SQL transaction atomicity test
-
----
-
-# 🎁 Sprint 4 – Referral & Reward System
-
-### 🎯 Goal: Reward & expiration system
-
-#### 🔢 Referral
-
-- [ ] Generate referral code (immutable)
-- [ ] Register with referral
-- [ ] Grant coupon to new user
-- [ ] Grant 10,000 points to referrer
-
-#### 🪙 Points
-
-- [ ] Implement ledger-based point system
-- [ ] Expiration after 3 months
-- [ ] Deduct points on usage
-- [ ] Restore on transaction cancel
-
-#### 🎟️ Coupons
-
-- [ ] Assign system coupon
-- [ ] Coupon expiration logic
-- [ ] Mark used / expired states
-
-#### 🧪 Tests
-
-- [ ] Referral reward test
-- [ ] Point expiration test
-- [ ] Coupon expiration test
-
----
-
-# ⭐ Sprint 5 – Reviews & Attendance
-
-### 🎯 Goal: Post-event interaction
-
-#### 👥 Attendance
-
-- [ ] Create attendee record when transaction DONE
-- [ ] Restrict review access until attendance confirmed
-
-#### 📝 Reviews
-
-- [ ] Create review
-- [ ] One review per transaction
-- [ ] Show average rating on organizer profile
-
-#### 🧪 Tests
-
-- [ ] Review eligibility test
-- [ ] Review uniqueness constraint test
-
----
-
-# 📊 Sprint 6 – Organizer Dashboard
-
-### 🎯 Goal: Business visibility & management
-
-#### 📈 Statistics
-
-- [ ] Revenue aggregation
-- [ ] Ticket sales aggregation
-- [ ] Filter by:
-  - [ ] Year
-  - [ ] Month
-  - [ ] Day
-
-- [ ] Graph visualization
-
-#### 📄 Transaction Management
-
-- [ ] View payment proof
-- [ ] Accept transaction
-- [ ] Reject transaction
-- [ ] Email notification on status change
-
-#### 📋 Attendee List
-
-- [ ] Display name
-- [ ] Ticket quantity
-- [ ] Total paid
-
-#### 🧪 Tests
-
-- [ ] Dashboard query test
-- [ ] Email trigger test
-
----
-
-# 🧪 Sprint 7 – Hardening & QA
-
-### 🎯 Goal: Production readiness
-
-- [ ] Edge case testing
-- [ ] Concurrent seat booking testing
-- [ ] Race condition testing
-- [ ] Performance optimization
-- [ ] DB index optimization
-- [ ] Error handling standardization
-- [ ] Logging implementation
-- [ ] Security audit
-
----
-
-# 📌 Technical Monitoring Checklist
-
-### 🔐 Security
-
-- [ ] Password hashing
-- [ ] JWT expiration
-- [ ] Role validation on each protected route
-- [ ] SQL injection prevention
-- [ ] File upload validation
-
-### ⚙️ Data Consistency
-
-- [ ] All multi-step operations use SQL transactions
-- [ ] No negative seat values
-- [ ] No double coupon usage
-- [ ] No negative point balance
-- [ ] Transaction status always valid enum
-
-### 📧 Email
-
-- [ ] Accept email
-- [ ] Reject email
-- [ ] Proper SMTP configuration
-
-- 🧪 Test coverage tracking file
-- 🐳 Docker + CI/CD monitoring README
-- 📈 Production observability setup guide
-
-# Reference :
-
-- Components : https://ui.shadcn.com/
-
-- Full UI Design (beta) :
-  - https://stitch.withgoogle.com/projects/13584918531067192384
-  - https://www.figma.com/make/yxau9zafyo66Fl6HxM53yr/Event-Management-Platform-MVP?t=yqo1ATdRlWg2u7q0-1
-
-# Notes :
-
-- This project will follow monorepo file structure -> one repo for frontend and backend
-
-## Design prototype
-- figma : https://www.figma.com/make/1D5T5VaYD3BBnh7b2Ifi2D/Event-Management-Platform-Prototype?t=zeOapZgtZ41aIZVv-1
+- [ ] Dashboard Access: Organizers can view and manage their events ( ex: edit events, etc.), transactions, and basic statistics.
+- [ ] Statistics Visualization: Display event data in graphical visualizations and reports by year, month, and day.
+- [ ] Transaction Management: Organizers can accept, reject, and view user payment proofs.
+- [ ] Notification Emails: Customers receive email notifications when their transaction is accepted or rejected. Ensure points/vouchers/coupons are returned if used in rejected transactions. Additionally, available seats are restored.
+- [ ] Attendee List: Show the list of attendees for each event, including name, ticket quantity, and total price paid.
