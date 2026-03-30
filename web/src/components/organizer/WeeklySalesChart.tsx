@@ -20,7 +20,10 @@ function normalizeRevenue(value: number | string) {
 }
 
 export function getTotalWeeklySales(weeklySales: WeeklySalesPoint[]) {
-  return weeklySales.reduce((sum, point) => sum + normalizeRevenue(point.revenue), 0);
+  return weeklySales.reduce(
+    (sum, point) => sum + normalizeRevenue(point.revenue),
+    0,
+  );
 }
 
 export default function WeeklySalesChart({
