@@ -9,6 +9,7 @@ import authRoutes from "./routes/auth.route.js";
 import eventRoutes from "./routes/event.route.js";
 import orderRoutes from "./routes/order.route.js";
 import transactionRoutes from "./routes/transaction.route.js";
+import organizerDashboardRoutes from "./routes/organizer.profile.route.js";
 import { notFoundHandler } from "./middlewares/not-found.middleware.js";
 import { error } from "./middlewares/error.middleware.js";
 
@@ -27,6 +28,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/event", eventRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/transaction", transactionRoutes);
+app.use("/api/organizer", organizerDashboardRoutes);
 
 app.use(notFoundHandler);
 app.use(error);

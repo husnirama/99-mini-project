@@ -2,18 +2,33 @@ import { apiClient } from "@/api/clients";
 import { API_ENDPOINTS } from "@/api/endpoint";
 import TransactionStatusBadge from "@/components/TransactionStatusBadge";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/store/auth-store";
 import { useTransactionStore } from "@/store/transaction-store";
+import type {
+  TransactionLifecycleRecord,
+  TransactionRecord,
+  TransactionStatus,
+} from "@/types/orderTransactionTypes";
 import { formatDate, formatTime } from "@/utils/eventList.utils";
 import {
   canCancelTransaction,
   canUploadPaymentProof,
   formatCurrency,
   formatPaymentMethod,
-  getEffectiveTransactionStatus,
 } from "@/utils/orderTransaction.utils";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { toast } from "sonner";
+
+const STATUS_FILTERS: Array<"ALL" | TransactionStatus> = [
+  "ALL",
+  "WAITING_FOR_PAYMENT",
+  "WAITING_FOR_ADMIN_CONFIRMATION",
+  "DONE",
+  "REJECTED",
+  "EXPIRED",
+  "CANCELED",
+];
 
 function formatDateTime(value?: string | null) {
   if (!value) {
@@ -23,56 +38,81 @@ function formatDateTime(value?: string | null) {
   return `${formatDate(value)} · ${formatTime(value)} WIB`;
 }
 
+function formatStatusLabel(status: "ALL" | TransactionStatus) {
+  if (status === "ALL") {
+    return "All statuses";
+  }
+
+  return status
+    .toLowerCase()
+    .split("_")
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(" ");
+}
+
+function stampRecord(
+  record: TransactionLifecycleRecord,
+): TransactionLifecycleRecord {
+  return {
+    ...record,
+    lastSyncedAt: new Date().toISOString(),
+  };
+}
+
 export default function CustomerTransactionsPage() {
-  const records = useTransactionStore((state) => Object.values(state.records));
-  const updateTransaction = useTransactionStore((state) => state.updateTransaction);
-  const [activeFilter, setActiveFilter] = useState<
-    | "ALL"
-    | "WAITING_FOR_PAYMENT"
-    | "WAITING_FOR_ADMIN_CONFIRMATION"
-    | "DONE"
-    | "REJECTED"
-    | "EXPIRED"
-    | "CANCELED"
-  >("ALL");
-  const [pendingTransactionId, setPendingTransactionId] = useState<number | null>(
-    null,
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const guestRecords = useTransactionStore((state) =>
+    Object.values(state.records).filter((record) => Boolean(record.guestToken)),
   );
-  const [now, setNow] = useState(Date.now());
+  const saveRecords = useTransactionStore((state) => state.saveRecords);
+  const updateTransaction = useTransactionStore(
+    (state) => state.updateTransaction,
+  );
+
+  const [activeFilter, setActiveFilter] = useState<"ALL" | TransactionStatus>(
+    "ALL",
+  );
+  const [records, setRecords] = useState<TransactionLifecycleRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [pendingTransactionId, setPendingTransactionId] = useState<
+    number | null
+  >(null);
+
+  async function fetchTransactions() {
+    if (!isAuthenticated) {
+      setRecords([]);
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.TRANSACTIONS.LIST, {
+        params: activeFilter === "ALL" ? undefined : { status: activeFilter },
+      });
+
+      const nextRecords = (
+        response.data.data as TransactionLifecycleRecord[]
+      ).map(stampRecord);
+
+      setRecords(nextRecords);
+      saveRecords(nextRecords);
+    } catch (error) {
+      console.error("Failed to fetch transactions", error);
+      toast.error("We couldn't load your transactions.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setNow(Date.now());
-    }, 1000);
+    fetchTransactions();
+  }, [activeFilter, isAuthenticated]);
 
-    return () => window.clearInterval(intervalId);
-  }, []);
-
-  const sortedRecords = useMemo(
-    () =>
-      [...records].sort((left, right) => {
-        const leftTime = new Date(
-          left.transaction.createdAt || left.order.createdAt || left.lastSyncedAt,
-        ).getTime();
-        const rightTime = new Date(
-          right.transaction.createdAt || right.order.createdAt || right.lastSyncedAt,
-        ).getTime();
-
-        return rightTime - leftTime;
-      }),
-    [records],
-  );
-
-  const filteredRecords = useMemo(
-    () =>
-      sortedRecords.filter((record) => {
-        const status = getEffectiveTransactionStatus(record, now);
-        return activeFilter === "ALL" ? true : status === activeFilter;
-      }),
-    [activeFilter, now, sortedRecords],
-  );
-
-  async function handleCancelTransaction(transactionId: number, guestToken?: string | null) {
+  async function handleCancelTransaction(
+    transactionId: number,
+    guestToken?: string | null,
+  ) {
     setPendingTransactionId(transactionId);
 
     try {
@@ -84,17 +124,40 @@ export default function CustomerTransactionsPage() {
         },
       );
 
-      updateTransaction(transactionId, response.data.data);
+      updateTransaction(transactionId, response.data.data as TransactionRecord);
+
+      if (isAuthenticated) {
+        await fetchTransactions();
+      }
+
       toast.success("Transaction canceled.");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to cancel transaction", error);
-      toast.error(
-        error?.response?.data?.message || "We couldn't cancel this transaction.",
-      );
+      toast.error("We couldn't cancel this transaction.");
     } finally {
       setPendingTransactionId(null);
     }
   }
+
+  const sourceRecords = isAuthenticated ? records : guestRecords;
+  const filteredRecords =
+    activeFilter === "ALL"
+      ? sourceRecords
+      : sourceRecords.filter(
+          (record) => record.transaction.status === activeFilter,
+        );
+  const sortedRecords = [...filteredRecords].sort((left, right) => {
+    const leftTime = new Date(
+      left.transaction.createdAt || left.order.createdAt || left.lastSyncedAt,
+    ).getTime();
+    const rightTime = new Date(
+      right.transaction.createdAt ||
+        right.order.createdAt ||
+        right.lastSyncedAt,
+    ).getTime();
+
+    return rightTime - leftTime;
+  });
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -104,11 +167,12 @@ export default function CustomerTransactionsPage() {
             Customer History
           </p>
           <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Saved Transactions
+            Transactions
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-            Transactions are kept in the current browser so guest checkout and signed-in
-            flow stay connected to the payment detail page.
+            {isAuthenticated
+              ? "Your transaction list is loaded from the backend."
+              : "You're viewing guest transactions saved in this browser."}
           </p>
         </div>
 
@@ -121,15 +185,7 @@ export default function CustomerTransactionsPage() {
       </div>
 
       <div className="mb-8 flex flex-wrap gap-3">
-        {[
-          "ALL",
-          "WAITING_FOR_PAYMENT",
-          "WAITING_FOR_ADMIN_CONFIRMATION",
-          "DONE",
-          "REJECTED",
-          "EXPIRED",
-          "CANCELED",
-        ].map((filter) => {
+        {STATUS_FILTERS.map((filter) => {
           const isActive = filter === activeFilter;
 
           return (
@@ -140,40 +196,27 @@ export default function CustomerTransactionsPage() {
                   : "border border-slate-200 bg-white text-slate-600 hover:border-primary hover:text-primary dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
               }`}
               key={filter}
-              onClick={() =>
-                setActiveFilter(
-                  filter as
-                    | "ALL"
-                    | "WAITING_FOR_PAYMENT"
-                    | "WAITING_FOR_ADMIN_CONFIRMATION"
-                    | "DONE"
-                    | "REJECTED"
-                    | "EXPIRED"
-                    | "CANCELED",
-                )
-              }
+              onClick={() => setActiveFilter(filter)}
               type="button"
             >
-              {filter === "ALL"
-                ? "All statuses"
-                : filter
-                    .toLowerCase()
-                    .split("_")
-                    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
-                    .join(" ")}
+              {formatStatusLabel(filter)}
             </button>
           );
         })}
       </div>
 
-      {filteredRecords.length === 0 ? (
+      {isLoading ? (
         <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/40">
-          No saved transactions match the current filter.
+          Loading transactions...
+        </div>
+      ) : sortedRecords.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/40">
+          No transactions match the current filter.
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredRecords.map((record) => {
-            const status = getEffectiveTransactionStatus(record, now);
+          {sortedRecords.map((record) => {
+            const status = record.transaction.status;
 
             return (
               <article
@@ -204,7 +247,9 @@ export default function CustomerTransactionsPage() {
                         <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                           {record.ticket.name} · {record.order.quantity} ticket
                           {record.order.quantity > 1 ? "s" : ""} ·{" "}
-                          {formatPaymentMethod(record.transaction.paymentMethod)}
+                          {formatPaymentMethod(
+                            record.transaction.paymentMethod,
+                          )}
                         </p>
                       </div>
 
@@ -226,7 +271,9 @@ export default function CustomerTransactionsPage() {
                         <p className="mt-1 font-medium text-slate-900 dark:text-white">
                           {record.order.buyerName}
                         </p>
-                        <p className="mt-1 text-xs">{record.order.buyerEmail}</p>
+                        <p className="mt-1 text-xs">
+                          {record.order.buyerEmail}
+                        </p>
                       </div>
 
                       <div>
@@ -234,7 +281,10 @@ export default function CustomerTransactionsPage() {
                           Created
                         </p>
                         <p className="mt-1 font-medium text-slate-900 dark:text-white">
-                          {formatDateTime(record.transaction.createdAt || record.order.createdAt)}
+                          {formatDateTime(
+                            record.transaction.createdAt ||
+                              record.order.createdAt,
+                          )}
                         </p>
                       </div>
 
@@ -243,13 +293,18 @@ export default function CustomerTransactionsPage() {
                           Expires
                         </p>
                         <p className="mt-1 font-medium text-slate-900 dark:text-white">
-                          {record.order.expiresAt ? formatDateTime(record.order.expiresAt) : "-"}
+                          {record.order.expiresAt
+                            ? formatDateTime(record.order.expiresAt)
+                            : "-"}
                         </p>
                       </div>
                     </div>
 
                     <div className="mt-5 flex flex-wrap gap-3">
-                      <Button asChild className="h-10 rounded-lg px-4 text-sm font-semibold">
+                      <Button
+                        asChild
+                        className="h-10 rounded-lg px-4 text-sm font-semibold"
+                      >
                         <Link to={`/transactions/${record.transaction.id}`}>
                           View detail
                         </Link>
@@ -267,7 +322,9 @@ export default function CustomerTransactionsPage() {
                       {canCancelTransaction(status) ? (
                         <Button
                           className="h-10 rounded-lg px-4 text-sm font-semibold"
-                          disabled={pendingTransactionId === record.transaction.id}
+                          disabled={
+                            pendingTransactionId === record.transaction.id
+                          }
                           onClick={() =>
                             handleCancelTransaction(
                               record.transaction.id,

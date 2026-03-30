@@ -74,7 +74,7 @@ export default async function orderCreation(
 
       const reserved = freshTicketType?.reserved ?? 0;
       const sold = freshTicketType?.sold ?? 0;
-      const availableStock = freshTicketType?.quota ?? 0 - reserved - sold;
+      const availableStock = (freshTicketType?.quota ?? 0) - reserved - sold;
 
       if (availableStock < payload.quantity) {
         throw new AppError("Ticket Stock is not enough", 400);

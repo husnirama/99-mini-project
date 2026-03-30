@@ -1,16 +1,41 @@
-import type { Prisma, Role } from "../generated/prisma/client.js";
-import type { CreateTransactionTxPayload } from "../types/transaction-type.js";
+import type {
+  Prisma,
+  Role,
+  transactionStatus,
+} from "../generated/prisma/client.js";
 import { prisma } from "../lib/prisma.js";
-import { AppError } from "../utils/app-error.js";
-import { registerTransactionJob } from "../queues/order.scheduller.js";
 import cloudinary from "../lib/cloudinary.js";
+import { registerTransactionJob } from "../queues/order.scheduller.js";
+import type {
+  CreateTransactionTxPayload,
+  TransactionListQuery,
+} from "../types/transaction-type.js";
 import { hashGuestToken } from "../utils/guest-token.js";
+import { AppError } from "../utils/app-error.js";
 
 interface TransactionActor {
   userId?: number | null;
   role?: Role | string | null;
   guestToken?: string | null;
 }
+
+const transactionLifecycleInclude = {
+  order: {
+    include: {
+      event: {
+        include: {
+          venue: true,
+          eventImage: true,
+        },
+      },
+      ticket: true,
+    },
+  },
+} satisfies Prisma.TransactionInclude;
+
+type TransactionWithLifecycle = Prisma.TransactionGetPayload<{
+  include: typeof transactionLifecycleInclude;
+}>;
 
 export async function createTransaction(
   tx: Prisma.TransactionClient,
@@ -49,6 +74,13 @@ async function getTransactionForAction(transactionId: number) {
   });
 }
 
+async function getTransactionWithLifecycle(transactionId: number) {
+  return prisma.transaction.findUnique({
+    where: { id: transactionId },
+    include: transactionLifecycleInclude,
+  });
+}
+
 function assertCustomerOwnership(
   transaction: NonNullable<Awaited<ReturnType<typeof getTransactionForAction>>>,
   actor: TransactionActor,
@@ -59,11 +91,13 @@ function assertCustomerOwnership(
     }
     return;
   }
+
   if (!actor.guestToken) {
     throw new AppError("Guest Token is Required", 401);
   }
 
   const hashedToken = hashGuestToken(actor.guestToken);
+
   if (
     !transaction.order.guestTokenHash ||
     hashedToken !== transaction.order.guestTokenHash
@@ -79,9 +113,11 @@ function assertOrganizerOwnership(
   if (!actor.userId) {
     throw new AppError("Unauthorized", 401);
   }
+
   if (actor.role !== "EVENT_ORGANIZER") {
     throw new AppError("Unauthorized", 401);
   }
+
   if (transaction.order.event.organizeBy !== actor.userId) {
     throw new AppError("Forbidden Action, not the right Orginzer", 403);
   }
@@ -94,7 +130,136 @@ function assertCancelByActor(
   if (actor.userId && transaction.order.event.organizeBy === actor.userId) {
     return;
   }
+
   assertCustomerOwnership(transaction, actor);
+}
+
+function assertLifecycleAccess(
+  transaction: TransactionWithLifecycle,
+  actor: TransactionActor,
+) {
+  if (
+    actor.userId &&
+    actor.role === "EVENT_ORGANIZER" &&
+    transaction.order.event.organizeBy === actor.userId
+  ) {
+    return;
+  }
+
+  if (transaction.order.customerId) {
+    if (!actor.userId || transaction.order.customerId !== actor.userId) {
+      throw new AppError("Forbidden Action, Not the right user", 403);
+    }
+    return;
+  }
+
+  if (!actor.guestToken) {
+    throw new AppError("Guest Token is Required", 401);
+  }
+
+  const hashedToken = hashGuestToken(actor.guestToken);
+
+  if (
+    !transaction.order.guestTokenHash ||
+    hashedToken !== transaction.order.guestTokenHash
+  ) {
+    throw new AppError("Invalid guest Token", 403);
+  }
+}
+
+function serializeLifecycleRecord(transaction: TransactionWithLifecycle) {
+  const venue = transaction.order.event.venue?.[0];
+  const eventImage =
+    transaction.order.event.eventImage?.[0]?.imageURL ??
+    "https://via.placeholder.com/1200x700?text=Event";
+
+  return {
+    order: {
+      id: transaction.order.id,
+      customerId: transaction.order.customerId,
+      eventId: transaction.order.eventId,
+      ticketTypeId: transaction.order.ticketTypeId,
+      quantity: transaction.order.quantity,
+      unitPrice: transaction.order.unitPrice,
+      subTotalAmount: transaction.order.subTotalAmount,
+      discountAmount: transaction.order.discountAmount,
+      totalAmount: transaction.order.totalAmount,
+      promotionId: transaction.order.promotionId,
+      voucherCode: transaction.order.voucherCode,
+      buyerName: transaction.order.buyerName,
+      buyerEmail: transaction.order.buyerEmail,
+      buyerPhone: transaction.order.buyerPhone,
+      status: transaction.order.status,
+      createdAt: transaction.order.createdAt,
+      updatedAt: transaction.order.updatedAt,
+      expiresAt: transaction.order.expiresAt,
+    },
+    transaction: {
+      id: transaction.id,
+      orderId: transaction.orderId,
+      paymentMethod: transaction.paymentMethod,
+      paymentProof: transaction.paymentProof,
+      status: transaction.status,
+      createdAt: transaction.createdAt,
+      updatedAt: transaction.updatedAt,
+      paidAt: transaction.paidAt,
+      verifiedBy: transaction.verifiedBy,
+      verifiedAt: transaction.verifiedAt,
+      canceledAt: transaction.canceledAt,
+      canceledBy: transaction.canceledBy,
+      rejectedReason: transaction.rejectedReason,
+    },
+    event: {
+      id: transaction.order.event.id,
+      title: transaction.order.event.title,
+      category: transaction.order.event.category,
+      eventDateStart: transaction.order.event.eventDateStart,
+      eventDateEnd: transaction.order.event.eventDateEnd,
+      image: eventImage,
+      locationLabel: [venue?.name, venue?.city, venue?.region, venue?.country]
+        .filter(Boolean)
+        .join(", "),
+    },
+    ticket: {
+      id: transaction.order.ticket.id,
+      name: transaction.order.ticket.name,
+      price: Number(transaction.order.ticket.price),
+      quota: transaction.order.ticket.quota,
+      status: transaction.order.ticket.status,
+      description: transaction.order.ticket.description,
+    },
+  };
+}
+
+function buildTransactionListWhere(
+  actor: TransactionActor,
+  query: TransactionListQuery,
+): Prisma.TransactionWhereInput {
+  if (!actor.userId) {
+    throw new AppError("Unauthorized", 401);
+  }
+
+  const where: Prisma.TransactionWhereInput = {};
+
+  if (query.status) {
+    where.status = query.status as transactionStatus;
+  }
+
+  if (actor.role === "EVENT_ORGANIZER") {
+    where.order = {
+      event: {
+        organizeBy: actor.userId,
+      },
+    };
+
+    return where;
+  }
+
+  where.order = {
+    customerId: actor.userId,
+  };
+
+  return where;
 }
 
 async function restoreOrderResources(
@@ -116,6 +281,7 @@ async function restoreOrderResources(
   if (!ticketType) {
     throw new AppError("Ticket not found", 404);
   }
+
   const currentReserved = ticketType.reserved ?? 0;
   const nextReserved = Math.max(0, currentReserved - data.quantity);
 
@@ -166,6 +332,7 @@ async function finalizeOrderResource(
       sold: true,
     },
   });
+
   if (!ticketType) {
     throw new AppError("Ticket not found", 404);
   }
@@ -182,6 +349,35 @@ async function finalizeOrderResource(
   });
 }
 
+export async function listTransactions(
+  actor: TransactionActor,
+  query: TransactionListQuery,
+) {
+  const transactions = await prisma.transaction.findMany({
+    where: buildTransactionListWhere(actor, query),
+    include: transactionLifecycleInclude,
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return transactions.map(serializeLifecycleRecord);
+}
+
+export async function getTransactionDetail(
+  transactionId: number,
+  actor: TransactionActor,
+) {
+  const transaction = await getTransactionWithLifecycle(transactionId);
+
+  if (!transaction) {
+    throw new AppError("Transaction not found", 404);
+  }
+
+  assertLifecycleAccess(transaction, actor);
+  return serializeLifecycleRecord(transaction);
+}
+
 export async function uploadPaymentProof(
   transactionId: number,
   paymentProof: Express.Multer.File,
@@ -196,6 +392,7 @@ export async function uploadPaymentProof(
   if (!transaction) {
     throw new AppError("Transaction not found", 404);
   }
+
   assertCustomerOwnership(transaction, actor);
 
   if (transaction.status !== "WAITING_FOR_PAYMENT") {
@@ -212,7 +409,8 @@ export async function uploadPaymentProof(
       status: "WAITING_FOR_ADMIN_CONFIRMATION",
     },
   });
-  registerTransactionJob(transaction.order.id, updatedTransaction.id);
+
+  await registerTransactionJob(transaction.order.id, updatedTransaction.id);
   return updatedTransaction;
 }
 
@@ -270,6 +468,7 @@ export async function rejectTransaction(
   if (!adminId && role !== "EVENT_ORGANIZER") {
     throw new AppError("Unauthorized", 401);
   }
+
   const transaction = await getTransactionForAction(transactionId);
 
   if (!transaction) {
@@ -321,6 +520,7 @@ export async function cancelTransaction(
   }
 
   assertCancelByActor(transaction, actor);
+
   if (
     transaction.status !== "WAITING_FOR_PAYMENT" &&
     transaction.status !== "WAITING_FOR_ADMIN_CONFIRMATION"
@@ -346,6 +546,9 @@ export async function cancelTransaction(
       where: { id: transactionId },
       data: {
         status: "CANCELED",
+        canceledAt: new Date(),
+        canceledBy:
+          actor.userId && actor.role === "EVENT_ORGANIZER" ? "ADMIN" : "USER",
       },
     });
   });
