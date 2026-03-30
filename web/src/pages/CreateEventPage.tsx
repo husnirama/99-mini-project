@@ -1,5 +1,10 @@
 import { apiClient } from "@/api/clients";
 import { API_ENDPOINTS } from "@/api/endpoint";
+import {
+  getOrganizerAttendeesPath,
+  getOrganizerSettingsPath,
+  getOrganizerStatisticsPath,
+} from "@/config/site-navigation";
 import { useEffect, useRef, useState } from "react";
 import { v4 as uuidV4 } from "uuid";
 import { toast } from "sonner";
@@ -105,6 +110,11 @@ export default function CreateEventPage() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const logout = useAuthStore((state) => state.logout);
+  const user = useAuthStore((state) => state.user);
+  const organizerId = user?.id;
+  const organizerStatisticsPath = getOrganizerStatisticsPath(organizerId);
+  const organizerAttendeesPath = getOrganizerAttendeesPath(organizerId);
+  const organizerSettingsPath = getOrganizerSettingsPath(organizerId);
   const handleLogout = async () => {
     await logout();
     navigate("/", { replace: true });
@@ -579,37 +589,42 @@ export default function CreateEventPage() {
                 </Link>
               </div>
               <nav className="hidden md:flex items-center gap-6">
-                <a
+                <Link
                   className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
-                  href="#"
+                  to="/organizer/dashboard"
                 >
                   Dashboard
-                </a>
-                <a className="text-sm font-medium text-primary" href="#">
+                </Link>
+                <Link className="text-sm font-medium text-primary" to="/organizer/create-event">
                   Events
-                </a>
-                <a
+                </Link>
+                <Link
                   className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
-                  href="#"
+                  to={organizerAttendeesPath}
                 >
                   Attendees
-                </a>
-                <a
+                </Link>
+                <Link
                   className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
-                  href="#"
+                  to={organizerStatisticsPath}
                 >
                   Analytics
-                </a>
+                </Link>
               </nav>
             </div>
             <div className="flex items-center gap-4">
-              <button className="hidden sm:inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+              <button
+                className="hidden sm:inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                form="create-event-form"
+                type="submit"
+              >
                 Save Draft
               </button>
               <div className="relative">
                 <button
                   className="navbar-login"
                   onClick={() => setOpen((v) => !v)}
+                  type="button"
                 >
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                     <span className="material-symbols-outlined">
@@ -624,14 +639,16 @@ export default function CreateEventPage() {
                       className="block w-full text-left px-4 py-2 text-sm hover:bg-slate-100"
                       onClick={() => {
                         setOpen(false);
-                        navigate("/");
+                        navigate(organizerSettingsPath);
                       }}
+                      type="button"
                     >
                       My Profile
                     </button>
                     <button
                       className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-slate-100"
                       onClick={handleLogout}
+                      type="button"
                     >
                       Log Out
                     </button>
@@ -645,15 +662,21 @@ export default function CreateEventPage() {
       <main className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* <!-- Breadcrumb & Header --> */}
         <nav className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-6">
-          <a className="hover:text-primary transition-colors" href="#">
+          <Link
+            className="hover:text-primary transition-colors"
+            to="/organizer/dashboard"
+          >
             Dashboard
-          </a>
+          </Link>
           <span className="material-symbols-outlined text-xs">
             chevron_right
           </span>
-          <a className="hover:text-primary transition-colors" href="#">
+          <Link
+            className="hover:text-primary transition-colors"
+            to="/organizer/create-event"
+          >
             Events
-          </a>
+          </Link>
           <span className="material-symbols-outlined text-xs">
             chevron_right
           </span>
@@ -669,7 +692,11 @@ export default function CreateEventPage() {
             Set up your event details, tickets, and schedule to start selling.
           </p>
         </div>
-        <form onSubmit={handleSingleFileSubmit} className="space-y-12">
+        <form
+          className="space-y-12"
+          id="create-event-form"
+          onSubmit={handleSingleFileSubmit}
+        >
           {/* <!-- Section 1: Basic Info --> */}
           <section className="space-y-6">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800">
@@ -1405,23 +1432,24 @@ export default function CreateEventPage() {
                 checked={hasAcceptedTerms}
                 onChange={(event) => setHasAcceptedTerms(event.target.checked)}
               />
-              <label
-                className="text-sm text-slate-600 dark:text-slate-400"
-                htmlFor="terms"
-              >
-                I agree to the{" "}
-                <a className="text-primary hover:underline" href="#">
-                  Terms &amp; Conditions
-                </a>{" "}
-                of EventManager.
-              </label>
-            </div>
-            <div className="flex items-center gap-4 w-full sm:w-auto">
-              <button
-                className="w-full sm:w-auto px-6 py-3 text-sm font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                type="button"
-              >
-                Cancel
+                <label
+                  className="text-sm text-slate-600 dark:text-slate-400"
+                  htmlFor="terms"
+                >
+                  I agree to the{" "}
+                  <Link className="text-primary hover:underline" to="/terms">
+                    Terms &amp; Conditions
+                  </Link>{" "}
+                  of EventHub.
+                </label>
+              </div>
+              <div className="flex items-center gap-4 w-full sm:w-auto">
+                <button
+                  className="w-full sm:w-auto px-6 py-3 text-sm font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                  onClick={() => navigate("/organizer/dashboard")}
+                  type="button"
+                >
+                  Cancel
               </button>
               <button
                 className="w-full sm:w-auto px-10 py-3 text-sm font-bold text-white bg-primary rounded-lg hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center justify-center gap-2"
@@ -1477,7 +1505,7 @@ export default function CreateEventPage() {
         </div>
       </main>
       <footer className="mt-20 border-t border-slate-200 dark:border-slate-800 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
-        <p>© 2024 EventHub Platform. All rights reserved.</p>
+        <p>Copyright 2024 EventHub Platform. All rights reserved.</p>
       </footer>
     </>
   );

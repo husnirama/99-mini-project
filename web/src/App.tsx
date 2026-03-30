@@ -16,60 +16,74 @@ import OrganizerStatisticsPage from "./pages/OrganizerProfile/OrganizerStatistic
 import OrganizerTransactionViewPage from "./pages/OrganizerProfile/OrganizerTransactionViewPage";
 import OrganizerAttendeesPage from "./pages/OrganizerProfile/OrganizerAttendeesPage";
 import OrganizerSettingPage from "./pages/OrganizerProfile/OrganizerSettingsPage";
+import AuthBootstrap from "./components/AuthBootstrap";
+import InfoPage from "./pages/InfoPage";
 
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* <Route path="/" element={ }></Route> */}
-        <Route element={<RootLayout />}>
-          <Route index element={<Home />}></Route>
-          <Route path="/events/:id" element={<EventDetail />}></Route>
-          <Route
-            path="/events/:id/checkout"
-            element={<OrderStep1Page />}
-          ></Route>
-          <Route
-            path="/transactions/history"
-            element={<CustomerTransactionsPage />}
-          ></Route>
-          <Route
-            path="/transactions/:transactionId"
-            element={<PaymentDetailPage />}
-          ></Route>
-        </Route>
-        <Route element={<GuestRoute />}>
-          <Route path="/auth/login" element={<LoginPage />}></Route>
-          <Route path="/auth/register" element={<RegisterPage />}></Route>
-        </Route>
-        <Route element={<OrganizerRoute />}>
-          <Route
-            path="/organizer/dashboard"
-            element={<OrganizerDashboardPage />}
-          />
-          <Route
-            path="/organizer/:id/statistics"
-            element={<OrganizerStatisticsPage />}
-          />
-          <Route
-            path="/organizer/:id/transactions"
-            element={<OrganizerTransactionViewPage />}
-          />
-          <Route
-            path="/organizer/:id/attendees"
-            element={<OrganizerAttendeesPage />}
-          />
-          <Route
-            path="/organizer/:id/settings"
-            element={<OrganizerSettingPage />}
-          />
-          <Route path="/organizer/create-event" element={<CreateEventPage />} />
-          <Route
-            path="/organizer/transactions"
-            element={<OrganizerTransactionsPage />}
-          />
-        </Route>
-      </Routes>
+      <AuthBootstrap>
+        <Routes>
+          {/* <Route path="/" element={ }></Route> */}
+          <Route element={<RootLayout />}>
+            <Route index element={<Home />}></Route>
+            <Route path="/events/:id" element={<EventDetail />}></Route>
+            <Route
+              path="/events/:id/checkout"
+              element={<OrderStep1Page />}
+            ></Route>
+            <Route
+              path="/transactions/history"
+              element={<CustomerTransactionsPage />}
+            ></Route>
+            <Route
+              path="/transactions/:transactionId"
+              element={<PaymentDetailPage />}
+            ></Route>
+            <Route path="/about" element={<InfoPage />}></Route>
+            <Route path="/pricing" element={<InfoPage />}></Route>
+            <Route path="/careers" element={<InfoPage />}></Route>
+            <Route path="/help" element={<InfoPage />}></Route>
+            <Route path="/privacy" element={<InfoPage />}></Route>
+            <Route path="/terms" element={<InfoPage />}></Route>
+            <Route path="/host" element={<InfoPage />}></Route>
+          </Route>
+          <Route element={<GuestRoute />}>
+            <Route path="/auth/login" element={<LoginPage />}></Route>
+            <Route path="/auth/register" element={<RegisterPage />}></Route>
+          </Route>
+          <Route element={<OrganizerRoute />}>
+            <Route
+              path="/organizer/dashboard"
+              element={<OrganizerDashboardPage />}
+            />
+            <Route
+              path="/organizer/:id/statistics"
+              element={<OrganizerStatisticsPage />}
+            />
+            <Route
+              path="/organizer/:id/transactions"
+              element={<OrganizerTransactionViewPage />}
+            />
+            <Route
+              path="/organizer/:id/attendees"
+              element={<OrganizerAttendeesPage />}
+            />
+            <Route
+              path="/organizer/:id/settings"
+              element={<OrganizerSettingPage />}
+            />
+            <Route
+              path="/organizer/create-event"
+              element={<CreateEventPage />}
+            />
+            <Route
+              path="/organizer/transactions"
+              element={<OrganizerTransactionsPage />}
+            />
+          </Route>
+        </Routes>
+      </AuthBootstrap>
     </BrowserRouter>
   );
 }

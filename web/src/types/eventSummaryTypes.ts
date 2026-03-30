@@ -10,17 +10,18 @@ export type WeeklySales = {
 };
 
 export type EventSummary = {
+  id: number;
   title: string;
-  category: string;
+  category: string | null;
   createdAt: string;
   status: string;
   ticket: TicketNumber[];
 };
 
 export type EventDashboard = {
-  numberOfEvent: string;
-  numberOfActiveEvent: string;
-  numberTransaction: string;
+  numberOfEvent: number;
+  numberOfActiveEvent: number;
+  numberTransaction: number;
   sumRevenue: {
     _sum: {
       totalAmount: number | null;

@@ -23,15 +23,15 @@ export default function EventCard({ event }: EventCardProps) {
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           src={image}
         />
-        <button className="absolute top-3 right-3 w-8 h-8 bg-white/90 dark:bg-slate-900/90 hover:bg-white rounded-full flex items-center justify-center text-slate-900 dark:text-white shadow-md transition-all">
+        <span className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow-md transition-all dark:bg-slate-900/90 dark:text-white">
           <span className="material-symbols-outlined text-base font-light">
             favorite
           </span>
-        </button>
+        </span>
       </div>
       <div className="p-5">
         <p className="text-[10px] font-extrabold text-primary uppercase tracking-widest mb-1.5">
-          {formatEventDate(event.eventDateStart)} •{" "}
+          {formatEventDate(event.eventDateStart)} -{" "}
           {formatEventTime(event.eventDateStart)}
         </p>
         <h4 className="font-bold text-lg mb-2 text-slate-900 dark:text-white group-hover:text-primary transition-colors line-clamp-1">

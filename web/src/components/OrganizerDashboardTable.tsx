@@ -1,5 +1,7 @@
+import { useAuthStore } from "@/store/auth-store";
 import type { EventsSummary, TicketNumber } from "@/types/eventSummaryTypes";
 import { formatEventDate } from "@/utils/eventList.utils";
+import { Link } from "react-router";
 
 function formattingTicket(tickets: TicketNumber[]) {
   const sold = tickets.reduce((sum, t) => sum + t.sold, 0);
@@ -8,6 +10,7 @@ function formattingTicket(tickets: TicketNumber[]) {
 }
 
 export default function OrganizerDashboardTable({ event }: EventsSummary) {
+  const organizerId = useAuthStore((state) => state.user?.id);
   const eventName = event.title;
   const eventCategory = event.category;
   const eventDate = event.createdAt;
@@ -29,40 +32,27 @@ export default function OrganizerDashboardTable({ event }: EventsSummary) {
         {formattingTicket(eventSold)}
       </td>
       <td className="px-6 py-4">
-        <div className="flex gap-2">
-          <button
-            className="text-outline hover:text-primary transition-colors"
-            title="Edit"
+        <div className="flex flex-wrap gap-3 text-xs font-semibold">
+          <Link
+            className="text-primary hover:underline"
+            to={`/events/${event.id}`}
           >
-            <span
-              className="material-symbols-outlined text-lg"
-              data-icon="edit"
+            View
+          </Link>
+          {organizerId ? (
+            <Link
+              className="text-slate-500 hover:text-primary hover:underline"
+              to={`/organizer/${organizerId}/statistics?eventId=${event.id}`}
             >
-              edit
-            </span>
-          </button>
-          <button
-            className="text-outline hover:text-primary transition-colors"
-            title="Analytics"
+              Statistics
+            </Link>
+          ) : null}
+          <Link
+            className="text-slate-500 hover:text-primary hover:underline"
+            to={`/organizer/transactions?eventId=${event.id}`}
           >
-            <span
-              className="material-symbols-outlined text-lg"
-              data-icon="analytics"
-            >
-              analytics
-            </span>
-          </button>
-          <button
-            className="text-outline hover:text-primary transition-colors"
-            title="More"
-          >
-            <span
-              className="material-symbols-outlined text-lg"
-              data-icon="more_vert"
-            >
-              more_vert
-            </span>
-          </button>
+            Transactions
+          </Link>
         </div>
       </td>
     </tr>

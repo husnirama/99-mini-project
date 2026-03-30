@@ -14,6 +14,7 @@ import {
   formatPaymentMethod,
 } from "@/utils/orderTransaction.utils";
 import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router";
 import { toast } from "sonner";
 
 const STATUS_FILTERS: Array<"ALL" | TransactionStatus> = [
@@ -56,6 +57,7 @@ function stampRecord(
 }
 
 export default function OrganizerTransactionsPage() {
+  const [searchParams] = useSearchParams();
   const [activeFilter, setActiveFilter] = useState<"ALL" | TransactionStatus>(
     "WAITING_FOR_ADMIN_CONFIRMATION",
   );
@@ -68,6 +70,8 @@ export default function OrganizerTransactionsPage() {
     transactionId: number;
     action: "approve" | "reject" | "cancel";
   } | null>(null);
+  const eventIdFilter = Number(searchParams.get("eventId"));
+  const hasEventFilter = Number.isFinite(eventIdFilter);
 
   async function fetchTransactions(
     filter: "ALL" | TransactionStatus = activeFilter,
@@ -76,7 +80,10 @@ export default function OrganizerTransactionsPage() {
 
     try {
       const response = await apiClient.get(API_ENDPOINTS.TRANSACTIONS.LIST, {
-        params: filter === "ALL" ? undefined : { status: filter },
+        params: {
+          ...(filter === "ALL" ? {} : { status: filter }),
+          ...(hasEventFilter ? { eventId: eventIdFilter } : {}),
+        },
       });
 
       const nextRecords = (
@@ -109,7 +116,7 @@ export default function OrganizerTransactionsPage() {
 
   useEffect(() => {
     fetchTransactions(activeFilter);
-  }, [activeFilter]);
+  }, [activeFilter, eventIdFilter, hasEventFilter]);
 
   async function handleAction(
     transactionId: number,
@@ -162,6 +169,16 @@ export default function OrganizerTransactionsPage() {
             Incoming transactions are loaded from the backend and grouped by the
             current status filter.
           </p>
+          {hasEventFilter ? (
+            <div className="mt-3">
+              <Link
+                className="text-sm font-semibold text-primary hover:underline"
+                to="/organizer/transactions"
+              >
+                Clear event filter
+              </Link>
+            </div>
+          ) : null}
         </div>
       </div>
 

@@ -1,355 +1,432 @@
+import { apiClient } from "@/api/clients";
+import { API_ENDPOINTS } from "@/api/endpoint";
+import type { OrganizerProfile } from "@/api/types";
+import OrganizerMetricCard from "@/components/organizer/OrganizerMetricCard";
+import OrganizerShell from "@/components/organizer/OrganizerShell";
+import { useAuthStore } from "@/store/auth-store";
+import { useEffect, useState } from "react";
+import { Link } from "react-router";
+import { toast } from "sonner";
+
+type ProfileFormState = {
+  name: string;
+  email: string;
+  address: string;
+};
+
+type PasswordFormState = {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+};
+
+const emptyProfileForm: ProfileFormState = {
+  name: "",
+  email: "",
+  address: "",
+};
+
+const emptyPasswordForm: PasswordFormState = {
+  currentPassword: "",
+  newPassword: "",
+  confirmNewPassword: "",
+};
+
+function formatMembershipDate(value?: string) {
+  if (!value) {
+    return "-";
+  }
+
+  return new Date(value).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+}
+
 export default function OrganizerSettingPage() {
+  const [profile, setProfile] = useState<OrganizerProfile | null>(null);
+  const [profileForm, setProfileForm] = useState<ProfileFormState>(emptyProfileForm);
+  const [passwordForm, setPasswordForm] = useState<PasswordFormState>(emptyPasswordForm);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchProfile() {
+      setIsLoading(true);
+
+      try {
+        const response = await apiClient.get(API_ENDPOINTS.ORGANIZER.PROFILE);
+        const nextProfile = response.data.data as OrganizerProfile;
+
+        if (!isMounted) {
+          return;
+        }
+
+        setProfile(nextProfile);
+        setProfileForm({
+          name: nextProfile.name,
+          email: nextProfile.email,
+          address: nextProfile.address ?? "",
+        });
+      } catch (error) {
+        console.error(error);
+        toast.error("We couldn't load your organizer profile.");
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  async function handleSaveProfile() {
+    setIsSavingProfile(true);
+
+    try {
+      const response = await apiClient.patch(API_ENDPOINTS.ORGANIZER.PROFILE, {
+        name: profileForm.name,
+        email: profileForm.email,
+        address: profileForm.address,
+      });
+
+      const nextProfile = response.data.data as OrganizerProfile;
+
+      setProfile(nextProfile);
+      setProfileForm({
+        name: nextProfile.name,
+        email: nextProfile.email,
+        address: nextProfile.address ?? "",
+      });
+
+      useAuthStore.setState((state) => ({
+        ...state,
+        user: state.user
+          ? {
+              ...state.user,
+              name: nextProfile.name,
+              email: nextProfile.email,
+              address: nextProfile.address ?? null,
+            }
+          : state.user,
+      }));
+
+      toast.success("Organizer profile updated.");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(
+        error?.response?.data?.message ||
+          "We couldn't update your organizer profile.",
+      );
+    } finally {
+      setIsSavingProfile(false);
+    }
+  }
+
+  async function handleSavePassword() {
+    setIsSavingPassword(true);
+
+    try {
+      await apiClient.patch(API_ENDPOINTS.ORGANIZER.PASSWORD, passwordForm);
+      setPasswordForm(emptyPasswordForm);
+      toast.success("Password updated successfully.");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(
+        error?.response?.data?.message ||
+          "We couldn't update your password.",
+      );
+    } finally {
+      setIsSavingPassword(false);
+    }
+  }
+
   return (
-    <>
-      <div className="bg-background text-on-background antialiased flex">
-        <aside className="hidden md:flex flex-col h-screen sticky top-0 left-0 w-64 p-4 bg-slate-100 dark:bg-slate-900 font-inter antialiased tracking-tight text-slate-900 dark:text-slate-100 shrink-0">
-          <div className="mb-8 px-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="material-icons text-white text-xl">event</span>
+    <OrganizerShell
+      title="Organizer Settings"
+      description="Manage the organizer identity your attendees see and keep your account credentials secure."
+      actions={
+        <Link
+          className="inline-flex h-11 items-center justify-center rounded-lg border border-slate-200 px-5 text-sm font-semibold text-slate-700 transition-colors hover:border-primary hover:text-primary dark:border-slate-700 dark:text-slate-200"
+          to="/organizer/dashboard"
+        >
+          Back to Dashboard
+        </Link>
+      }
+    >
+      {isLoading ? (
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/40">
+          Loading organizer profile...
+        </div>
+      ) : (
+        <div className="space-y-8">
+          <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <OrganizerMetricCard
+              icon="event"
+              label="Events"
+              value={profile?.stats.totalEvents ?? 0}
+            />
+            <OrganizerMetricCard
+              icon="receipt_long"
+              label="Transactions"
+              tone="amber"
+              value={profile?.stats.totalTransactions ?? 0}
+            />
+            <OrganizerMetricCard
+              icon="groups"
+              label="Attendees"
+              tone="emerald"
+              value={profile?.stats.totalAttendees ?? 0}
+            />
+          </section>
+
+          <section className="grid grid-cols-1 gap-8 xl:grid-cols-[1.15fr_0.85fr]">
+            <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/60">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Organizer Profile
+                  </p>
+                  <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                    {profile?.name || "Organizer"}
+                  </h2>
+                  <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                    Member since {formatMembershipDate(profile?.createdAt)}
+                  </p>
+                </div>
+                <div className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                  {profile?.role === "EVENT_ORGANIZER"
+                    ? "Organizer"
+                    : profile?.role}
+                </div>
               </div>
-              <span className="text-xl font-bold tracking-tight text-primary">
-                EventHub
-              </span>
-            </div>
-            <p className="text-[10px] text-slate-500 font-semibold tracking-widest uppercase mt-1">
-              Event Management
-            </p>
-          </div>
-          <nav className="flex-1 space-y-1">
-            <a
-              className="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-200"
-              href="#"
-            >
-              <span className="material-symbols-outlined" data-icon="dashboard">
-                dashboard
-              </span>
-              <span>Dashboard</span>
-            </a>
-            <a
-              className="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-200"
-              href="#"
-            >
-              <span className="material-symbols-outlined" data-icon="bar_chart">
-                bar_chart
-              </span>
-              <span>Statistics</span>
-            </a>
-            <a
-              className="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-200"
-              href="#"
-            >
-              <span className="material-symbols-outlined" data-icon="payments">
-                payments
-              </span>
-              <span>Transactions</span>
-            </a>
-            <a
-              className="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-200"
-              href="#"
-            >
-              <span className="material-symbols-outlined" data-icon="groups">
-                groups
-              </span>
-              <span>Attendees</span>
-            </a>
-            <a
-              className="flex items-center gap-3 px-4 py-3 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg font-semibold active:scale-95 transition-all"
-              href="#"
-            >
-              <span className="material-symbols-outlined" data-icon="settings">
-                settings
-              </span>
-              <span>Settings</span>
-            </a>
-          </nav>
-          <div className="mt-auto pt-4 border-t border-slate-200/50 dark:border-slate-800 space-y-1">
-            <a
-              className="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-200"
-              href="#"
-            >
-              <span className="material-symbols-outlined" data-icon="help">
-                help
-              </span>
-              <span>Help Center</span>
-            </a>
-            <a
-              className="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-200"
-              href="#"
-            >
-              <span className="material-symbols-outlined" data-icon="logout">
-                logout
-              </span>
-              <span>Logout</span>
-            </a>
-          </div>
-        </aside>
-        <main className="ml-64 pt-16 min-h-screen bg-surface-container-low">
-          <div className="max-w-5xl mx-auto px-8 py-10">
-            {/* <!-- Header Section --> */}
-            <div className="mb-10">
-              <h1 className="text-3xl font-bold tracking-tight text-on-surface mb-2">
-                Account Settings
-              </h1>
-              <p className="text-on-surface-variant max-w-2xl">
-                Manage your professional profile, security preferences, and
-                account configurations for the Precision Orchestrator platform.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 gap-10">
-              {/* <!-- Updated Section 1: Branding & Profile Information --> */}
-              <section className="bg-surface-container-lowest rounded-xl overflow-hidden custom-shadow">
-                {/* <!-- Background Branding Area --> */}
-                <div className="relative h-64 w-full bg-slate-200">
-                  <img
-                    alt="Account Background"
-                    className="w-full h-full object-cover"
-                    data-alt="minimalist architectural abstract background with soft blue and grey tones"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAoP-4XsBL-PGBKPrCcpkykigwQI1-k_XzTBeQZZ0wtJzfoog__2jWS6YiTfTvgXrmsgWmVsqQJP5BK0AjiuGHZo0MQlsPFtilLEUrW854KkyhXaw_bHZqCk5I-iC0RNLYgrxXPNfSd882S8--zGwuo1RT5Pdgak7fJ02zEhH_NDuS9M5Po4jRmPvE-q1mdcrPbdYhFgquXiqJ_YT-sPJ0wGOc-49aVUCtII1IIK9AV-qfdfuVwAkwi7u8w7LcvnqLiXB2vTRqRKS3H"
+
+              <div className="mt-8 grid grid-cols-1 gap-5">
+                <label className="space-y-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Full Name
+                  </span>
+                  <input
+                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition-colors focus:border-primary dark:border-slate-700 dark:bg-slate-950/40"
+                    onChange={(event) =>
+                      setProfileForm((current) => ({
+                        ...current,
+                        name: event.target.value,
+                      }))
+                    }
+                    type="text"
+                    value={profileForm.name}
                   />
-                  <div className="absolute inset-0 bg-black/10"></div>
-                  <button className="absolute top-4 right-4 bg-white/90 backdrop-blur-md text-on-surface px-4 py-2 rounded-lg font-bold text-sm shadow-sm flex items-center gap-2 hover:bg-white active:scale-95 transition-all">
-                    <span className="material-symbols-outlined text-lg">
-                      image
-                    </span>
-                    Change Background
+                </label>
+
+                <label className="space-y-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Email Address
+                  </span>
+                  <input
+                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition-colors focus:border-primary dark:border-slate-700 dark:bg-slate-950/40"
+                    onChange={(event) =>
+                      setProfileForm((current) => ({
+                        ...current,
+                        email: event.target.value,
+                      }))
+                    }
+                    type="email"
+                    value={profileForm.email}
+                  />
+                </label>
+
+                <label className="space-y-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Address
+                  </span>
+                  <textarea
+                    className="min-h-32 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition-colors focus:border-primary dark:border-slate-700 dark:bg-slate-950/40"
+                    onChange={(event) =>
+                      setProfileForm((current) => ({
+                        ...current,
+                        address: event.target.value,
+                      }))
+                    }
+                    value={profileForm.address}
+                  />
+                </label>
+
+                <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 dark:border-slate-800 dark:bg-slate-950/30">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      Referral Code
+                    </p>
+                    <p className="mt-2 text-base font-semibold text-slate-900 dark:text-white">
+                      {profile?.referralCode || "-"}
+                    </p>
+                  </div>
+                  <button
+                    className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-primary hover:text-primary dark:border-slate-700 dark:text-slate-200"
+                    onClick={() => {
+                      if (!profile?.referralCode) {
+                        return;
+                      }
+
+                      if (!navigator.clipboard) {
+                        toast.error("Clipboard access is not available here.");
+                        return;
+                      }
+
+                      navigator.clipboard
+                        .writeText(profile.referralCode)
+                        .then(() => toast.success("Referral code copied."));
+                    }}
+                    type="button"
+                  >
+                    Copy Code
                   </button>
                 </div>
-                <div className="px-8 pb-8 flex flex-col md:flex-row gap-10">
-                  <div className="w-full md:w-1/3 -mt-16 relative">
-                    <div className="flex flex-col items-center text-center">
-                      <div className="relative group">
-                        <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-surface-container-lowest bg-surface-container-lowest shadow-xl mb-4">
-                          <img
-                            alt="Profile Preview"
-                            className="w-full h-full object-cover"
-                            data-alt="high-quality portrait of a male professional with dark hair and a friendly expression, studio lighting, neutral background"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqzNI96-9h8zQcywn6rGlZRfZMSf9mZ7F8DBuwBtPRuq2787tiMSovgi_n6ztcXESaKKNXk6MJMtXXY0ukL93rj1UtkXu3Tn6vd4pvZD7RVmsexJhtvgt18LYXO9rceU5u-fAb65sgeTzvnNt7dmuIxOoiaGtCE-y_qVUElHdtQHlAns9kRWCe49ODzYzVNSqg66CgQUMGar79upHOO6FnCwK80pkA0g9_kVT4Q_AXSZj1dOGj8Ru9GFt8uP4wrEGgMP12Evymo7w_"
-                          />
-                        </div>
-                        <button
-                          className="absolute bottom-4 right-0 bg-primary text-white p-2 rounded-full shadow-lg border-4 border-surface-container-lowest active:scale-90 transition-transform flex items-center justify-center"
-                          title="Change Photo"
-                        >
-                          <span className="material-symbols-outlined text-sm">
-                            photo_camera
-                          </span>
-                        </button>
-                      </div>
-                      <h3 className="font-bold text-lg">Alex Sterling</h3>
-                      <p className="text-sm text-on-surface-variant font-medium uppercase tracking-widest mt-1">
-                        Senior Event Orchestrator
-                      </p>
-                    </div>
-                    <div className="bg-surface-container-low p-4 rounded-lg mt-6">
-                      <h4 className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">
-                        Member Since
-                      </h4>
-                      <p className="text-sm font-semibold">October 2022</p>
-                    </div>
-                  </div>
-                  <div className="flex-1 space-y-6 pt-8">
-                    <h2 className="text-xl font-bold text-on-surface border-l-4 border-primary pl-4">
-                      Profile Information
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-                          Full Name
-                        </label>
-                        <input
-                          className="w-full bg-surface-container rounded-lg border-none focus:ring-2 focus:ring-primary py-3 px-4 font-medium"
-                          type="text"
-                          value="Alex Sterling"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-                          Email Address
-                        </label>
-                        <input
-                          className="w-full bg-surface-container rounded-lg border-none focus:ring-2 focus:ring-primary py-3 px-4 font-medium"
-                          type="email"
-                          value="alex.sterling@precision-orchestra.com"
-                        />
-                      </div>
-                      <div className="space-y-2 md:col-span-2">
-                        <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-                          Contact Number
-                        </label>
-                        <input
-                          className="w-full bg-surface-container rounded-lg border-none focus:ring-2 focus:ring-primary py-3 px-4 font-medium"
-                          type="tel"
-                          value="+1 (555) 902-3481"
-                        />
-                      </div>
-                      <div className="space-y-2 md:col-span-2">
-                        <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-                          Bio / Description
-                        </label>
-                        <textarea
-                          className="w-full bg-surface-container rounded-lg border-none focus:ring-2 focus:ring-primary py-3 px-4 font-medium"
-                          rows={3}
-                        >
-                          Strategic event architect with 10+ years experience in
-                          high-stakes corporate summits and luxury gala
-                          coordination.
-                        </textarea>
-                      </div>
-                    </div>
-                    <div className="pt-4 flex justify-end">
-                      <button className="btn-primary-gradient text-white px-8 py-3 rounded-lg font-bold shadow-md active:scale-95 transition-all">
-                        Save Changes
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </section>
-              {/* <!-- Section 2: Security & Password --> */}
-              <section className="bg-surface-container-lowest rounded-xl custom-shadow p-8">
-                <div className="flex flex-col md:flex-row gap-10">
-                  <div className="w-full md:w-1/3">
-                    <h2 className="text-xl font-bold text-on-surface border-l-4 border-primary pl-4 mb-4">
-                      Security &amp; Password
-                    </h2>
-                    <p className="text-sm text-on-surface-variant leading-relaxed">
-                      Ensure your account stays secure by using a strong, unique
-                      password and reviewing your login history regularly.
-                    </p>
-                    <div className="mt-8 p-4 bg-tertiary-fixed rounded-xl border border-tertiary-fixed-dim/20">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="material-symbols-outlined text-on-tertiary-fixed">
-                          shield
-                        </span>
-                        <span className="text-xs font-bold text-on-tertiary-fixed uppercase tracking-widest">
-                          Security Tip
-                        </span>
-                      </div>
-                      <p className="text-xs text-on-tertiary-fixed-variant leading-relaxed">
-                        Combine symbols, numbers, and both case types to
-                        maximize password strength.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex-1 space-y-6">
-                    <div className="grid grid-cols-1 gap-6">
-                      <div className="space-y-2">
-                        <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-                          Current Password
-                        </label>
-                        <div className="relative">
-                          <input
-                            className="w-full bg-surface-container rounded-lg border-none focus:ring-2 focus:ring-primary py-3 px-4"
-                            placeholder="••••••••••••"
-                            type="password"
-                          />
-                          <button className="absolute right-3 top-1/2 -translate-y-1/2 text-outline">
-                            <span className="material-symbols-outlined text-lg">
-                              visibility
-                            </span>
-                          </button>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-                            New Password
-                          </label>
-                          <input
-                            className="w-full bg-surface-container rounded-lg border-none focus:ring-2 focus:ring-primary py-3 px-4"
-                            type="password"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-                            Confirm New Password
-                          </label>
-                          <input
-                            className="w-full bg-surface-container rounded-lg border-none focus:ring-2 focus:ring-primary py-3 px-4"
-                            type="password"
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-                            Password Strength
-                          </span>
-                          <span className="text-xs font-bold text-primary">
-                            STRONG
-                          </span>
-                        </div>
-                        <div className="h-2 w-full bg-surface-container rounded-full overflow-hidden flex gap-1">
-                          <div className="h-full w-1/4 bg-primary rounded-full"></div>
-                          <div className="h-full w-1/4 bg-primary rounded-full"></div>
-                          <div className="h-full w-1/4 bg-primary rounded-full"></div>
-                          <div className="h-full w-1/4 bg-surface-variant rounded-full"></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="pt-4 flex justify-end">
-                      <button className="btn-primary-gradient text-white px-8 py-3 rounded-lg font-bold shadow-md active:scale-95 transition-all">
-                        Update Password
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </section>
-              {/* <!-- Section 3: Account Recovery & Options (2FA Removed) --> */}
-              <section className="bg-surface-container-lowest rounded-xl custom-shadow p-8">
-                <h2 className="text-xl font-bold text-on-surface border-l-4 border-primary pl-4 mb-8">
-                  Account Options
-                </h2>
-                <div className="space-y-8">
-                  {/* <!-- Reset Password --> */}
-                  <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-xl">
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-secondary-fixed flex items-center justify-center text-secondary">
-                        <span className="material-symbols-outlined">mail</span>
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-on-surface">
-                          Account Recovery
-                        </h4>
-                        <p className="text-sm text-on-surface-variant">
-                          Update your emergency contact email or reset via
-                          external provider.
-                        </p>
-                      </div>
-                    </div>
-                    <button className="px-6 py-2 bg-secondary-container text-on-secondary-container rounded-lg font-bold text-sm hover:opacity-90 active:scale-95 transition-all">
-                      Reset Password
-                    </button>
-                  </div>
-                  {/* <!-- Destructive Action --> */}
-                  <div className="mt-12 pt-8 border-t border-outline-variant/30">
-                    <div className="p-6 border border-error/20 bg-error-container/10 rounded-xl flex flex-col md:flex-row items-center justify-between gap-6">
-                      <div>
-                        <h4 className="font-bold text-error flex items-center gap-2">
-                          <span className="material-symbols-outlined text-sm">
-                            warning
-                          </span>
-                          Danger Zone: Delete Account
-                        </h4>
-                        <p className="text-sm text-on-surface-variant mt-1">
-                          Once you delete your account, there is no going back.
-                          All event data, historical logs, and documentation
-                          will be permanently erased.
-                        </p>
-                      </div>
-                      <button className="whitespace-nowrap bg-error text-white px-8 py-3 rounded-lg font-bold shadow-sm hover:bg-error/90 active:scale-95 transition-all">
-                        Delete Account
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            </div>
 
-            <div className="h-20"></div>
-          </div>
-        </main>
-      </div>
-    </>
+                <div className="flex justify-end">
+                  <button
+                    className="inline-flex h-11 items-center justify-center rounded-lg bg-primary px-6 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={isSavingProfile}
+                    onClick={handleSaveProfile}
+                    type="button"
+                  >
+                    {isSavingProfile ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <article className="space-y-6">
+              <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/60">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Security
+                  </p>
+                  <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                    Update Password
+                  </h2>
+                </div>
+
+                <div className="mt-6 space-y-4">
+                  <label className="space-y-2">
+                    <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      Current Password
+                    </span>
+                    <div className="relative">
+                      <input
+                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-12 text-sm outline-none transition-colors focus:border-primary dark:border-slate-700 dark:bg-slate-950/40"
+                        onChange={(event) =>
+                          setPasswordForm((current) => ({
+                            ...current,
+                            currentPassword: event.target.value,
+                          }))
+                        }
+                        type={showCurrentPassword ? "text" : "password"}
+                        value={passwordForm.currentPassword}
+                      />
+                      <button
+                        className="absolute inset-y-0 right-3 text-sm font-semibold text-slate-500 hover:text-primary"
+                        onClick={() => setShowCurrentPassword((value) => !value)}
+                        type="button"
+                      >
+                        {showCurrentPassword ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                  </label>
+
+                  <label className="space-y-2">
+                    <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      New Password
+                    </span>
+                    <div className="relative">
+                      <input
+                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-12 text-sm outline-none transition-colors focus:border-primary dark:border-slate-700 dark:bg-slate-950/40"
+                        onChange={(event) =>
+                          setPasswordForm((current) => ({
+                            ...current,
+                            newPassword: event.target.value,
+                          }))
+                        }
+                        type={showNewPassword ? "text" : "password"}
+                        value={passwordForm.newPassword}
+                      />
+                      <button
+                        className="absolute inset-y-0 right-3 text-sm font-semibold text-slate-500 hover:text-primary"
+                        onClick={() => setShowNewPassword((value) => !value)}
+                        type="button"
+                      >
+                        {showNewPassword ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                  </label>
+
+                  <label className="space-y-2">
+                    <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      Confirm Password
+                    </span>
+                    <div className="relative">
+                      <input
+                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-12 text-sm outline-none transition-colors focus:border-primary dark:border-slate-700 dark:bg-slate-950/40"
+                        onChange={(event) =>
+                          setPasswordForm((current) => ({
+                            ...current,
+                            confirmNewPassword: event.target.value,
+                          }))
+                        }
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={passwordForm.confirmNewPassword}
+                      />
+                      <button
+                        className="absolute inset-y-0 right-3 text-sm font-semibold text-slate-500 hover:text-primary"
+                        onClick={() => setShowConfirmPassword((value) => !value)}
+                        type="button"
+                      >
+                        {showConfirmPassword ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                  </label>
+
+                  <button
+                    className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-slate-950 px-6 text-sm font-semibold text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={isSavingPassword}
+                    onClick={handleSavePassword}
+                    type="button"
+                  >
+                    {isSavingPassword ? "Updating..." : "Update Password"}
+                  </button>
+                </div>
+              </section>
+
+              <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/60">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  Need Help?
+                </p>
+                <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+                  Visit the help center for organizer guidance, policy details,
+                  and support contact information.
+                </p>
+                <Link
+                  className="mt-5 inline-flex text-sm font-semibold text-primary hover:underline"
+                  to="/help"
+                >
+                  Open Help Center
+                </Link>
+              </section>
+            </article>
+          </section>
+        </div>
+      )}
+    </OrganizerShell>
   );
 }

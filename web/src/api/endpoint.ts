@@ -29,5 +29,7 @@ export const API_ENDPOINTS = {
   CUSTOMERS: {},
   ORGANIZER: {
     DASHBOARD: "/organizer/dashboard",
+    PROFILE: "/organizer/profile",
+    PASSWORD: "/organizer/profile/password",
   },
 };
