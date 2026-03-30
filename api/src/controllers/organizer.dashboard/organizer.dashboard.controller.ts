@@ -18,7 +18,7 @@ export async function organizerDahsboardController(
   try {
     const userId = req.user?.id;
     if (!userId) {
-      throw new AppError("Unathorized", 401);
+      throw new AppError("Unauthorized", 401);
     }
     const [
       totalEvent,
@@ -40,7 +40,7 @@ export async function organizerDahsboardController(
 
     const dashboardData = {
       numberOfEvent: totalEvent,
-      numberActiveEvent: countActiveEvent,
+      numberOfActiveEvent: countActiveEvent,
       numberTransaction: countTransaction,
       sumRevenue: totalRevenue,
       eventSummary,

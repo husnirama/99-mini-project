@@ -25,4 +25,27 @@ export const promotionDiscountType = {
     PERCENTAGE: 'PERCENTAGE',
     FIXED: 'FIXED'
 };
+export const transactionStatus = {
+    WAITING_FOR_PAYMENT: 'WAITING_FOR_PAYMENT',
+    WAITING_FOR_ADMIN_CONFIRMATION: 'WAITING_FOR_ADMIN_CONFIRMATION',
+    DONE: 'DONE',
+    REJECTED: 'REJECTED',
+    EXPIRED: 'EXPIRED',
+    CANCELED: 'CANCELED'
+};
+export const orderStatus = {
+    PENDING: 'PENDING',
+    COMPLETED: 'COMPLETED',
+    EXPIRED: 'EXPIRED',
+    CANCELED: 'CANCELED',
+    REJECTED: 'REJECTED'
+};
+export const paymentMethod = {
+    CARD: 'CARD',
+    BANK_TRANSFER: 'BANK_TRANSFER'
+};
+export const cancelActor = {
+    USER: 'USER',
+    ADMIN: 'ADMIN'
+};
 //# sourceMappingURL=enums.js.map

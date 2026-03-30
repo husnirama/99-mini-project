@@ -3,6 +3,7 @@ import type {
   Role,
   transactionStatus,
 } from "../generated/prisma/client.js";
+import { cacheTags, invalidateCacheTags } from "../lib/cache.js";
 import { prisma } from "../lib/prisma.js";
 import cloudinary from "../lib/cloudinary.js";
 import { registerTransactionJob } from "../queues/order.scheduller.js";
@@ -58,6 +59,7 @@ async function getTransactionForAction(transactionId: number) {
         select: {
           id: true,
           customerId: true,
+          eventId: true,
           guestTokenHash: true,
           ticketTypeId: true,
           quantity: true,
@@ -106,6 +108,23 @@ function assertCustomerOwnership(
   }
 }
 
+async function invalidateTransactionCache(
+  transactionId: number,
+  transaction: NonNullable<Awaited<ReturnType<typeof getTransactionForAction>>>,
+) {
+  await invalidateCacheTags([
+    cacheTags.transaction(transactionId),
+    cacheTags.transactionsOrganizer(transaction.order.event.organizeBy),
+    cacheTags.organizerDashboard(transaction.order.event.organizeBy),
+    cacheTags.organizerScope(transaction.order.event.organizeBy),
+    cacheTags.eventsList,
+    cacheTags.event(transaction.order.eventId),
+    ...(transaction.order.customerId
+      ? [cacheTags.transactionsUser(transaction.order.customerId)]
+      : []),
+  ]);
+}
+
 function assertOrganizerOwnership(
   transaction: NonNullable<Awaited<ReturnType<typeof getTransactionForAction>>>,
   actor: TransactionActor,
@@ -119,7 +138,7 @@ function assertOrganizerOwnership(
   }
 
   if (transaction.order.event.organizeBy !== actor.userId) {
-    throw new AppError("Forbidden Action, not the right Orginzer", 403);
+    throw new AppError("Forbidden action, not the right organizer", 403);
   }
 }
 
@@ -249,6 +268,7 @@ function buildTransactionListWhere(
     where.order = {
       event: {
         organizeBy: actor.userId,
+        ...(query.eventId ? { id: query.eventId } : {}),
       },
     };
 
@@ -257,6 +277,7 @@ function buildTransactionListWhere(
 
   where.order = {
     customerId: actor.userId,
+    ...(query.eventId ? { eventId: query.eventId } : {}),
   };
 
   return where;
@@ -411,6 +432,7 @@ export async function uploadPaymentProof(
   });
 
   await registerTransactionJob(transaction.order.id, updatedTransaction.id);
+  await invalidateTransactionCache(transactionId, transaction);
   return updatedTransaction;
 }
 
@@ -434,7 +456,7 @@ export async function approveTransaction(
     );
   }
 
-  return prisma.$transaction(async (tx) => {
+  const updatedTransaction = await prisma.$transaction(async (tx) => {
     await finalizeOrderResource(tx, {
       ticketTypeId: transaction.order.ticketTypeId,
       quantity: transaction.order.quantity,
@@ -457,6 +479,8 @@ export async function approveTransaction(
       },
     });
   });
+  await invalidateTransactionCache(transactionId, transaction);
+  return updatedTransaction;
 }
 
 export async function rejectTransaction(
@@ -484,7 +508,7 @@ export async function rejectTransaction(
     );
   }
 
-  return prisma.$transaction(async (tx) => {
+  const updatedTransaction = await prisma.$transaction(async (tx) => {
     await restoreOrderResources(tx, {
       ticketTypeId: transaction.order.ticketTypeId,
       quantity: transaction.order.quantity,
@@ -507,6 +531,8 @@ export async function rejectTransaction(
       },
     });
   });
+  await invalidateTransactionCache(transactionId, transaction);
+  return updatedTransaction;
 }
 
 export async function cancelTransaction(
@@ -528,7 +554,7 @@ export async function cancelTransaction(
     throw new AppError("Transaction can not be canceled", 400);
   }
 
-  return prisma.$transaction(async (tx) => {
+  const updatedTransaction = await prisma.$transaction(async (tx) => {
     await restoreOrderResources(tx, {
       ticketTypeId: transaction.order.ticketTypeId,
       quantity: transaction.order.quantity,
@@ -552,6 +578,8 @@ export async function cancelTransaction(
       },
     });
   });
+  await invalidateTransactionCache(transactionId, transaction);
+  return updatedTransaction;
 }
 
 export async function expireTransaction(transactionId: number) {
@@ -568,7 +596,7 @@ export async function expireTransaction(transactionId: number) {
     return transaction;
   }
 
-  return prisma.$transaction(async (tx) => {
+  const updatedTransaction = await prisma.$transaction(async (tx) => {
     await restoreOrderResources(tx, {
       ticketTypeId: transaction.order.ticketTypeId,
       quantity: transaction.order.quantity,
@@ -589,4 +617,6 @@ export async function expireTransaction(transactionId: number) {
       },
     });
   });
+  await invalidateTransactionCache(transactionId, transaction);
+  return updatedTransaction;
 }

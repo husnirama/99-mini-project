@@ -11,14 +11,19 @@ export default function requireAuth(req, res, next) {
         if (!secret)
             throw new Error("JWT_SECRET not Defined");
         const decoded = jwt.verify(token, secret);
-        req.user = decoded;
+        req.user = {
+            ...decoded,
+            id: Number(decoded.userId),
+            userId: Number(decoded.userId),
+            role: decoded.role,
+        };
         next();
     }
     catch (err) {
         if (err?.name === "TokenExpiredError") {
             return res.status(401).json({ message: "Token expired" });
         }
-        return res.status(401).json({ message: "Unathorized" });
+        return res.status(401).json({ message: "Unauthorized" });
     }
 }
 //# sourceMappingURL=auth.middleware.js.map

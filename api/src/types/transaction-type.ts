@@ -7,4 +7,5 @@ export interface CreateTransactionTxPayload {
 
 export interface TransactionListQuery {
   status?: transactionStatus | undefined;
+  eventId?: number | undefined;
 }

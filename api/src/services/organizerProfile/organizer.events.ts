@@ -56,6 +56,7 @@ export async function getEventsByOrganizer(userId: number) {
       organizeBy: userId,
     },
     select: {
+      id: true,
       title: true,
       category: true,
       createdAt: true,
@@ -66,6 +67,9 @@ export async function getEventsByOrganizer(userId: number) {
           sold: true,
         },
       },
+    },
+    orderBy: {
+      createdAt: "desc",
     },
   });
   return EventSummary;

@@ -1,3 +1,4 @@
+import { cacheTags, invalidateCacheTags } from "../../lib/cache.js";
 import { prisma } from "../../lib/prisma.js";
 import { AppError } from "../../utils/app-error.js";
 import type { CreateOrderPayload } from "../../types/order-type.js";
@@ -161,6 +162,14 @@ export default async function orderCreation(
     },
   );
   await registerOrderJob(result.order.id, result.transaction.id, expiresAt);
+  await invalidateCacheTags([
+    cacheTags.eventsList,
+    cacheTags.event(payload.eventId),
+    cacheTags.organizerDashboard(ticketInfo!.event.organizeBy),
+    cacheTags.organizerScope(ticketInfo!.event.organizeBy),
+    cacheTags.transactionsOrganizer(ticketInfo!.event.organizeBy),
+    ...(customerId ? [cacheTags.transactionsUser(customerId)] : []),
+  ]);
 
   return {
     ...result,

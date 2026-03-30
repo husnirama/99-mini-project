@@ -11,4 +11,5 @@ export const transactionStatusSchema = z.enum([
 
 export const transactionListQuerySchema = z.object({
   status: transactionStatusSchema.optional(),
+  eventId: z.coerce.number().int().positive().optional(),
 });

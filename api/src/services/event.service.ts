@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import { cacheTags, invalidateCacheTags } from "../lib/cache.js";
 import cloudinary from "../lib/cloudinary.js";
 import { prisma } from "../lib/prisma.js";
 import type { CreateEventInput } from "../types/event-type.js";
@@ -140,6 +141,12 @@ export async function createDraftEvent(
         },
       });
     });
+
+    await invalidateCacheTags([
+      cacheTags.eventsList,
+      cacheTags.organizerDashboard(organizerId),
+      cacheTags.organizerScope(organizerId),
+    ]);
 
     return event;
   } catch (error) {

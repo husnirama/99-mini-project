@@ -35,6 +35,6 @@ export default function requireAuth(
     if (err?.name === "TokenExpiredError") {
       return res.status(401).json({ message: "Token expired" });
     }
-    return res.status(401).json({ message: "Unathorized" });
+    return res.status(401).json({ message: "Unauthorized" });
   }
 }

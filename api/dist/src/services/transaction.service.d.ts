@@ -1,0 +1,207 @@
+import type { Prisma, Role, transactionStatus } from "../generated/prisma/client.js";
+import type { CreateTransactionTxPayload, TransactionListQuery } from "../types/transaction-type.js";
+interface TransactionActor {
+    userId?: number | null;
+    role?: Role | string | null;
+    guestToken?: string | null;
+}
+export declare function createTransaction(tx: Prisma.TransactionClient, payload: CreateTransactionTxPayload): Promise<{
+    id: number;
+    createdAt: Date;
+    updatedAt: Date;
+    status: transactionStatus;
+    orderId: number;
+    paymentMethod: import("../generated/prisma/enums.js").paymentMethod;
+    paymentProof: string | null;
+    paidAt: Date | null;
+    verifiedBy: number | null;
+    verifiedAt: Date | null;
+    canceledAt: Date | null;
+    canceledBy: import("../generated/prisma/enums.js").cancelActor | null;
+    rejectedReason: string | null;
+}>;
+export declare function listTransactions(actor: TransactionActor, query: TransactionListQuery): Promise<{
+    order: {
+        id: number;
+        customerId: number | null;
+        eventId: number;
+        ticketTypeId: number;
+        quantity: number;
+        unitPrice: number;
+        subTotalAmount: number;
+        discountAmount: number;
+        totalAmount: number;
+        promotionId: number | null;
+        voucherCode: string | null;
+        buyerName: string;
+        buyerEmail: string;
+        buyerPhone: string;
+        status: import("../generated/prisma/enums.js").orderStatus;
+        createdAt: Date;
+        updatedAt: Date;
+        expiresAt: Date;
+    };
+    transaction: {
+        id: number;
+        orderId: number;
+        paymentMethod: import("../generated/prisma/enums.js").paymentMethod;
+        paymentProof: string | null;
+        status: transactionStatus;
+        createdAt: Date;
+        updatedAt: Date;
+        paidAt: Date | null;
+        verifiedBy: number | null;
+        verifiedAt: Date | null;
+        canceledAt: Date | null;
+        canceledBy: import("../generated/prisma/enums.js").cancelActor | null;
+        rejectedReason: string | null;
+    };
+    event: {
+        id: number;
+        title: string;
+        category: string | null;
+        eventDateStart: Date;
+        eventDateEnd: Date;
+        image: string;
+        locationLabel: string;
+    };
+    ticket: {
+        id: number;
+        name: string;
+        price: number;
+        quota: number;
+        status: import("../generated/prisma/enums.js").ticketStatus;
+        description: string | null;
+    };
+}[]>;
+export declare function getTransactionDetail(transactionId: number, actor: TransactionActor): Promise<{
+    order: {
+        id: number;
+        customerId: number | null;
+        eventId: number;
+        ticketTypeId: number;
+        quantity: number;
+        unitPrice: number;
+        subTotalAmount: number;
+        discountAmount: number;
+        totalAmount: number;
+        promotionId: number | null;
+        voucherCode: string | null;
+        buyerName: string;
+        buyerEmail: string;
+        buyerPhone: string;
+        status: import("../generated/prisma/enums.js").orderStatus;
+        createdAt: Date;
+        updatedAt: Date;
+        expiresAt: Date;
+    };
+    transaction: {
+        id: number;
+        orderId: number;
+        paymentMethod: import("../generated/prisma/enums.js").paymentMethod;
+        paymentProof: string | null;
+        status: transactionStatus;
+        createdAt: Date;
+        updatedAt: Date;
+        paidAt: Date | null;
+        verifiedBy: number | null;
+        verifiedAt: Date | null;
+        canceledAt: Date | null;
+        canceledBy: import("../generated/prisma/enums.js").cancelActor | null;
+        rejectedReason: string | null;
+    };
+    event: {
+        id: number;
+        title: string;
+        category: string | null;
+        eventDateStart: Date;
+        eventDateEnd: Date;
+        image: string;
+        locationLabel: string;
+    };
+    ticket: {
+        id: number;
+        name: string;
+        price: number;
+        quota: number;
+        status: import("../generated/prisma/enums.js").ticketStatus;
+        description: string | null;
+    };
+}>;
+export declare function uploadPaymentProof(transactionId: number, paymentProof: Express.Multer.File, actor: TransactionActor): Promise<{
+    id: number;
+    createdAt: Date;
+    updatedAt: Date;
+    status: transactionStatus;
+    orderId: number;
+    paymentMethod: import("../generated/prisma/enums.js").paymentMethod;
+    paymentProof: string | null;
+    paidAt: Date | null;
+    verifiedBy: number | null;
+    verifiedAt: Date | null;
+    canceledAt: Date | null;
+    canceledBy: import("../generated/prisma/enums.js").cancelActor | null;
+    rejectedReason: string | null;
+}>;
+export declare function approveTransaction(transactionId: number, adminId: number, actor: TransactionActor): Promise<{
+    id: number;
+    createdAt: Date;
+    updatedAt: Date;
+    status: transactionStatus;
+    orderId: number;
+    paymentMethod: import("../generated/prisma/enums.js").paymentMethod;
+    paymentProof: string | null;
+    paidAt: Date | null;
+    verifiedBy: number | null;
+    verifiedAt: Date | null;
+    canceledAt: Date | null;
+    canceledBy: import("../generated/prisma/enums.js").cancelActor | null;
+    rejectedReason: string | null;
+}>;
+export declare function rejectTransaction(transactionId: number, adminId: number, role: string, actor: TransactionActor): Promise<{
+    id: number;
+    createdAt: Date;
+    updatedAt: Date;
+    status: transactionStatus;
+    orderId: number;
+    paymentMethod: import("../generated/prisma/enums.js").paymentMethod;
+    paymentProof: string | null;
+    paidAt: Date | null;
+    verifiedBy: number | null;
+    verifiedAt: Date | null;
+    canceledAt: Date | null;
+    canceledBy: import("../generated/prisma/enums.js").cancelActor | null;
+    rejectedReason: string | null;
+}>;
+export declare function cancelTransaction(transactionId: number, actor: TransactionActor): Promise<{
+    id: number;
+    createdAt: Date;
+    updatedAt: Date;
+    status: transactionStatus;
+    orderId: number;
+    paymentMethod: import("../generated/prisma/enums.js").paymentMethod;
+    paymentProof: string | null;
+    paidAt: Date | null;
+    verifiedBy: number | null;
+    verifiedAt: Date | null;
+    canceledAt: Date | null;
+    canceledBy: import("../generated/prisma/enums.js").cancelActor | null;
+    rejectedReason: string | null;
+}>;
+export declare function expireTransaction(transactionId: number): Promise<{
+    id: number;
+    createdAt: Date;
+    updatedAt: Date;
+    status: transactionStatus;
+    orderId: number;
+    paymentMethod: import("../generated/prisma/enums.js").paymentMethod;
+    paymentProof: string | null;
+    paidAt: Date | null;
+    verifiedBy: number | null;
+    verifiedAt: Date | null;
+    canceledAt: Date | null;
+    canceledBy: import("../generated/prisma/enums.js").cancelActor | null;
+    rejectedReason: string | null;
+}>;
+export {};
+//# sourceMappingURL=transaction.service.d.ts.map
