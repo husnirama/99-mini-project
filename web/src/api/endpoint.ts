@@ -26,7 +26,11 @@ export const API_ENDPOINTS = {
     CANCEL: (transactionId: string | number) =>
       `/transaction/${transactionId}/cancel`,
   },
-  CUSTOMERS: {},
+  CUSTOMERS: {
+    PROFILE: "/user/customer/profile",
+    PASSWORD: "/user/customer/profile/password",
+    COUPONS: "/user/customer/coupons",
+  },
   ORGANIZER: {
     DASHBOARD: "/organizer/dashboard",
     PROFILE: "/organizer/profile",

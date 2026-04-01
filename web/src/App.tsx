@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import LoginPage from "./pages/LoginPage";
 import Home from "./pages/Home";
 import RootLayout from "./layouts/RootLayout";
@@ -10,6 +10,8 @@ import EventDetail from "./pages/EventDetail";
 import OrderStep1Page from "./pages/OrderStep1Page";
 import PaymentDetailPage from "./pages/PaymentDetailPage";
 import CustomerTransactionsPage from "./pages/CustomerTransactionsPage";
+import CustomerProfilePage from "./pages/Customer/CustomerProfilePage";
+import CustomerCouponsPage from "./pages/Customer/CustomerCouponsPage";
 import OrganizerTransactionsPage from "./pages/OrganizerTransactionsPage";
 import OrganizerDashboardPage from "./pages/OrganizerProfile/OrganizerDashboardPage";
 import OrganizerStatisticsPage from "./pages/OrganizerProfile/OrganizerStatisticsPage";
@@ -18,6 +20,26 @@ import OrganizerAttendeesPage from "./pages/OrganizerProfile/OrganizerAttendeesP
 import OrganizerSettingPage from "./pages/OrganizerProfile/OrganizerSettingsPage";
 import AuthBootstrap from "./components/AuthBootstrap";
 import InfoPage from "./pages/InfoPage";
+import { useAuthStore } from "./store/auth-store";
+import type { ReactNode } from "react";
+
+function CustomerOnly({ children }: { children: ReactNode }) {
+  const { isReady, user } = useAuthStore();
+
+  if (!isReady) {
+    return null;
+  }
+
+  if (!user) {
+    return <Navigate replace to="/auth/login" />;
+  }
+
+  if (user.role !== "CUSTOMER") {
+    return <Navigate replace to="/" />;
+  }
+
+  return <>{children}</>;
+}
 
 export default function App() {
   return (
@@ -39,6 +61,22 @@ export default function App() {
             <Route
               path="/transactions/:transactionId"
               element={<PaymentDetailPage />}
+            ></Route>
+            <Route
+              path="/customer/profile"
+              element={
+                <CustomerOnly>
+                  <CustomerProfilePage />
+                </CustomerOnly>
+              }
+            ></Route>
+            <Route
+              path="/customer/coupons"
+              element={
+                <CustomerOnly>
+                  <CustomerCouponsPage />
+                </CustomerOnly>
+              }
             ></Route>
             <Route path="/about" element={<InfoPage />}></Route>
             <Route path="/pricing" element={<InfoPage />}></Route>
