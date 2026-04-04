@@ -10,6 +10,12 @@ import { loginSchema, registerSchema } from "../validations/auth.validation.js";
 import SendEmail from "../utils/email.js";
 
 const ACCESS_TOKEN_EXPIRES_IN = "1h";
+const REFERRAL_REWARD_POINTS = 10_000;
+const REFERRAL_COUPON_PROMOTION_ID = 1;
+
+type ReferralOwnerRow = {
+  id: number;
+};
 
 // register service
 export async function createUser(data: UserCreateInput) {
@@ -26,29 +32,58 @@ export async function createUser(data: UserCreateInput) {
     throw new AppError("Email has been used", 400);
   }
 
+  let referralOwner: ReferralOwnerRow | null = null;
+
   if (usedReferralCode) {
-    const refOwner = await prisma.user.findUnique({
+    referralOwner = await prisma.user.findUnique({
       where: {
         referralCode: usedReferralCode,
       },
+      select: {
+        id: true,
+      },
     });
-    if (!refOwner) {
+    if (!referralOwner) {
       throw new AppError("Invalid Referral Code", 400);
     }
   }
   const hashedPassword = await bcrypt.hash(dataInput.password, 10);
 
   const newReferralCode = await generateUniqueReferralCode(dataInput.name);
-  const user = await prisma.user.create({
-    data: {
-      name: dataInput.name.trim(),
-      password: hashedPassword,
-      email: normalizedEmail,
-      role: dataInput.role,
-      address: data.address?.trim() ? data.address.trim() : null,
-      referralCode: newReferralCode,
-      referredBy: usedReferralCode ?? null,
-    },
+  const user = await prisma.$transaction(async (tx) => {
+    const createdUser = await tx.user.create({
+      data: {
+        name: dataInput.name.trim(),
+        password: hashedPassword,
+        email: normalizedEmail,
+        role: dataInput.role,
+        address: data.address?.trim() ? data.address.trim() : null,
+        referralCode: newReferralCode,
+        referredBy: usedReferralCode ?? null,
+      },
+    });
+
+    if (usedReferralCode && referralOwner) {
+      const createdAt = new Date();
+      const expiresAt = new Date(createdAt);
+      expiresAt.setMonth(expiresAt.getMonth() + 3);
+
+      await tx.$executeRaw`
+        INSERT INTO public."Points"
+          ("userId", "points", "discount", "source", "createdAt", "updatedAt", "expiresAt")
+        VALUES
+          (${referralOwner.id}, ${REFERRAL_REWARD_POINTS}, 0, 'REFERRAL', ${createdAt}, ${createdAt}, ${expiresAt})
+      `;
+
+      await tx.$executeRaw`
+        INSERT INTO public."UserPromotion"
+          ("userId", "promotionId", "createdAt", "expiresAt", "status")
+        VALUES
+          (${createdUser.id}, ${REFERRAL_COUPON_PROMOTION_ID}, ${createdAt}, ${expiresAt}, 'ACTIVE')
+      `;
+    }
+
+    return createdUser;
   });
 
   SendEmail({

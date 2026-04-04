@@ -44,7 +44,7 @@ link ui from google sticth : https://stitch.withgoogle.com/projects/135849185310
 - [ ] Referral Rewards: Users registering with a referral get a discount coupon, and the referrer gets 10,000 points.
 - [ ] Points Expiration: Points expire 3 months after being credited. (ex: today is 28 Dec 2023 and there are 3 people using your referral number, your balance would be 30.000 and available until 28 March 2024.
 - [ ] Coupon Expiration: Discount coupons after registering with referral are valid for 3 months.
-- [ ] Profile: Customers and Event organizers can edit their profiles, including updating their profile picture, changing their password, and resetting their password if forgotten.
+- [x] Profile: Customers and Event organizers can edit their profiles, including updating their profile picture, changing their password, and resetting their password if forgotten.
 
 ### 3. Event Management Dashboard (4 point)
 

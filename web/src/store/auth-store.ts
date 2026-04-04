@@ -4,6 +4,7 @@ import type { LoginCredentials, RegisterCredentials, User } from "@/api/types";
 import {
   clearPersistedAuthState,
   getPersistedRefreshToken,
+  patchPersistedAuthState,
   readPersistedAuthState,
 } from "@/lib/auth-session";
 import { create } from "zustand";
@@ -31,6 +32,32 @@ const emptyAuthState: AuthSnapshot = {
   user: null,
   isAuthenticated: false,
 };
+
+const shouldUseDevCustomerBypass =
+  import.meta.env.DEV && import.meta.env.VITE_BYPASS_CUSTOMER_AUTH !== "false";
+
+const devCustomerUser: User = {
+  id: 777777,
+  name: "Dev Customer",
+  email: "customer-dev@eventhub.local",
+  role: "CUSTOMER",
+  address: "Development Workspace",
+  referralCode: "DEV-CUSTOMER",
+  referredBy: "DEV-REFERRAL",
+};
+
+function applyDevCustomerBypass(set: (partial: Partial<AuthState>) => void) {
+  const nextState = {
+    accessToken: "dev-customer-access-token",
+    refreshToken: "dev-customer-refresh-token",
+    user: devCustomerUser,
+    isAuthenticated: true,
+    isReady: true,
+  };
+
+  patchPersistedAuthState(nextState);
+  set(nextState);
+}
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -95,6 +122,11 @@ export const useAuthStore = create<AuthState>()(
         const persistedState = readPersistedAuthState();
 
         if (!persistedState.accessToken && !persistedState.refreshToken) {
+          if (shouldUseDevCustomerBypass) {
+            applyDevCustomerBypass(set);
+            return;
+          }
+
           set({
             ...emptyAuthState,
             isReady: true,
@@ -116,6 +148,12 @@ export const useAuthStore = create<AuthState>()(
           });
         } catch {
           clearPersistedAuthState();
+
+          if (shouldUseDevCustomerBypass) {
+            applyDevCustomerBypass(set);
+            return;
+          }
+
           set({
             ...emptyAuthState,
             isReady: true,
@@ -125,6 +163,15 @@ export const useAuthStore = create<AuthState>()(
 
       syncFromStorage: () => {
         const persistedState = readPersistedAuthState();
+
+        if (
+          shouldUseDevCustomerBypass &&
+          !persistedState.accessToken &&
+          !persistedState.refreshToken
+        ) {
+          applyDevCustomerBypass(set);
+          return;
+        }
 
         set({
           accessToken: persistedState.accessToken ?? null,
