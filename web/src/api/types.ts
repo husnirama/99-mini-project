@@ -49,3 +49,36 @@ export interface OrganizerProfile {
     totalAttendees: number;
   };
 }
+
+export interface CustomerProfile {
+  id: number;
+  name: string;
+  email: string;
+  address?: string | null;
+  role: UserRole;
+  referralCode?: string;
+  referredBy?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  stats: {
+    totalOrders: number;
+    completedOrders: number;
+    availablePoints: number;
+    activeCoupons: number;
+  };
+  referrer: {
+    name: string;
+    referralCode: string;
+  } | null;
+}
+
+export interface CustomerCoupon {
+  id: number;
+  code: string;
+  description: string;
+  discountAmount: number;
+  createdAt: string;
+  expiresAt: string;
+  usedAt?: string | null;
+  status: "ACTIVE" | "USED" | "EXPIRED";
+}
