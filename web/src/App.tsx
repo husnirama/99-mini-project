@@ -75,11 +75,11 @@ export default function App() {
             <Route path="/auth/login" element={<LoginPage />}></Route>
             <Route path="/auth/register" element={<RegisterPage />}></Route>
           </Route>
-          <Route element={<CustomerRoute />}>
+          {/* <Route element={<CustomerRoute />}>
             <Route path="/customer/dashboard" element={<CustomerTickets />} />
             <Route path="/customer/reviews" element={<CustomerReviews />} />
             <Route path="/customer/points" element={<CustomerPoints />} />
-          </Route>
+          </Route> */}
           <Route element={<OrganizerRoute />}>
             <Route
               path="/organizer/dashboard"
