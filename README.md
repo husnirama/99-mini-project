@@ -41,9 +41,9 @@ link ui from google sticth : https://stitch.withgoogle.com/projects/135849185310
 
 ### 2. Referral System, Profile, and Prizes (4 point)
 
-- [ ] Referral Rewards: Users registering with a referral get a discount coupon, and the referrer gets 10,000 points.
-- [ ] Points Expiration: Points expire 3 months after being credited. (ex: today is 28 Dec 2023 and there are 3 people using your referral number, your balance would be 30.000 and available until 28 March 2024.
-- [ ] Coupon Expiration: Discount coupons after registering with referral are valid for 3 months.
+- [x] Referral Rewards: Users registering with a referral get a discount coupon, and the referrer gets 10,000 points.
+- [x] Points Expiration: Points expire 3 months after being credited. (ex: today is 28 Dec 2023 and there are 3 people using your referral number, your balance would be 30.000 and available until 28 March 2024.
+- [x] Coupon Expiration: Discount coupons after registering with referral are valid for 3 months.
 - [ ] Profile: Customers and Event organizers can edit their profiles, including updating their profile picture, changing their password, and resetting their password if forgotten.
 
 ### 3. Event Management Dashboard (4 point)
@@ -53,10 +53,3 @@ link ui from google sticth : https://stitch.withgoogle.com/projects/135849185310
 - [x] Transaction Management: Organizers can accept, reject, and view user payment proofs.
 - [ ] Notification Emails: Customers receive email notifications when their transaction is accepted or rejected. Ensure points/vouchers/coupons are returned if used in rejected transactions. Additionally, available seats are restored.
 - [x] Attendee List: Show the list of attendees for each event, including name, ticket quantity, and total price paid.
-
-## STATUS at 30032026
-
-- [ ] All the features does not using the cache yet (only get method needed)
-- [ ] All features 2.3 done only on UI, backend still on progress
-- [ ] Link UI on all features does not done yet
-- [ ] User Login still broken (have to check token)

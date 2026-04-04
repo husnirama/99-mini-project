@@ -1,12 +1,10 @@
 import type { EventDetail } from "@/types/eventDetailTypes";
 import type { TicketType } from "@/types/eventListTypes";
 import type {
-  BuildLifecycleRecordInput,
   NormalizedOrderStatus,
   OrderStatus,
   PaymentMethod,
   TransactionLifecycleRecord,
-  TransactionRecord,
   TransactionStatus,
 } from "@/types/orderTransactionTypes";
 import { formatPrice } from "./eventList.utils";
@@ -161,45 +159,6 @@ export function getEventImageUrl(event: EventDetail) {
   );
 }
 
-export function buildLifecycleRecord({
-  response,
-  event,
-  ticket,
-  previousRecord,
-}: BuildLifecycleRecordInput): TransactionLifecycleRecord {
-  return {
-    order: {
-      ...previousRecord?.order,
-      ...response.order,
-    },
-    transaction: {
-      ...previousRecord?.transaction,
-      ...response.transaction,
-    },
-    event: {
-      ...previousRecord?.event,
-      id: event.id,
-      title: event.title,
-      category: event.category ?? null,
-      eventDateStart: event.eventDateStart,
-      eventDateEnd: event.eventDateEnd,
-      image: getEventImageUrl(event),
-      locationLabel: getEventLocationLabel(event),
-    },
-    ticket: {
-      ...previousRecord?.ticket,
-      id: ticket.id,
-      name: ticket.name,
-      price: response.order.unitPrice ?? getTicketPrice(ticket),
-      quota: ticket.quota,
-      status: ticket.status,
-      description: ticket.description ?? null,
-    },
-    guestToken: response.guestToken ?? previousRecord?.guestToken ?? null,
-    lastSyncedAt: new Date().toISOString(),
-  };
-}
-
 export function getPaymentExpiry(record: TransactionLifecycleRecord) {
   return record.order.expiresAt ?? null;
 }
@@ -285,45 +244,5 @@ export function getCountdownParts(targetDate?: string | null, now: number = Date
     hours,
     minutes,
     seconds,
-  };
-}
-
-export function getMirroredOrderStatusFromTransactionStatus(
-  status: TransactionStatus,
-): NormalizedOrderStatus {
-  if (status === "DONE") {
-    return "DONE";
-  }
-
-  if (status === "REJECTED") {
-    return "REJECTED";
-  }
-
-  if (status === "CANCELED") {
-    return "CANCELED";
-  }
-
-  if (status === "EXPIRED") {
-    return "EXPIRED";
-  }
-
-  return "PENDING";
-}
-
-export function mergeTransactionUpdate(
-  record: TransactionLifecycleRecord,
-  transaction: TransactionRecord,
-): TransactionLifecycleRecord {
-  return {
-    ...record,
-    order: {
-      ...record.order,
-      status: getMirroredOrderStatusFromTransactionStatus(transaction.status),
-    },
-    transaction: {
-      ...record.transaction,
-      ...transaction,
-    },
-    lastSyncedAt: new Date().toISOString(),
   };
 }

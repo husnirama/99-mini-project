@@ -392,7 +392,8 @@ export const ModelName = {
   TicketType: 'TicketType',
   Promotion: 'Promotion',
   Order: 'Order',
-  Transaction: 'Transaction'
+  Transaction: 'Transaction',
+  Points: 'Points'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -408,7 +409,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "event" | "eventImage" | "venue" | "ticketType" | "promotion" | "order" | "transaction"
+    modelProps: "user" | "session" | "event" | "eventImage" | "venue" | "ticketType" | "promotion" | "order" | "transaction" | "points"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1078,6 +1079,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Points: {
+      payload: Prisma.$PointsPayload<ExtArgs>
+      fields: Prisma.PointsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PointsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PointsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload>
+        }
+        findFirst: {
+          args: Prisma.PointsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PointsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload>
+        }
+        findMany: {
+          args: Prisma.PointsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload>[]
+        }
+        create: {
+          args: Prisma.PointsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload>
+        }
+        createMany: {
+          args: Prisma.PointsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PointsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload>[]
+        }
+        delete: {
+          args: Prisma.PointsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload>
+        }
+        update: {
+          args: Prisma.PointsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload>
+        }
+        deleteMany: {
+          args: Prisma.PointsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PointsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PointsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload>[]
+        }
+        upsert: {
+          args: Prisma.PointsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload>
+        }
+        aggregate: {
+          args: Prisma.PointsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePoints>
+        }
+        groupBy: {
+          args: Prisma.PointsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PointsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PointsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PointsCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1276,6 +1351,21 @@ export const TransactionScalarFieldEnum = {
 } as const
 
 export type TransactionScalarFieldEnum = (typeof TransactionScalarFieldEnum)[keyof typeof TransactionScalarFieldEnum]
+
+
+export const PointsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  points: 'points',
+  discount: 'discount',
+  source: 'source',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  expiresAt: 'expiresAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type PointsScalarFieldEnum = (typeof PointsScalarFieldEnum)[keyof typeof PointsScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1484,6 +1574,20 @@ export type ListEnumcancelActorFieldRefInput<$PrismaModel> = FieldRefInputType<$
 
 
 /**
+ * Reference to a field of type 'pointsSource'
+ */
+export type EnumpointsSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'pointsSource'>
+    
+
+
+/**
+ * Reference to a field of type 'pointsSource[]'
+ */
+export type ListEnumpointsSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'pointsSource[]'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -1600,6 +1704,7 @@ export type GlobalOmitConfig = {
   promotion?: Prisma.PromotionOmit
   order?: Prisma.OrderOmit
   transaction?: Prisma.TransactionOmit
+  points?: Prisma.PointsOmit
 }
 
 /* Types for Logging */

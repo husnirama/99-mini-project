@@ -1,15 +1,21 @@
 import { loginSchema } from "@/validatons/auth.validation";
+import { buildAuthRedirectPath, getSafeRedirectPath } from "@/lib/auth-redirect";
 import { useAuthStore } from "@/store/auth-store";
 import { useFormik } from "formik";
 import { useState } from "react";
-import { Link, Navigate } from "react-router";
+import { Link, Navigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { toFormikValidate } from "zod-formik-adapter";
 
 export default function LoginPage() {
   const [redirectPath, setRedirectPath] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [searchParams] = useSearchParams();
   const login = useAuthStore((state) => state.login);
+  const requestedRedirect = searchParams.get("redirect");
+  const registerPath = requestedRedirect
+    ? buildAuthRedirectPath(requestedRedirect, "register")
+    : "/auth/register";
 
   const formik = useFormik({
     initialValues: { email: "", password: "" },
@@ -17,8 +23,11 @@ export default function LoginPage() {
     onSubmit: async (values) => {
       try {
         const user = await login(values);
+        const fallbackPath =
+          user.role === "EVENT_ORGANIZER" ? "/organizer/dashboard" : "/";
+
         setRedirectPath(
-          user.role === "EVENT_ORGANIZER" ? "/organizer/dashboard" : "/",
+          getSafeRedirectPath(requestedRedirect, fallbackPath),
         );
         toast.success("Login successful");
       } catch (error) {
@@ -67,7 +76,7 @@ export default function LoginPage() {
         </nav>
         <Link
           className="flex h-10 min-w-[100px] items-center justify-center rounded-lg bg-primary px-5 text-sm font-bold tracking-wide text-white transition-all hover:bg-primary/90"
-          to="/auth/register"
+          to={registerPath}
         >
           Sign Up
         </Link>
@@ -170,7 +179,7 @@ export default function LoginPage() {
               Don&apos;t have an account?{" "}
               <Link
                 className="font-bold text-primary hover:underline"
-                to="/auth/register"
+                to={registerPath}
               >
                 Sign up
               </Link>

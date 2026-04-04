@@ -1,6 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
 import { redis } from "./redis.js";
-import { hashGuestToken } from "../utils/guest-token.js";
 
 type CacheOptions = {
   namespace: string;
@@ -32,12 +31,6 @@ function stableSerialize(value: unknown): string {
 function getActorScope(req: Request) {
   if (req.user?.userId) {
     return `user:${req.user.userId}`;
-  }
-
-  const guestToken = req.headers["x-guest-token"];
-
-  if (typeof guestToken === "string" && guestToken) {
-    return `guest:${hashGuestToken(guestToken)}`;
   }
 
   return "public";

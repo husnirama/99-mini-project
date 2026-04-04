@@ -1,4 +1,3 @@
-import type { CreateOrderPayload } from "../../types/order-type.js";
 export declare function getUserInfo(customerId: number): Promise<{
     id: number;
     name: string;
@@ -27,7 +26,7 @@ export declare function getPromotionInfo(voucherCode: string): Promise<{
     startDate: Date | null;
     endDate: Date | null;
 } | null>;
-export declare function resolveBuyerInfo(payload: CreateOrderPayload, customerId: number | null): Promise<{
+export declare function resolveBuyerInfo(customerId: number): Promise<{
     buyerName: string;
     buyerEmail: string;
 }>;

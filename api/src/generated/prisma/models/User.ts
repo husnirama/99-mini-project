@@ -267,6 +267,7 @@ export type UserWhereInput = {
   sessions?: Prisma.SessionListRelationFilter
   event?: Prisma.EventListRelationFilter
   orders?: Prisma.OrderListRelationFilter
+  points?: Prisma.PointsListRelationFilter
   verifiedTransactions?: Prisma.TransactionListRelationFilter
 }
 
@@ -285,6 +286,7 @@ export type UserOrderByWithRelationInput = {
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   event?: Prisma.EventOrderByRelationAggregateInput
   orders?: Prisma.OrderOrderByRelationAggregateInput
+  points?: Prisma.PointsOrderByRelationAggregateInput
   verifiedTransactions?: Prisma.TransactionOrderByRelationAggregateInput
 }
 
@@ -306,6 +308,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   sessions?: Prisma.SessionListRelationFilter
   event?: Prisma.EventListRelationFilter
   orders?: Prisma.OrderListRelationFilter
+  points?: Prisma.PointsListRelationFilter
   verifiedTransactions?: Prisma.TransactionListRelationFilter
 }, "id" | "email" | "referralCode">
 
@@ -359,6 +362,7 @@ export type UserCreateInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   event?: Prisma.EventCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
+  points?: Prisma.PointsCreateNestedManyWithoutUserInput
   verifiedTransactions?: Prisma.TransactionCreateNestedManyWithoutAdminInput
 }
 
@@ -377,6 +381,7 @@ export type UserUncheckedCreateInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   event?: Prisma.EventUncheckedCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
+  points?: Prisma.PointsUncheckedCreateNestedManyWithoutUserInput
   verifiedTransactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutAdminInput
 }
 
@@ -394,6 +399,7 @@ export type UserUpdateInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   event?: Prisma.EventUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
+  points?: Prisma.PointsUpdateManyWithoutUserNestedInput
   verifiedTransactions?: Prisma.TransactionUpdateManyWithoutAdminNestedInput
 }
 
@@ -412,6 +418,7 @@ export type UserUncheckedUpdateInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   event?: Prisma.EventUncheckedUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
+  points?: Prisma.PointsUncheckedUpdateManyWithoutUserNestedInput
   verifiedTransactions?: Prisma.TransactionUncheckedUpdateManyWithoutAdminNestedInput
 }
 
@@ -604,6 +611,20 @@ export type UserUpdateOneWithoutVerifiedTransactionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutVerifiedTransactionsInput, Prisma.UserUpdateWithoutVerifiedTransactionsInput>, Prisma.UserUncheckedUpdateWithoutVerifiedTransactionsInput>
 }
 
+export type UserCreateNestedOneWithoutPointsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPointsInput, Prisma.UserUncheckedCreateWithoutPointsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPointsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPointsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPointsInput, Prisma.UserUncheckedCreateWithoutPointsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPointsInput
+  upsert?: Prisma.UserUpsertWithoutPointsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPointsInput, Prisma.UserUpdateWithoutPointsInput>, Prisma.UserUncheckedUpdateWithoutPointsInput>
+}
+
 export type UserCreateWithoutSessionsInput = {
   name: string
   password: string
@@ -617,6 +638,7 @@ export type UserCreateWithoutSessionsInput = {
   deletedAt?: Date | string | null
   event?: Prisma.EventCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
+  points?: Prisma.PointsCreateNestedManyWithoutUserInput
   verifiedTransactions?: Prisma.TransactionCreateNestedManyWithoutAdminInput
 }
 
@@ -634,6 +656,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   deletedAt?: Date | string | null
   event?: Prisma.EventUncheckedCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
+  points?: Prisma.PointsUncheckedCreateNestedManyWithoutUserInput
   verifiedTransactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutAdminInput
 }
 
@@ -666,6 +689,7 @@ export type UserUpdateWithoutSessionsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   event?: Prisma.EventUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
+  points?: Prisma.PointsUpdateManyWithoutUserNestedInput
   verifiedTransactions?: Prisma.TransactionUpdateManyWithoutAdminNestedInput
 }
 
@@ -683,6 +707,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   event?: Prisma.EventUncheckedUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
+  points?: Prisma.PointsUncheckedUpdateManyWithoutUserNestedInput
   verifiedTransactions?: Prisma.TransactionUncheckedUpdateManyWithoutAdminNestedInput
 }
 
@@ -699,6 +724,7 @@ export type UserCreateWithoutEventInput = {
   deletedAt?: Date | string | null
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
+  points?: Prisma.PointsCreateNestedManyWithoutUserInput
   verifiedTransactions?: Prisma.TransactionCreateNestedManyWithoutAdminInput
 }
 
@@ -716,6 +742,7 @@ export type UserUncheckedCreateWithoutEventInput = {
   deletedAt?: Date | string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
+  points?: Prisma.PointsUncheckedCreateNestedManyWithoutUserInput
   verifiedTransactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutAdminInput
 }
 
@@ -748,6 +775,7 @@ export type UserUpdateWithoutEventInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
+  points?: Prisma.PointsUpdateManyWithoutUserNestedInput
   verifiedTransactions?: Prisma.TransactionUpdateManyWithoutAdminNestedInput
 }
 
@@ -765,6 +793,7 @@ export type UserUncheckedUpdateWithoutEventInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
+  points?: Prisma.PointsUncheckedUpdateManyWithoutUserNestedInput
   verifiedTransactions?: Prisma.TransactionUncheckedUpdateManyWithoutAdminNestedInput
 }
 
@@ -781,6 +810,7 @@ export type UserCreateWithoutOrdersInput = {
   deletedAt?: Date | string | null
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   event?: Prisma.EventCreateNestedManyWithoutUserInput
+  points?: Prisma.PointsCreateNestedManyWithoutUserInput
   verifiedTransactions?: Prisma.TransactionCreateNestedManyWithoutAdminInput
 }
 
@@ -798,6 +828,7 @@ export type UserUncheckedCreateWithoutOrdersInput = {
   deletedAt?: Date | string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   event?: Prisma.EventUncheckedCreateNestedManyWithoutUserInput
+  points?: Prisma.PointsUncheckedCreateNestedManyWithoutUserInput
   verifiedTransactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutAdminInput
 }
 
@@ -830,6 +861,7 @@ export type UserUpdateWithoutOrdersInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   event?: Prisma.EventUpdateManyWithoutUserNestedInput
+  points?: Prisma.PointsUpdateManyWithoutUserNestedInput
   verifiedTransactions?: Prisma.TransactionUpdateManyWithoutAdminNestedInput
 }
 
@@ -847,6 +879,7 @@ export type UserUncheckedUpdateWithoutOrdersInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   event?: Prisma.EventUncheckedUpdateManyWithoutUserNestedInput
+  points?: Prisma.PointsUncheckedUpdateManyWithoutUserNestedInput
   verifiedTransactions?: Prisma.TransactionUncheckedUpdateManyWithoutAdminNestedInput
 }
 
@@ -864,6 +897,7 @@ export type UserCreateWithoutVerifiedTransactionsInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   event?: Prisma.EventCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
+  points?: Prisma.PointsCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutVerifiedTransactionsInput = {
@@ -881,6 +915,7 @@ export type UserUncheckedCreateWithoutVerifiedTransactionsInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   event?: Prisma.EventUncheckedCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
+  points?: Prisma.PointsUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutVerifiedTransactionsInput = {
@@ -913,6 +948,7 @@ export type UserUpdateWithoutVerifiedTransactionsInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   event?: Prisma.EventUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
+  points?: Prisma.PointsUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutVerifiedTransactionsInput = {
@@ -930,6 +966,93 @@ export type UserUncheckedUpdateWithoutVerifiedTransactionsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   event?: Prisma.EventUncheckedUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
+  points?: Prisma.PointsUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutPointsInput = {
+  name: string
+  password: string
+  email: string
+  address?: string | null
+  role?: $Enums.Role
+  referralCode: string
+  referredBy?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  event?: Prisma.EventCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderCreateNestedManyWithoutUserInput
+  verifiedTransactions?: Prisma.TransactionCreateNestedManyWithoutAdminInput
+}
+
+export type UserUncheckedCreateWithoutPointsInput = {
+  id?: number
+  name: string
+  password: string
+  email: string
+  address?: string | null
+  role?: $Enums.Role
+  referralCode: string
+  referredBy?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  event?: Prisma.EventUncheckedCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
+  verifiedTransactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutAdminInput
+}
+
+export type UserCreateOrConnectWithoutPointsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPointsInput, Prisma.UserUncheckedCreateWithoutPointsInput>
+}
+
+export type UserUpsertWithoutPointsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPointsInput, Prisma.UserUncheckedUpdateWithoutPointsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPointsInput, Prisma.UserUncheckedCreateWithoutPointsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPointsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPointsInput, Prisma.UserUncheckedUpdateWithoutPointsInput>
+}
+
+export type UserUpdateWithoutPointsInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  referralCode?: Prisma.StringFieldUpdateOperationsInput | string
+  referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  event?: Prisma.EventUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
+  verifiedTransactions?: Prisma.TransactionUpdateManyWithoutAdminNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPointsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  referralCode?: Prisma.StringFieldUpdateOperationsInput | string
+  referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  event?: Prisma.EventUncheckedUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
+  verifiedTransactions?: Prisma.TransactionUncheckedUpdateManyWithoutAdminNestedInput
 }
 
 
@@ -941,6 +1064,7 @@ export type UserCountOutputType = {
   sessions: number
   event: number
   orders: number
+  points: number
   verifiedTransactions: number
 }
 
@@ -948,6 +1072,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   event?: boolean | UserCountOutputTypeCountEventArgs
   orders?: boolean | UserCountOutputTypeCountOrdersArgs
+  points?: boolean | UserCountOutputTypeCountPointsArgs
   verifiedTransactions?: boolean | UserCountOutputTypeCountVerifiedTransactionsArgs
 }
 
@@ -985,6 +1110,13 @@ export type UserCountOutputTypeCountOrdersArgs<ExtArgs extends runtime.Types.Ext
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountPointsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PointsWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountVerifiedTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.TransactionWhereInput
 }
@@ -1005,6 +1137,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   event?: boolean | Prisma.User$eventArgs<ExtArgs>
   orders?: boolean | Prisma.User$ordersArgs<ExtArgs>
+  points?: boolean | Prisma.User$pointsArgs<ExtArgs>
   verifiedTransactions?: boolean | Prisma.User$verifiedTransactionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -1056,6 +1189,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   event?: boolean | Prisma.User$eventArgs<ExtArgs>
   orders?: boolean | Prisma.User$ordersArgs<ExtArgs>
+  points?: boolean | Prisma.User$pointsArgs<ExtArgs>
   verifiedTransactions?: boolean | Prisma.User$verifiedTransactionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1068,6 +1202,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     sessions: Prisma.$SessionPayload<ExtArgs>[]
     event: Prisma.$EventPayload<ExtArgs>[]
     orders: Prisma.$OrderPayload<ExtArgs>[]
+    points: Prisma.$PointsPayload<ExtArgs>[]
     verifiedTransactions: Prisma.$TransactionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1479,6 +1614,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   event<T extends Prisma.User$eventArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$eventArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orders<T extends Prisma.User$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  points<T extends Prisma.User$pointsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$pointsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PointsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   verifiedTransactions<T extends Prisma.User$verifiedTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$verifiedTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1977,6 +2113,30 @@ export type User$ordersArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   distinct?: Prisma.OrderScalarFieldEnum | Prisma.OrderScalarFieldEnum[]
+}
+
+/**
+ * User.points
+ */
+export type User$pointsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Points
+   */
+  select?: Prisma.PointsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Points
+   */
+  omit?: Prisma.PointsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PointsInclude<ExtArgs> | null
+  where?: Prisma.PointsWhereInput
+  orderBy?: Prisma.PointsOrderByWithRelationInput | Prisma.PointsOrderByWithRelationInput[]
+  cursor?: Prisma.PointsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PointsScalarFieldEnum | Prisma.PointsScalarFieldEnum[]
 }
 
 /**

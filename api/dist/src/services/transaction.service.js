@@ -2,7 +2,6 @@ import { cacheTags, invalidateCacheTags } from "../lib/cache.js";
 import { prisma } from "../lib/prisma.js";
 import cloudinary from "../lib/cloudinary.js";
 import { registerTransactionJob } from "../queues/order.scheduller.js";
-import { hashGuestToken } from "../utils/guest-token.js";
 import { AppError } from "../utils/app-error.js";
 const transactionLifecycleInclude = {
     order: {
@@ -35,7 +34,6 @@ async function getTransactionForAction(transactionId) {
                     id: true,
                     customerId: true,
                     eventId: true,
-                    guestTokenHash: true,
                     ticketTypeId: true,
                     quantity: true,
                     promotionId: true,
@@ -57,19 +55,11 @@ async function getTransactionWithLifecycle(transactionId) {
     });
 }
 function assertCustomerOwnership(transaction, actor) {
-    if (transaction.order.customerId) {
-        if (!actor.userId || transaction.order.customerId !== actor.userId) {
-            throw new AppError("Forbidden Action, Not the right user", 403);
-        }
-        return;
+    if (!actor.userId) {
+        throw new AppError("Unauthorized", 401);
     }
-    if (!actor.guestToken) {
-        throw new AppError("Guest Token is Required", 401);
-    }
-    const hashedToken = hashGuestToken(actor.guestToken);
-    if (!transaction.order.guestTokenHash ||
-        hashedToken !== transaction.order.guestTokenHash) {
-        throw new AppError("Invalid guest Token", 403);
+    if (!transaction.order.customerId || transaction.order.customerId !== actor.userId) {
+        throw new AppError("Forbidden Action, Not the right user", 403);
     }
 }
 async function invalidateTransactionCache(transactionId, transaction) {
@@ -108,19 +98,11 @@ function assertLifecycleAccess(transaction, actor) {
         transaction.order.event.organizeBy === actor.userId) {
         return;
     }
-    if (transaction.order.customerId) {
-        if (!actor.userId || transaction.order.customerId !== actor.userId) {
-            throw new AppError("Forbidden Action, Not the right user", 403);
-        }
-        return;
+    if (!actor.userId) {
+        throw new AppError("Unauthorized", 401);
     }
-    if (!actor.guestToken) {
-        throw new AppError("Guest Token is Required", 401);
-    }
-    const hashedToken = hashGuestToken(actor.guestToken);
-    if (!transaction.order.guestTokenHash ||
-        hashedToken !== transaction.order.guestTokenHash) {
-        throw new AppError("Invalid guest Token", 403);
+    if (!transaction.order.customerId || transaction.order.customerId !== actor.userId) {
+        throw new AppError("Forbidden Action, Not the right user", 403);
     }
 }
 function serializeLifecycleRecord(transaction) {

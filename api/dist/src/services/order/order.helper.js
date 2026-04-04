@@ -48,19 +48,15 @@ export async function getPromotionInfo(voucherCode) {
         },
     });
 }
-export async function resolveBuyerInfo(payload, customerId) {
-    let buyerName = payload.buyerName;
-    let buyerEmail = payload.buyerEmail;
-    if (!customerId) {
-        return { buyerName, buyerEmail };
-    }
+export async function resolveBuyerInfo(customerId) {
     const buyerInfo = await getUserInfo(customerId);
     if (!buyerInfo) {
         throw new AppError("User Not Found", 404);
     }
-    buyerName = buyerInfo.name;
-    buyerEmail = buyerInfo.email;
-    return { buyerName, buyerEmail };
+    return {
+        buyerName: buyerInfo.name,
+        buyerEmail: buyerInfo.email,
+    };
 }
 export function calculateOrderAmounts(quantity, unitPrice, discountAmount) {
     const subTotalAmount = quantity * unitPrice;

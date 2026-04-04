@@ -9,7 +9,7 @@ import { AppError } from "../utils/app-error.js";
 import { loginSchema, registerSchema } from "../validations/auth.validation.js";
 import SendEmail from "../utils/email.js";
 
-const ACCESS_TOKEN_EXPIRES_IN = "1h";
+const ACCESS_TOKEN_EXPIRES_IN = "1d";
 
 // register service
 export async function createUser(data: UserCreateInput) {

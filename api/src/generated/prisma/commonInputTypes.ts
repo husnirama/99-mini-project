@@ -392,6 +392,23 @@ export type EnumcancelActorNullableWithAggregatesFilter<$PrismaModel = never> = 
   _max?: Prisma.NestedEnumcancelActorNullableFilter<$PrismaModel>
 }
 
+export type EnumpointsSourceFilter<$PrismaModel = never> = {
+  equals?: $Enums.pointsSource | Prisma.EnumpointsSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.pointsSource[] | Prisma.ListEnumpointsSourceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.pointsSource[] | Prisma.ListEnumpointsSourceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumpointsSourceFilter<$PrismaModel> | $Enums.pointsSource
+}
+
+export type EnumpointsSourceWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.pointsSource | Prisma.EnumpointsSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.pointsSource[] | Prisma.ListEnumpointsSourceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.pointsSource[] | Prisma.ListEnumpointsSourceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumpointsSourceWithAggregatesFilter<$PrismaModel> | $Enums.pointsSource
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumpointsSourceFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumpointsSourceFilter<$PrismaModel>
+}
+
 export type NestedIntFilter<$PrismaModel = never> = {
   equals?: number | Prisma.IntFieldRefInput<$PrismaModel>
   in?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
@@ -781,6 +798,23 @@ export type NestedEnumcancelActorNullableWithAggregatesFilter<$PrismaModel = nev
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumcancelActorNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumcancelActorNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumpointsSourceFilter<$PrismaModel = never> = {
+  equals?: $Enums.pointsSource | Prisma.EnumpointsSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.pointsSource[] | Prisma.ListEnumpointsSourceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.pointsSource[] | Prisma.ListEnumpointsSourceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumpointsSourceFilter<$PrismaModel> | $Enums.pointsSource
+}
+
+export type NestedEnumpointsSourceWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.pointsSource | Prisma.EnumpointsSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.pointsSource[] | Prisma.ListEnumpointsSourceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.pointsSource[] | Prisma.ListEnumpointsSourceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumpointsSourceWithAggregatesFilter<$PrismaModel> | $Enums.pointsSource
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumpointsSourceFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumpointsSourceFilter<$PrismaModel>
 }
 
 

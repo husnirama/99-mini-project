@@ -11,13 +11,11 @@ import type {
   CreateTransactionTxPayload,
   TransactionListQuery,
 } from "../types/transaction-type.js";
-import { hashGuestToken } from "../utils/guest-token.js";
 import { AppError } from "../utils/app-error.js";
 
 interface TransactionActor {
   userId?: number | null;
   role?: Role | string | null;
-  guestToken?: string | null;
 }
 
 const transactionLifecycleInclude = {
@@ -60,7 +58,6 @@ async function getTransactionForAction(transactionId: number) {
           id: true,
           customerId: true,
           eventId: true,
-          guestTokenHash: true,
           ticketTypeId: true,
           quantity: true,
           promotionId: true,
@@ -87,24 +84,12 @@ function assertCustomerOwnership(
   transaction: NonNullable<Awaited<ReturnType<typeof getTransactionForAction>>>,
   actor: TransactionActor,
 ) {
-  if (transaction.order.customerId) {
-    if (!actor.userId || transaction.order.customerId !== actor.userId) {
-      throw new AppError("Forbidden Action, Not the right user", 403);
-    }
-    return;
+  if (!actor.userId) {
+    throw new AppError("Unauthorized", 401);
   }
 
-  if (!actor.guestToken) {
-    throw new AppError("Guest Token is Required", 401);
-  }
-
-  const hashedToken = hashGuestToken(actor.guestToken);
-
-  if (
-    !transaction.order.guestTokenHash ||
-    hashedToken !== transaction.order.guestTokenHash
-  ) {
-    throw new AppError("Invalid guest Token", 403);
+  if (!transaction.order.customerId || transaction.order.customerId !== actor.userId) {
+    throw new AppError("Forbidden Action, Not the right user", 403);
   }
 }
 
@@ -165,24 +150,12 @@ function assertLifecycleAccess(
     return;
   }
 
-  if (transaction.order.customerId) {
-    if (!actor.userId || transaction.order.customerId !== actor.userId) {
-      throw new AppError("Forbidden Action, Not the right user", 403);
-    }
-    return;
+  if (!actor.userId) {
+    throw new AppError("Unauthorized", 401);
   }
 
-  if (!actor.guestToken) {
-    throw new AppError("Guest Token is Required", 401);
-  }
-
-  const hashedToken = hashGuestToken(actor.guestToken);
-
-  if (
-    !transaction.order.guestTokenHash ||
-    hashedToken !== transaction.order.guestTokenHash
-  ) {
-    throw new AppError("Invalid guest Token", 403);
+  if (!transaction.order.customerId || transaction.order.customerId !== actor.userId) {
+    throw new AppError("Forbidden Action, Not the right user", 403);
   }
 }
 

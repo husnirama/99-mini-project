@@ -80,3 +80,11 @@ export const cancelActor = {
 } as const
 
 export type cancelActor = (typeof cancelActor)[keyof typeof cancelActor]
+
+
+export const pointsSource = {
+  REFERRAL: 'REFERRAL',
+  PURCHASE: 'PURCHASE'
+} as const
+
+export type pointsSource = (typeof pointsSource)[keyof typeof pointsSource]

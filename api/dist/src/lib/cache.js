@@ -1,5 +1,4 @@
 import { redis } from "./redis.js";
-import { hashGuestToken } from "../utils/guest-token.js";
 function stableSerialize(value) {
     if (value === null || value === undefined) {
         return "";
@@ -19,10 +18,6 @@ function stableSerialize(value) {
 function getActorScope(req) {
     if (req.user?.userId) {
         return `user:${req.user.userId}`;
-    }
-    const guestToken = req.headers["x-guest-token"];
-    if (typeof guestToken === "string" && guestToken) {
-        return `guest:${hashGuestToken(guestToken)}`;
     }
     return "public";
 }

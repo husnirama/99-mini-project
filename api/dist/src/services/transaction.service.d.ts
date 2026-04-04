@@ -3,7 +3,6 @@ import type { CreateTransactionTxPayload, TransactionListQuery } from "../types/
 interface TransactionActor {
     userId?: number | null;
     role?: Role | string | null;
-    guestToken?: string | null;
 }
 export declare function createTransaction(tx: Prisma.TransactionClient, payload: CreateTransactionTxPayload): Promise<{
     id: number;

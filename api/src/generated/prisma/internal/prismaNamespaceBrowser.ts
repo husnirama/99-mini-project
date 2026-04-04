@@ -59,7 +59,8 @@ export const ModelName = {
   TicketType: 'TicketType',
   Promotion: 'Promotion',
   Order: 'Order',
-  Transaction: 'Transaction'
+  Transaction: 'Transaction',
+  Points: 'Points'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -237,6 +238,21 @@ export const TransactionScalarFieldEnum = {
 } as const
 
 export type TransactionScalarFieldEnum = (typeof TransactionScalarFieldEnum)[keyof typeof TransactionScalarFieldEnum]
+
+
+export const PointsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  points: 'points',
+  discount: 'discount',
+  source: 'source',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  expiresAt: 'expiresAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type PointsScalarFieldEnum = (typeof PointsScalarFieldEnum)[keyof typeof PointsScalarFieldEnum]
 
 
 export const SortOrder = {

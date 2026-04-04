@@ -10,12 +10,11 @@ import {
 import { transactionListQuerySchema } from "../validations/transaction.validation.js";
 
 function getActorFromRequest(req: Request) {
-  const userId = req.user?.id ?? null;
+  const userId = req.user?.userId ?? req.user?.id ?? null;
 
   return {
     userId,
     role: req.user?.role ?? null,
-    guestToken: req.headers["x-guest-token"] as string | null,
   };
 }
 

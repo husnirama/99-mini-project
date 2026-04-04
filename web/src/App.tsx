@@ -5,6 +5,7 @@ import RootLayout from "./layouts/RootLayout";
 import GuestRoute from "./routes/GuestRoute";
 import RegisterPage from "./pages/RegisterPage";
 import OrganizerRoute from "./routes/OrganizerRoute";
+import CustomerRoute from "./routes/CustomerRoute";
 import CreateEventPage from "./pages/CreateEventPage";
 import EventDetail from "./pages/EventDetail";
 import OrderStep1Page from "./pages/OrderStep1Page";
@@ -18,6 +19,10 @@ import OrganizerAttendeesPage from "./pages/OrganizerProfile/OrganizerAttendeesP
 import OrganizerSettingPage from "./pages/OrganizerProfile/OrganizerSettingsPage";
 import AuthBootstrap from "./components/AuthBootstrap";
 import InfoPage from "./pages/InfoPage";
+import AuthenticatedRoute from "./routes/AuthenticatedRoute";
+import CustomerTickets from "./pages/CustomerProfile/CustomerTickets";
+import CustomerReviews from "./pages/CustomerProfile/CustomerReviews";
+import CustomerPoints from "./pages/CustomerProfile/CustomerPoints";
 
 export default function App() {
   return (
@@ -28,18 +33,6 @@ export default function App() {
           <Route element={<RootLayout />}>
             <Route index element={<Home />}></Route>
             <Route path="/events/:id" element={<EventDetail />}></Route>
-            <Route
-              path="/events/:id/checkout"
-              element={<OrderStep1Page />}
-            ></Route>
-            <Route
-              path="/transactions/history"
-              element={<CustomerTransactionsPage />}
-            ></Route>
-            <Route
-              path="/transactions/:transactionId"
-              element={<PaymentDetailPage />}
-            ></Route>
             <Route path="/about" element={<InfoPage />}></Route>
             <Route path="/pricing" element={<InfoPage />}></Route>
             <Route path="/careers" element={<InfoPage />}></Route>
@@ -47,10 +40,29 @@ export default function App() {
             <Route path="/privacy" element={<InfoPage />}></Route>
             <Route path="/terms" element={<InfoPage />}></Route>
             <Route path="/host" element={<InfoPage />}></Route>
+            <Route element={<AuthenticatedRoute />}>
+              <Route
+                path="/events/:id/checkout"
+                element={<OrderStep1Page />}
+              ></Route>
+              <Route
+                path="/transactions/history"
+                element={<CustomerTransactionsPage />}
+              ></Route>
+              <Route
+                path="/transactions/:transactionId"
+                element={<PaymentDetailPage />}
+              ></Route>
+            </Route>
           </Route>
           <Route element={<GuestRoute />}>
             <Route path="/auth/login" element={<LoginPage />}></Route>
             <Route path="/auth/register" element={<RegisterPage />}></Route>
+          </Route>
+          <Route element={<CustomerRoute />}>
+            <Route path="/customer/dashboard" element={<CustomerTickets />} />
+            <Route path="/customer/reviews" element={<CustomerReviews />} />
+            <Route path="/customer/points" element={<CustomerPoints />} />
           </Route>
           <Route element={<OrganizerRoute />}>
             <Route

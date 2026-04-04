@@ -34,7 +34,9 @@ model User {
      sessions Session[]
      event Event[]
      orders Order[]
+     points Points[]
      verifiedTransactions Transaction[] @relation("AdminVerifiedTransaction")
+     
    }
 
 model Session {
@@ -252,4 +254,26 @@ model Transaction {
 
   @@index([orderId])
 @@index([status])
+}
+
+enum pointsSource {
+  REFERRAL
+  PURCHASE
+
+}
+
+model Points{
+  id Int @id @default(autoincrement())
+  userId Int
+  points Int @default(0)
+  discount Int @default(0)
+  source pointsSource
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime
+  deletedAt DateTime?
+  user User @relation(fields: [userId], references: [id])
+  @@index([userId])
+
 }

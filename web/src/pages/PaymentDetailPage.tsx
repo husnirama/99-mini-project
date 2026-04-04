@@ -3,7 +3,6 @@ import { API_ENDPOINTS } from "@/api/endpoint";
 import TransactionStatusBadge from "@/components/TransactionStatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useTransactionStore } from "@/store/transaction-store";
 import type { TransactionLifecycleRecord } from "@/types/orderTransactionTypes";
 import { formatDate, formatTime } from "@/utils/eventList.utils";
 import {
@@ -32,13 +31,9 @@ function formatDateTime(value?: string | null) {
   return `${formatDate(value)} · ${formatTime(value)} WIB`;
 }
 
-function stampRecord(
-  record: TransactionLifecycleRecord,
-  guestToken?: string | null,
-): TransactionLifecycleRecord {
+function stampRecord(record: TransactionLifecycleRecord): TransactionLifecycleRecord {
   return {
     ...record,
-    guestToken: guestToken ?? record.guestToken ?? null,
     lastSyncedAt: new Date().toISOString(),
   };
 }
@@ -47,14 +42,7 @@ export default function PaymentDetailPage() {
   const { transactionId } = useParams();
   const navigate = useNavigate();
   const parsedTransactionId = Number(transactionId);
-  const storedRecord = useTransactionStore((state) =>
-    Number.isFinite(parsedTransactionId) ? state.records[parsedTransactionId] ?? null : null,
-  );
-  const saveRecord = useTransactionStore((state) => state.saveRecord);
-
-  const [record, setRecord] = useState<TransactionLifecycleRecord | null>(
-    storedRecord ?? null,
-  );
+  const [record, setRecord] = useState<TransactionLifecycleRecord | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
@@ -76,41 +64,26 @@ export default function PaymentDetailPage() {
     try {
       const response = await apiClient.get(
         API_ENDPOINTS.TRANSACTIONS.DETAIL(parsedTransactionId),
-        {
-          headers: storedRecord?.guestToken
-            ? { "x-guest-token": storedRecord.guestToken }
-            : undefined,
-        },
       );
-
       const nextRecord = stampRecord(
         response.data.data as TransactionLifecycleRecord,
-        storedRecord?.guestToken,
       );
 
       setRecord(nextRecord);
-      saveRecord(nextRecord);
     } catch (error: any) {
       console.error("Failed to fetch transaction detail", error);
-
-      if (storedRecord) {
-        setRecord(storedRecord);
-        setErrorMessage("Showing the last saved transaction data from this browser.");
-      } else {
-        setRecord(null);
-        setErrorMessage(
-          error?.response?.data?.message || "We couldn't load this transaction.",
-        );
-      }
+      setRecord(null);
+      setErrorMessage(
+        error?.response?.data?.message || "We couldn't load this transaction.",
+      );
     } finally {
       setIsLoading(false);
     }
   }
 
   useEffect(() => {
-    setRecord(storedRecord ?? null);
     fetchTransactionDetail();
-  }, [parsedTransactionId, storedRecord?.guestToken]);
+  }, [parsedTransactionId]);
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -169,7 +142,6 @@ export default function PaymentDetailPage() {
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            ...(record.guestToken ? { "x-guest-token": record.guestToken } : {}),
           },
         },
       );
@@ -203,11 +175,6 @@ export default function PaymentDetailPage() {
       await apiClient.patch(
         API_ENDPOINTS.TRANSACTIONS.CANCEL(record.transaction.id),
         {},
-        {
-          headers: record.guestToken
-            ? { "x-guest-token": record.guestToken }
-            : undefined,
-        },
       );
 
       toast.success("Transaction canceled.");

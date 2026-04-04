@@ -1,6 +1,3 @@
-import type { EventDetail } from "./eventDetailTypes";
-import type { TicketType } from "./eventListTypes";
-
 export type PaymentMethod = "CARD" | "BANK_TRANSFER";
 
 export type TransactionStatus =
@@ -52,7 +49,6 @@ export interface OrderRecord {
   buyerName: string;
   buyerEmail: string;
   buyerPhone: string;
-  guestTokenHash?: string | null;
   status: OrderStatus;
   createdAt?: string;
   updatedAt?: string;
@@ -78,7 +74,6 @@ export interface TransactionRecord {
 export interface TransactionCheckoutResponse {
   order: OrderRecord;
   transaction: TransactionRecord;
-  guestToken?: string | null;
 }
 
 export interface OrderEventSnapshot {
@@ -105,15 +100,7 @@ export interface TransactionLifecycleRecord {
   transaction: TransactionRecord;
   event: OrderEventSnapshot;
   ticket: OrderTicketSnapshot;
-  guestToken?: string | null;
   lastSyncedAt: string;
-}
-
-export interface BuildLifecycleRecordInput {
-  response: TransactionCheckoutResponse;
-  event: EventDetail;
-  ticket: TicketType;
-  previousRecord?: TransactionLifecycleRecord | null;
 }
 
 export type TransactionStatusFilter = "ALL" | TransactionStatus;

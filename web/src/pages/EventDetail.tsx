@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { apiClient } from "@/api/clients";
 import { API_ENDPOINTS } from "@/api/endpoint";
 import EventCard from "@/components/EventCard";
+import { buildAuthRedirectPath } from "@/lib/auth-redirect";
+import { useAuthStore } from "@/store/auth-store";
 import type { EventDetail } from "@/types/eventDetailTypes";
 import type { EventItem } from "@/types/eventListTypes";
 import { formatDate, formatPrice, formatTime } from "@/utils/eventList.utils";
@@ -27,7 +29,7 @@ function pickRandomEvents(
   return pool.slice(0, limit);
 }
 
-function getTicketStatusConfig(status?: string) {
+function getTicketStatusConfig(status?: string, isAuthenticated: boolean = false) {
   if (status === "ACTIVE") {
     return {
       badgeClass:
@@ -37,7 +39,7 @@ function getTicketStatusConfig(status?: string) {
       buttonClass:
         "w-full py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary/90 transition-colors",
       badgeText: "Available",
-      buttonText: "Select",
+      buttonText: isAuthenticated ? "Select" : "Sign in to buy",
       buttonDisabled: false,
     };
   }
@@ -72,6 +74,7 @@ function getTicketStatusConfig(status?: string) {
 export default function EventDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [recommendedEvents, setRecommendedEvents] = useState<EventItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -82,7 +85,15 @@ export default function EventDetail() {
       return;
     }
 
-    navigate(`/events/${event.id}/checkout?ticketId=${ticketId}`);
+    const checkoutPath = `/events/${event.id}/checkout?ticketId=${ticketId}`;
+
+    if (!isAuthenticated) {
+      toast.info("Sign in or create an account before buying tickets.");
+      navigate(buildAuthRedirectPath(checkoutPath));
+      return;
+    }
+
+    navigate(checkoutPath);
   }
 
   useEffect(() => {
@@ -374,7 +385,10 @@ export default function EventDetail() {
                 {eventTickets.length > 0 ? (
                   <div className="space-y-4 mb-8">
                     {eventTickets.map((ticket) => {
-                      const ticketStatus = getTicketStatusConfig(ticket.status);
+                      const ticketStatus = getTicketStatusConfig(
+                        ticket.status,
+                        isAuthenticated,
+                      );
                       const price = Number(ticket.price);
                       const hasValidPrice = Number.isFinite(price);
 

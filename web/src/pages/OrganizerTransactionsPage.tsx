@@ -7,6 +7,7 @@ import type {
   TransactionStatus,
 } from "@/types/orderTransactionTypes";
 import { formatDate, formatTime } from "@/utils/eventList.utils";
+import { getPositiveIntegerSearchParam } from "@/utils/search-params.utils";
 import {
   canCancelTransaction,
   canReviewTransaction,
@@ -70,8 +71,8 @@ export default function OrganizerTransactionsPage() {
     transactionId: number;
     action: "approve" | "reject" | "cancel";
   } | null>(null);
-  const eventIdFilter = Number(searchParams.get("eventId"));
-  const hasEventFilter = Number.isFinite(eventIdFilter);
+  const eventIdFilter = getPositiveIntegerSearchParam(searchParams, "eventId");
+  const hasEventFilter = eventIdFilter !== null;
 
   async function fetchTransactions(
     filter: "ALL" | TransactionStatus = activeFilter,

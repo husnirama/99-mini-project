@@ -1,5 +1,4 @@
 import { prisma } from "../../lib/prisma.js";
-import type { CreateOrderPayload } from "../../types/order-type.js";
 import { AppError } from "../../utils/app-error.js";
 
 export async function getUserInfo(customerId: number) {
@@ -54,25 +53,17 @@ export async function getPromotionInfo(voucherCode: string) {
 }
 
 export async function resolveBuyerInfo(
-  payload: CreateOrderPayload,
-  customerId: number | null,
+  customerId: number,
 ) {
-  let buyerName = payload.buyerName;
-  let buyerEmail = payload.buyerEmail;
-
-  if (!customerId) {
-    return { buyerName, buyerEmail };
-  }
-
   const buyerInfo = await getUserInfo(customerId);
   if (!buyerInfo) {
     throw new AppError("User Not Found", 404);
   }
 
-  buyerName = buyerInfo.name;
-  buyerEmail = buyerInfo.email;
-
-  return { buyerName, buyerEmail };
+  return {
+    buyerName: buyerInfo.name,
+    buyerEmail: buyerInfo.email,
+  };
 }
 
 export function calculateOrderAmounts(

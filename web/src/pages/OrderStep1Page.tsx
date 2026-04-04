@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/store/auth-store";
-import { useTransactionStore } from "@/store/transaction-store";
 import type { EventDetail } from "@/types/eventDetailTypes";
 import type {
   CreateOrderPayload,
@@ -13,7 +12,6 @@ import type {
 } from "@/types/orderTransactionTypes";
 import { formatDate, formatTime } from "@/utils/eventList.utils";
 import {
-  buildLifecycleRecord,
   formatCurrency,
   formatPaymentMethod,
   getEventImageUrl,
@@ -39,7 +37,6 @@ export default function OrderStep1Page() {
   const location = useLocation();
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
-  const saveRecord = useTransactionStore((state) => state.saveRecord);
 
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,25 +46,15 @@ export default function OrderStep1Page() {
   const [voucherCode, setVoucherCode] = useState("");
   const [paymentMethod, setPaymentMethod] =
     useState<PaymentMethod>("BANK_TRANSFER");
-  const [buyerForm, setBuyerForm] = useState({
-    buyerName: user?.name ?? "",
-    buyerEmail: user?.email ?? "",
-    buyerPhone: "",
-  });
+  const [buyerPhone, setBuyerPhone] = useState("");
+  const buyerName = user?.name?.trim() ?? "";
+  const buyerEmail = user?.email?.trim() ?? "";
 
   const requestedTicketId = useMemo(() => {
     const searchParams = new URLSearchParams(location.search);
     const value = Number(searchParams.get("ticketId"));
     return Number.isFinite(value) ? value : null;
   }, [location.search]);
-
-  useEffect(() => {
-    setBuyerForm((previous) => ({
-      buyerName: previous.buyerName || user?.name || "",
-      buyerEmail: previous.buyerEmail || user?.email || "",
-      buyerPhone: previous.buyerPhone,
-    }));
-  }, [user?.email, user?.name]);
 
   useEffect(() => {
     const parsedEventId = Number(id);
@@ -150,38 +137,20 @@ export default function OrderStep1Page() {
   const eventImage = event ? getEventImageUrl(event) : "";
   const eventLocation = event ? getEventLocationLabel(event) : "Venue TBA";
 
-  function updateBuyerField(
-    field: "buyerName" | "buyerEmail" | "buyerPhone",
-    value: string,
-  ) {
-    setBuyerForm((previous) => ({
-      ...previous,
-      [field]: value,
-    }));
-  }
-
   async function handleSubmit() {
     if (!event || !selectedTicket) {
       toast.error("Please choose a valid ticket first.");
       return;
     }
 
-    if (!buyerForm.buyerName.trim()) {
-      toast.error("Buyer name is required.");
+    if (!buyerName || !buyerEmail) {
+      toast.error("Your session is missing account details. Please log in again.");
       return;
     }
 
     if (
-      !buyerForm.buyerEmail.trim() ||
-      !/\S+@\S+\.\S+/.test(buyerForm.buyerEmail)
-    ) {
-      toast.error("Enter a valid buyer email.");
-      return;
-    }
-
-    if (
-      !buyerForm.buyerPhone.trim() ||
-      !/^\+?[1-9]\d{7,14}$/.test(buyerForm.buyerPhone.trim())
+      !buyerPhone.trim() ||
+      !/^\+?[1-9]\d{7,14}$/.test(buyerPhone.trim())
     ) {
       toast.error("Enter a valid phone number.");
       return;
@@ -192,9 +161,9 @@ export default function OrderStep1Page() {
       ticketTypeId: selectedTicket.id,
       quantity,
       voucherCode: voucherCode.trim() || undefined,
-      buyerName: buyerForm.buyerName.trim(),
-      buyerEmail: buyerForm.buyerEmail.trim(),
-      buyerPhone: buyerForm.buyerPhone.trim(),
+      buyerName,
+      buyerEmail,
+      buyerPhone: buyerPhone.trim(),
       paymentMethod,
     };
 
@@ -207,13 +176,6 @@ export default function OrderStep1Page() {
       );
       const checkoutResponse = response.data
         .data as TransactionCheckoutResponse;
-      const lifecycleRecord = buildLifecycleRecord({
-        response: checkoutResponse,
-        event,
-        ticket: selectedTicket,
-      });
-
-      saveRecord(lifecycleRecord);
       toast.success("Order created. Finish the payment before it expires.");
       navigate(`/transactions/${checkoutResponse.transaction.id}`);
     } catch (error) {
@@ -489,25 +451,26 @@ export default function OrderStep1Page() {
               <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                 Buyer Information
               </h2>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                We will use this contact for payment updates and ticket
-                delivery.
-              </p>
-            </div>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  Your registered account details are used for the order, and we
+                  will use your phone number for payment updates if needed.
+                </p>
+              </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
                 <Label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                   Full Name
                 </Label>
                 <Input
-                  className="h-11 border-slate-200 bg-white px-4 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900"
-                  onChange={(event) =>
-                    updateBuyerField("buyerName", event.target.value)
-                  }
-                  placeholder="Alex Johnson"
-                  value={buyerForm.buyerName}
+                  className="h-11 border-slate-200 bg-slate-50 px-4 text-sm shadow-none dark:border-slate-700 dark:bg-slate-950/40"
+                  placeholder="Your account name"
+                  readOnly
+                  value={buyerName}
                 />
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  This comes from your registered account.
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -515,14 +478,15 @@ export default function OrderStep1Page() {
                   Email Address
                 </Label>
                 <Input
-                  className="h-11 border-slate-200 bg-white px-4 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900"
-                  onChange={(event) =>
-                    updateBuyerField("buyerEmail", event.target.value)
-                  }
+                  className="h-11 border-slate-200 bg-slate-50 px-4 text-sm shadow-none dark:border-slate-700 dark:bg-slate-950/40"
                   placeholder="name@example.com"
+                  readOnly
                   type="email"
-                  value={buyerForm.buyerEmail}
+                  value={buyerEmail}
                 />
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Tickets and payment updates are tied to this email.
+                </p>
               </div>
 
               <div className="space-y-2 sm:col-span-2">
@@ -531,11 +495,9 @@ export default function OrderStep1Page() {
                 </Label>
                 <Input
                   className="h-11 border-slate-200 bg-white px-4 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900"
-                  onChange={(event) =>
-                    updateBuyerField("buyerPhone", event.target.value)
-                  }
+                  onChange={(event) => setBuyerPhone(event.target.value)}
                   placeholder="+628123456789"
-                  value={buyerForm.buyerPhone}
+                  value={buyerPhone}
                 />
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   Use an active phone number so the organizer can reach you if
