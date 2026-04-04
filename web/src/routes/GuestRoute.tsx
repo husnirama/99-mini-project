@@ -3,9 +3,13 @@ import { useAuthStore } from "@/store/auth-store";
 import { Toaster } from "@/components/ui/sonner";
 
 export default function GuestRoute() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, isReady } = useAuthStore();
 
-  if (isAuthenticated) return <Navigate to="/" />;
+  if (!isReady) {
+    return null;
+  }
+
+  if (isAuthenticated) return <Navigate replace to="/" />;
 
   return (
     <>

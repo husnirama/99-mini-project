@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import LoginPage from "./pages/LoginPage";
 import Home from "./pages/Home";
 import RootLayout from "./layouts/RootLayout";
@@ -10,38 +10,118 @@ import EventDetail from "./pages/EventDetail";
 import OrderStep1Page from "./pages/OrderStep1Page";
 import PaymentDetailPage from "./pages/PaymentDetailPage";
 import CustomerTransactionsPage from "./pages/CustomerTransactionsPage";
+import CustomerProfilePage from "./pages/Customer/CustomerProfilePage";
+import CustomerCouponsPage from "./pages/Customer/CustomerCouponsPage";
 import OrganizerTransactionsPage from "./pages/OrganizerTransactionsPage";
+import OrganizerDashboardPage from "./pages/OrganizerProfile/OrganizerDashboardPage";
+import OrganizerStatisticsPage from "./pages/OrganizerProfile/OrganizerStatisticsPage";
+import OrganizerTransactionViewPage from "./pages/OrganizerProfile/OrganizerTransactionViewPage";
+import OrganizerAttendeesPage from "./pages/OrganizerProfile/OrganizerAttendeesPage";
+import OrganizerSettingPage from "./pages/OrganizerProfile/OrganizerSettingsPage";
+import AuthBootstrap from "./components/AuthBootstrap";
+import InfoPage from "./pages/InfoPage";
+import { useAuthStore } from "./store/auth-store";
+import type { ReactNode } from "react";
+
+function CustomerOnly({ children }: { children: ReactNode }) {
+  const { isReady, user } = useAuthStore();
+
+  if (!isReady) {
+    return null;
+  }
+
+  if (!user) {
+    return <Navigate replace to="/auth/login" />;
+  }
+
+  if (user.role !== "CUSTOMER") {
+    return <Navigate replace to="/" />;
+  }
+
+  return <>{children}</>;
+}
 
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* <Route path="/" element={ }></Route> */}
-        <Route element={<RootLayout />}>
-          <Route index element={<Home />}></Route>
-          <Route path="/events/:id" element={<EventDetail />}></Route>
-          <Route path="/events/:id/checkout" element={<OrderStep1Page />}></Route>
-          <Route
-            path="/transactions/history"
-            element={<CustomerTransactionsPage />}
-          ></Route>
-          <Route
-            path="/transactions/:transactionId"
-            element={<PaymentDetailPage />}
-          ></Route>
-        </Route>
-        <Route element={<GuestRoute />}>
-          <Route path="/auth/login" element={<LoginPage />}></Route>
-          <Route path="/auth/register" element={<RegisterPage />}></Route>
-        </Route>
-        <Route element={<OrganizerRoute />}>
-          <Route path="/organizer/create-event" element={<CreateEventPage />} />
-          <Route
-            path="/organizer/transactions"
-            element={<OrganizerTransactionsPage />}
-          />
-        </Route>
-      </Routes>
+      <AuthBootstrap>
+        <Routes>
+          {/* <Route path="/" element={ }></Route> */}
+          <Route element={<RootLayout />}>
+            <Route index element={<Home />}></Route>
+            <Route path="/events/:id" element={<EventDetail />}></Route>
+            <Route
+              path="/events/:id/checkout"
+              element={<OrderStep1Page />}
+            ></Route>
+            <Route
+              path="/transactions/history"
+              element={<CustomerTransactionsPage />}
+            ></Route>
+            <Route
+              path="/transactions/:transactionId"
+              element={<PaymentDetailPage />}
+            ></Route>
+            <Route
+              path="/customer/profile"
+              element={
+                <CustomerOnly>
+                  <CustomerProfilePage />
+                </CustomerOnly>
+              }
+            ></Route>
+            <Route
+              path="/customer/coupons"
+              element={
+                <CustomerOnly>
+                  <CustomerCouponsPage />
+                </CustomerOnly>
+              }
+            ></Route>
+            <Route path="/about" element={<InfoPage />}></Route>
+            <Route path="/pricing" element={<InfoPage />}></Route>
+            <Route path="/careers" element={<InfoPage />}></Route>
+            <Route path="/help" element={<InfoPage />}></Route>
+            <Route path="/privacy" element={<InfoPage />}></Route>
+            <Route path="/terms" element={<InfoPage />}></Route>
+            <Route path="/host" element={<InfoPage />}></Route>
+          </Route>
+          <Route element={<GuestRoute />}>
+            <Route path="/auth/login" element={<LoginPage />}></Route>
+            <Route path="/auth/register" element={<RegisterPage />}></Route>
+          </Route>
+          <Route element={<OrganizerRoute />}>
+            <Route
+              path="/organizer/dashboard"
+              element={<OrganizerDashboardPage />}
+            />
+            <Route
+              path="/organizer/:id/statistics"
+              element={<OrganizerStatisticsPage />}
+            />
+            <Route
+              path="/organizer/:id/transactions"
+              element={<OrganizerTransactionViewPage />}
+            />
+            <Route
+              path="/organizer/:id/attendees"
+              element={<OrganizerAttendeesPage />}
+            />
+            <Route
+              path="/organizer/:id/settings"
+              element={<OrganizerSettingPage />}
+            />
+            <Route
+              path="/organizer/create-event"
+              element={<CreateEventPage />}
+            />
+            <Route
+              path="/organizer/transactions"
+              element={<OrganizerTransactionsPage />}
+            />
+          </Route>
+        </Routes>
+      </AuthBootstrap>
     </BrowserRouter>
   );
 }

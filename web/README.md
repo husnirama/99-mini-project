@@ -72,3 +72,13 @@ link ui from google sticth : https://stitch.withgoogle.com/projects/135849185310
 - [x] Automatic Status Changes: Transactions expire if no payment proof is uploaded within 2 hours. If the organizer doesn't accept/reject within 3 days, the transaction is automatically canceled.
 - [x] Rollbacks and Seat Restoration: Points, vouchers, or coupons used in transactions are returned if the transaction is canceled or expired. Additionally, available seats are restored
 - [ ] Point Usage: Customers can use points to reduce payment amounts.(ex: event tickets price is IDR 300.000 while your points balance is 20.000, you could use it and get IDR 280.000 as the final price)
+
+## Task for 23032026
+
+### 4. Event Organizer
+
+- [ ] Dashboard Access: Organizers can view and manage their events ( ex: edit events, etc.), transactions, and basic statistics.
+- [ ] Statistics Visualization: Display event data in graphical visualizations and reports by year, month, and day.
+- [ ] Transaction Management: Organizers can accept, reject, and view user payment proofs.
+- [ ] Notification Emails: Customers receive email notifications when their transaction is accepted or rejected. Ensure points/vouchers/coupons are returned if used in rejected transactions. Additionally, available seats are restored.
+- [ ] Attendee List: Show the list of attendees for each event, including name, ticket quantity, and total price paid.

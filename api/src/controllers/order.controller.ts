@@ -9,7 +9,13 @@ export async function createOrderController(
 ) {
   try {
     const payload = orderSchema.parse(req.body);
-    const order = await orderCreation(payload);
+    const customerId =
+      typeof req.user?.userId === "number"
+        ? req.user.userId
+        : typeof req.user?.id === "number"
+          ? req.user.id
+          : undefined;
+    const order = await orderCreation(payload, customerId);
 
     return res.status(201).json({
       message: "Order Created Successfully",

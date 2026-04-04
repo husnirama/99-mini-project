@@ -249,6 +249,7 @@ export type EventWhereInput = {
     ticket?: Prisma.TicketTypeListRelationFilter;
     eventImage?: Prisma.EventImageListRelationFilter;
     promotion?: Prisma.PromotionListRelationFilter;
+    order?: Prisma.OrderListRelationFilter;
     user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>;
 };
 export type EventOrderByWithRelationInput = {
@@ -270,6 +271,7 @@ export type EventOrderByWithRelationInput = {
     ticket?: Prisma.TicketTypeOrderByRelationAggregateInput;
     eventImage?: Prisma.EventImageOrderByRelationAggregateInput;
     promotion?: Prisma.PromotionOrderByRelationAggregateInput;
+    order?: Prisma.OrderOrderByRelationAggregateInput;
     user?: Prisma.UserOrderByWithRelationInput;
 };
 export type EventWhereUniqueInput = Prisma.AtLeast<{
@@ -295,6 +297,7 @@ export type EventWhereUniqueInput = Prisma.AtLeast<{
     ticket?: Prisma.TicketTypeListRelationFilter;
     eventImage?: Prisma.EventImageListRelationFilter;
     promotion?: Prisma.PromotionListRelationFilter;
+    order?: Prisma.OrderListRelationFilter;
     user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>;
 }, "id" | "organizeBy_title">;
 export type EventOrderByWithAggregationInput = {
@@ -354,6 +357,7 @@ export type EventCreateInput = {
     ticket?: Prisma.TicketTypeCreateNestedManyWithoutEventInput;
     eventImage?: Prisma.EventImageCreateNestedManyWithoutEventInput;
     promotion?: Prisma.PromotionCreateNestedManyWithoutEventInput;
+    order?: Prisma.OrderCreateNestedManyWithoutEventInput;
     user: Prisma.UserCreateNestedOneWithoutEventInput;
 };
 export type EventUncheckedCreateInput = {
@@ -375,6 +379,7 @@ export type EventUncheckedCreateInput = {
     ticket?: Prisma.TicketTypeUncheckedCreateNestedManyWithoutEventInput;
     eventImage?: Prisma.EventImageUncheckedCreateNestedManyWithoutEventInput;
     promotion?: Prisma.PromotionUncheckedCreateNestedManyWithoutEventInput;
+    order?: Prisma.OrderUncheckedCreateNestedManyWithoutEventInput;
 };
 export type EventUpdateInput = {
     title?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -393,6 +398,7 @@ export type EventUpdateInput = {
     ticket?: Prisma.TicketTypeUpdateManyWithoutEventNestedInput;
     eventImage?: Prisma.EventImageUpdateManyWithoutEventNestedInput;
     promotion?: Prisma.PromotionUpdateManyWithoutEventNestedInput;
+    order?: Prisma.OrderUpdateManyWithoutEventNestedInput;
     user?: Prisma.UserUpdateOneRequiredWithoutEventNestedInput;
 };
 export type EventUncheckedUpdateInput = {
@@ -414,6 +420,7 @@ export type EventUncheckedUpdateInput = {
     ticket?: Prisma.TicketTypeUncheckedUpdateManyWithoutEventNestedInput;
     eventImage?: Prisma.EventImageUncheckedUpdateManyWithoutEventNestedInput;
     promotion?: Prisma.PromotionUncheckedUpdateManyWithoutEventNestedInput;
+    order?: Prisma.OrderUncheckedUpdateManyWithoutEventNestedInput;
 };
 export type EventCreateManyInput = {
     id?: number;
@@ -625,6 +632,18 @@ export type EventUpdateOneRequiredWithoutPromotionNestedInput = {
     connect?: Prisma.EventWhereUniqueInput;
     update?: Prisma.XOR<Prisma.XOR<Prisma.EventUpdateToOneWithWhereWithoutPromotionInput, Prisma.EventUpdateWithoutPromotionInput>, Prisma.EventUncheckedUpdateWithoutPromotionInput>;
 };
+export type EventCreateNestedOneWithoutOrderInput = {
+    create?: Prisma.XOR<Prisma.EventCreateWithoutOrderInput, Prisma.EventUncheckedCreateWithoutOrderInput>;
+    connectOrCreate?: Prisma.EventCreateOrConnectWithoutOrderInput;
+    connect?: Prisma.EventWhereUniqueInput;
+};
+export type EventUpdateOneRequiredWithoutOrderNestedInput = {
+    create?: Prisma.XOR<Prisma.EventCreateWithoutOrderInput, Prisma.EventUncheckedCreateWithoutOrderInput>;
+    connectOrCreate?: Prisma.EventCreateOrConnectWithoutOrderInput;
+    upsert?: Prisma.EventUpsertWithoutOrderInput;
+    connect?: Prisma.EventWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.EventUpdateToOneWithWhereWithoutOrderInput, Prisma.EventUpdateWithoutOrderInput>, Prisma.EventUncheckedUpdateWithoutOrderInput>;
+};
 export type EventCreateWithoutUserInput = {
     title: string;
     category?: string | null;
@@ -642,6 +661,7 @@ export type EventCreateWithoutUserInput = {
     ticket?: Prisma.TicketTypeCreateNestedManyWithoutEventInput;
     eventImage?: Prisma.EventImageCreateNestedManyWithoutEventInput;
     promotion?: Prisma.PromotionCreateNestedManyWithoutEventInput;
+    order?: Prisma.OrderCreateNestedManyWithoutEventInput;
 };
 export type EventUncheckedCreateWithoutUserInput = {
     id?: number;
@@ -661,6 +681,7 @@ export type EventUncheckedCreateWithoutUserInput = {
     ticket?: Prisma.TicketTypeUncheckedCreateNestedManyWithoutEventInput;
     eventImage?: Prisma.EventImageUncheckedCreateNestedManyWithoutEventInput;
     promotion?: Prisma.PromotionUncheckedCreateNestedManyWithoutEventInput;
+    order?: Prisma.OrderUncheckedCreateNestedManyWithoutEventInput;
 };
 export type EventCreateOrConnectWithoutUserInput = {
     where: Prisma.EventWhereUniqueInput;
@@ -718,6 +739,7 @@ export type EventCreateWithoutEventImageInput = {
     venue?: Prisma.VenueCreateNestedManyWithoutEventInput;
     ticket?: Prisma.TicketTypeCreateNestedManyWithoutEventInput;
     promotion?: Prisma.PromotionCreateNestedManyWithoutEventInput;
+    order?: Prisma.OrderCreateNestedManyWithoutEventInput;
     user: Prisma.UserCreateNestedOneWithoutEventInput;
 };
 export type EventUncheckedCreateWithoutEventImageInput = {
@@ -738,6 +760,7 @@ export type EventUncheckedCreateWithoutEventImageInput = {
     venue?: Prisma.VenueUncheckedCreateNestedManyWithoutEventInput;
     ticket?: Prisma.TicketTypeUncheckedCreateNestedManyWithoutEventInput;
     promotion?: Prisma.PromotionUncheckedCreateNestedManyWithoutEventInput;
+    order?: Prisma.OrderUncheckedCreateNestedManyWithoutEventInput;
 };
 export type EventCreateOrConnectWithoutEventImageInput = {
     where: Prisma.EventWhereUniqueInput;
@@ -768,6 +791,7 @@ export type EventUpdateWithoutEventImageInput = {
     venue?: Prisma.VenueUpdateManyWithoutEventNestedInput;
     ticket?: Prisma.TicketTypeUpdateManyWithoutEventNestedInput;
     promotion?: Prisma.PromotionUpdateManyWithoutEventNestedInput;
+    order?: Prisma.OrderUpdateManyWithoutEventNestedInput;
     user?: Prisma.UserUpdateOneRequiredWithoutEventNestedInput;
 };
 export type EventUncheckedUpdateWithoutEventImageInput = {
@@ -788,6 +812,7 @@ export type EventUncheckedUpdateWithoutEventImageInput = {
     venue?: Prisma.VenueUncheckedUpdateManyWithoutEventNestedInput;
     ticket?: Prisma.TicketTypeUncheckedUpdateManyWithoutEventNestedInput;
     promotion?: Prisma.PromotionUncheckedUpdateManyWithoutEventNestedInput;
+    order?: Prisma.OrderUncheckedUpdateManyWithoutEventNestedInput;
 };
 export type EventCreateWithoutVenueInput = {
     title: string;
@@ -805,6 +830,7 @@ export type EventCreateWithoutVenueInput = {
     ticket?: Prisma.TicketTypeCreateNestedManyWithoutEventInput;
     eventImage?: Prisma.EventImageCreateNestedManyWithoutEventInput;
     promotion?: Prisma.PromotionCreateNestedManyWithoutEventInput;
+    order?: Prisma.OrderCreateNestedManyWithoutEventInput;
     user: Prisma.UserCreateNestedOneWithoutEventInput;
 };
 export type EventUncheckedCreateWithoutVenueInput = {
@@ -825,6 +851,7 @@ export type EventUncheckedCreateWithoutVenueInput = {
     ticket?: Prisma.TicketTypeUncheckedCreateNestedManyWithoutEventInput;
     eventImage?: Prisma.EventImageUncheckedCreateNestedManyWithoutEventInput;
     promotion?: Prisma.PromotionUncheckedCreateNestedManyWithoutEventInput;
+    order?: Prisma.OrderUncheckedCreateNestedManyWithoutEventInput;
 };
 export type EventCreateOrConnectWithoutVenueInput = {
     where: Prisma.EventWhereUniqueInput;
@@ -855,6 +882,7 @@ export type EventUpdateWithoutVenueInput = {
     ticket?: Prisma.TicketTypeUpdateManyWithoutEventNestedInput;
     eventImage?: Prisma.EventImageUpdateManyWithoutEventNestedInput;
     promotion?: Prisma.PromotionUpdateManyWithoutEventNestedInput;
+    order?: Prisma.OrderUpdateManyWithoutEventNestedInput;
     user?: Prisma.UserUpdateOneRequiredWithoutEventNestedInput;
 };
 export type EventUncheckedUpdateWithoutVenueInput = {
@@ -875,6 +903,7 @@ export type EventUncheckedUpdateWithoutVenueInput = {
     ticket?: Prisma.TicketTypeUncheckedUpdateManyWithoutEventNestedInput;
     eventImage?: Prisma.EventImageUncheckedUpdateManyWithoutEventNestedInput;
     promotion?: Prisma.PromotionUncheckedUpdateManyWithoutEventNestedInput;
+    order?: Prisma.OrderUncheckedUpdateManyWithoutEventNestedInput;
 };
 export type EventCreateWithoutTicketInput = {
     title: string;
@@ -892,6 +921,7 @@ export type EventCreateWithoutTicketInput = {
     venue?: Prisma.VenueCreateNestedManyWithoutEventInput;
     eventImage?: Prisma.EventImageCreateNestedManyWithoutEventInput;
     promotion?: Prisma.PromotionCreateNestedManyWithoutEventInput;
+    order?: Prisma.OrderCreateNestedManyWithoutEventInput;
     user: Prisma.UserCreateNestedOneWithoutEventInput;
 };
 export type EventUncheckedCreateWithoutTicketInput = {
@@ -912,6 +942,7 @@ export type EventUncheckedCreateWithoutTicketInput = {
     venue?: Prisma.VenueUncheckedCreateNestedManyWithoutEventInput;
     eventImage?: Prisma.EventImageUncheckedCreateNestedManyWithoutEventInput;
     promotion?: Prisma.PromotionUncheckedCreateNestedManyWithoutEventInput;
+    order?: Prisma.OrderUncheckedCreateNestedManyWithoutEventInput;
 };
 export type EventCreateOrConnectWithoutTicketInput = {
     where: Prisma.EventWhereUniqueInput;
@@ -942,6 +973,7 @@ export type EventUpdateWithoutTicketInput = {
     venue?: Prisma.VenueUpdateManyWithoutEventNestedInput;
     eventImage?: Prisma.EventImageUpdateManyWithoutEventNestedInput;
     promotion?: Prisma.PromotionUpdateManyWithoutEventNestedInput;
+    order?: Prisma.OrderUpdateManyWithoutEventNestedInput;
     user?: Prisma.UserUpdateOneRequiredWithoutEventNestedInput;
 };
 export type EventUncheckedUpdateWithoutTicketInput = {
@@ -962,6 +994,7 @@ export type EventUncheckedUpdateWithoutTicketInput = {
     venue?: Prisma.VenueUncheckedUpdateManyWithoutEventNestedInput;
     eventImage?: Prisma.EventImageUncheckedUpdateManyWithoutEventNestedInput;
     promotion?: Prisma.PromotionUncheckedUpdateManyWithoutEventNestedInput;
+    order?: Prisma.OrderUncheckedUpdateManyWithoutEventNestedInput;
 };
 export type EventCreateWithoutPromotionInput = {
     title: string;
@@ -979,6 +1012,7 @@ export type EventCreateWithoutPromotionInput = {
     venue?: Prisma.VenueCreateNestedManyWithoutEventInput;
     ticket?: Prisma.TicketTypeCreateNestedManyWithoutEventInput;
     eventImage?: Prisma.EventImageCreateNestedManyWithoutEventInput;
+    order?: Prisma.OrderCreateNestedManyWithoutEventInput;
     user: Prisma.UserCreateNestedOneWithoutEventInput;
 };
 export type EventUncheckedCreateWithoutPromotionInput = {
@@ -999,6 +1033,7 @@ export type EventUncheckedCreateWithoutPromotionInput = {
     venue?: Prisma.VenueUncheckedCreateNestedManyWithoutEventInput;
     ticket?: Prisma.TicketTypeUncheckedCreateNestedManyWithoutEventInput;
     eventImage?: Prisma.EventImageUncheckedCreateNestedManyWithoutEventInput;
+    order?: Prisma.OrderUncheckedCreateNestedManyWithoutEventInput;
 };
 export type EventCreateOrConnectWithoutPromotionInput = {
     where: Prisma.EventWhereUniqueInput;
@@ -1029,6 +1064,7 @@ export type EventUpdateWithoutPromotionInput = {
     venue?: Prisma.VenueUpdateManyWithoutEventNestedInput;
     ticket?: Prisma.TicketTypeUpdateManyWithoutEventNestedInput;
     eventImage?: Prisma.EventImageUpdateManyWithoutEventNestedInput;
+    order?: Prisma.OrderUpdateManyWithoutEventNestedInput;
     user?: Prisma.UserUpdateOneRequiredWithoutEventNestedInput;
 };
 export type EventUncheckedUpdateWithoutPromotionInput = {
@@ -1049,6 +1085,98 @@ export type EventUncheckedUpdateWithoutPromotionInput = {
     venue?: Prisma.VenueUncheckedUpdateManyWithoutEventNestedInput;
     ticket?: Prisma.TicketTypeUncheckedUpdateManyWithoutEventNestedInput;
     eventImage?: Prisma.EventImageUncheckedUpdateManyWithoutEventNestedInput;
+    order?: Prisma.OrderUncheckedUpdateManyWithoutEventNestedInput;
+};
+export type EventCreateWithoutOrderInput = {
+    title: string;
+    category?: string | null;
+    image?: string | null;
+    eventDateStart: Date | string;
+    eventDateEnd: Date | string;
+    status?: $Enums.eventStatus;
+    eventDescription?: string | null;
+    eventTnC?: string | null;
+    termsAccepted?: boolean;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    deletedAt?: Date | string | null;
+    venue?: Prisma.VenueCreateNestedManyWithoutEventInput;
+    ticket?: Prisma.TicketTypeCreateNestedManyWithoutEventInput;
+    eventImage?: Prisma.EventImageCreateNestedManyWithoutEventInput;
+    promotion?: Prisma.PromotionCreateNestedManyWithoutEventInput;
+    user: Prisma.UserCreateNestedOneWithoutEventInput;
+};
+export type EventUncheckedCreateWithoutOrderInput = {
+    id?: number;
+    organizeBy: number;
+    title: string;
+    category?: string | null;
+    image?: string | null;
+    eventDateStart: Date | string;
+    eventDateEnd: Date | string;
+    status?: $Enums.eventStatus;
+    eventDescription?: string | null;
+    eventTnC?: string | null;
+    termsAccepted?: boolean;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    deletedAt?: Date | string | null;
+    venue?: Prisma.VenueUncheckedCreateNestedManyWithoutEventInput;
+    ticket?: Prisma.TicketTypeUncheckedCreateNestedManyWithoutEventInput;
+    eventImage?: Prisma.EventImageUncheckedCreateNestedManyWithoutEventInput;
+    promotion?: Prisma.PromotionUncheckedCreateNestedManyWithoutEventInput;
+};
+export type EventCreateOrConnectWithoutOrderInput = {
+    where: Prisma.EventWhereUniqueInput;
+    create: Prisma.XOR<Prisma.EventCreateWithoutOrderInput, Prisma.EventUncheckedCreateWithoutOrderInput>;
+};
+export type EventUpsertWithoutOrderInput = {
+    update: Prisma.XOR<Prisma.EventUpdateWithoutOrderInput, Prisma.EventUncheckedUpdateWithoutOrderInput>;
+    create: Prisma.XOR<Prisma.EventCreateWithoutOrderInput, Prisma.EventUncheckedCreateWithoutOrderInput>;
+    where?: Prisma.EventWhereInput;
+};
+export type EventUpdateToOneWithWhereWithoutOrderInput = {
+    where?: Prisma.EventWhereInput;
+    data: Prisma.XOR<Prisma.EventUpdateWithoutOrderInput, Prisma.EventUncheckedUpdateWithoutOrderInput>;
+};
+export type EventUpdateWithoutOrderInput = {
+    title?: Prisma.StringFieldUpdateOperationsInput | string;
+    category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    eventDateStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    eventDateEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    status?: Prisma.EnumeventStatusFieldUpdateOperationsInput | $Enums.eventStatus;
+    eventDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    eventTnC?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    termsAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    venue?: Prisma.VenueUpdateManyWithoutEventNestedInput;
+    ticket?: Prisma.TicketTypeUpdateManyWithoutEventNestedInput;
+    eventImage?: Prisma.EventImageUpdateManyWithoutEventNestedInput;
+    promotion?: Prisma.PromotionUpdateManyWithoutEventNestedInput;
+    user?: Prisma.UserUpdateOneRequiredWithoutEventNestedInput;
+};
+export type EventUncheckedUpdateWithoutOrderInput = {
+    id?: Prisma.IntFieldUpdateOperationsInput | number;
+    organizeBy?: Prisma.IntFieldUpdateOperationsInput | number;
+    title?: Prisma.StringFieldUpdateOperationsInput | string;
+    category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    eventDateStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    eventDateEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    status?: Prisma.EnumeventStatusFieldUpdateOperationsInput | $Enums.eventStatus;
+    eventDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    eventTnC?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    termsAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    venue?: Prisma.VenueUncheckedUpdateManyWithoutEventNestedInput;
+    ticket?: Prisma.TicketTypeUncheckedUpdateManyWithoutEventNestedInput;
+    eventImage?: Prisma.EventImageUncheckedUpdateManyWithoutEventNestedInput;
+    promotion?: Prisma.PromotionUncheckedUpdateManyWithoutEventNestedInput;
 };
 export type EventCreateManyUserInput = {
     id?: number;
@@ -1082,6 +1210,7 @@ export type EventUpdateWithoutUserInput = {
     ticket?: Prisma.TicketTypeUpdateManyWithoutEventNestedInput;
     eventImage?: Prisma.EventImageUpdateManyWithoutEventNestedInput;
     promotion?: Prisma.PromotionUpdateManyWithoutEventNestedInput;
+    order?: Prisma.OrderUpdateManyWithoutEventNestedInput;
 };
 export type EventUncheckedUpdateWithoutUserInput = {
     id?: Prisma.IntFieldUpdateOperationsInput | number;
@@ -1101,6 +1230,7 @@ export type EventUncheckedUpdateWithoutUserInput = {
     ticket?: Prisma.TicketTypeUncheckedUpdateManyWithoutEventNestedInput;
     eventImage?: Prisma.EventImageUncheckedUpdateManyWithoutEventNestedInput;
     promotion?: Prisma.PromotionUncheckedUpdateManyWithoutEventNestedInput;
+    order?: Prisma.OrderUncheckedUpdateManyWithoutEventNestedInput;
 };
 export type EventUncheckedUpdateManyWithoutUserInput = {
     id?: Prisma.IntFieldUpdateOperationsInput | number;
@@ -1125,12 +1255,14 @@ export type EventCountOutputType = {
     ticket: number;
     eventImage: number;
     promotion: number;
+    order: number;
 };
 export type EventCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     venue?: boolean | EventCountOutputTypeCountVenueArgs;
     ticket?: boolean | EventCountOutputTypeCountTicketArgs;
     eventImage?: boolean | EventCountOutputTypeCountEventImageArgs;
     promotion?: boolean | EventCountOutputTypeCountPromotionArgs;
+    order?: boolean | EventCountOutputTypeCountOrderArgs;
 };
 /**
  * EventCountOutputType without action
@@ -1165,6 +1297,12 @@ export type EventCountOutputTypeCountEventImageArgs<ExtArgs extends runtime.Type
 export type EventCountOutputTypeCountPromotionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     where?: Prisma.PromotionWhereInput;
 };
+/**
+ * EventCountOutputType without action
+ */
+export type EventCountOutputTypeCountOrderArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.OrderWhereInput;
+};
 export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
     organizeBy?: boolean;
@@ -1184,6 +1322,7 @@ export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     ticket?: boolean | Prisma.Event$ticketArgs<ExtArgs>;
     eventImage?: boolean | Prisma.Event$eventImageArgs<ExtArgs>;
     promotion?: boolean | Prisma.Event$promotionArgs<ExtArgs>;
+    order?: boolean | Prisma.Event$orderArgs<ExtArgs>;
     user?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
     _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["event"]>;
@@ -1243,6 +1382,7 @@ export type EventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     ticket?: boolean | Prisma.Event$ticketArgs<ExtArgs>;
     eventImage?: boolean | Prisma.Event$eventImageArgs<ExtArgs>;
     promotion?: boolean | Prisma.Event$promotionArgs<ExtArgs>;
+    order?: boolean | Prisma.Event$orderArgs<ExtArgs>;
     user?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
     _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>;
 };
@@ -1259,6 +1399,7 @@ export type $EventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
         ticket: Prisma.$TicketTypePayload<ExtArgs>[];
         eventImage: Prisma.$EventImagePayload<ExtArgs>[];
         promotion: Prisma.$PromotionPayload<ExtArgs>[];
+        order: Prisma.$OrderPayload<ExtArgs>[];
         user: Prisma.$UserPayload<ExtArgs>;
     };
     scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1609,6 +1750,7 @@ export interface Prisma__EventClient<T, Null = never, ExtArgs extends runtime.Ty
     ticket<T extends Prisma.Event$ticketArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$ticketArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TicketTypePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     eventImage<T extends Prisma.Event$eventImageArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$eventImageArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventImagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     promotion<T extends Prisma.Event$promotionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$promotionArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PromotionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    order<T extends Prisma.Event$orderArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$orderArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>;
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2118,6 +2260,29 @@ export type Event$promotionArgs<ExtArgs extends runtime.Types.Extensions.Interna
     take?: number;
     skip?: number;
     distinct?: Prisma.PromotionScalarFieldEnum | Prisma.PromotionScalarFieldEnum[];
+};
+/**
+ * Event.order
+ */
+export type Event$orderArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Order
+     */
+    select?: Prisma.OrderSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Order
+     */
+    omit?: Prisma.OrderOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.OrderInclude<ExtArgs> | null;
+    where?: Prisma.OrderWhereInput;
+    orderBy?: Prisma.OrderOrderByWithRelationInput | Prisma.OrderOrderByWithRelationInput[];
+    cursor?: Prisma.OrderWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.OrderScalarFieldEnum | Prisma.OrderScalarFieldEnum[];
 };
 /**
  * Event without action

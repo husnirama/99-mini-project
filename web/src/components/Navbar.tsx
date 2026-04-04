@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { useNavigate } from "react-router";
+import { getOrganizerEntryPath, getOrganizerSettingsPath } from "@/config/site-navigation";
 import { useAuthStore } from "@/store/auth-store";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
@@ -22,6 +23,8 @@ function Navbar() {
     const searchParams = new URLSearchParams(location.search);
     return searchParams.get("q") ?? "";
   }, [location.search]);
+  const organizerSettingsPath = getOrganizerSettingsPath(user?.id);
+  const organizerEntryPath = getOrganizerEntryPath(user);
 
   const visibleQuery = isTypingQuery ? navbarQuery : queryFromUrl;
 
@@ -68,14 +71,14 @@ function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2">
+            <Link className="flex items-center gap-2" to="/">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <span className="material-icons text-white text-xl">event</span>
               </div>
               <span className="text-xl font-bold tracking-tight text-primary">
                 EventHub
               </span>
-            </div>
+            </Link>
             <form className="hidden md:flex relative w-96" onSubmit={handleNavbarSearch}>
               <span className="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
                 search
@@ -108,12 +111,14 @@ function Navbar() {
             </form>
           </div>
           <div className="flex items-center gap-4">
-            <Link
-              to={"/organizer/create-event"}
-              className="hidden lg:block text-sm font-medium hover:text-primary transition-colors"
-            >
-              Host an Event
-            </Link>
+            {!user || user.role === "EVENT_ORGANIZER" ? (
+              <Link
+                to={organizerEntryPath}
+                className="hidden lg:block text-sm font-medium hover:text-primary transition-colors"
+              >
+                Host an Event
+              </Link>
+            ) : null}
             <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-2"></div>
             {!isAuthenticated ? (
               <>
@@ -135,6 +140,7 @@ function Navbar() {
                 <button
                   className="navbar-login"
                   onClick={() => setOpen((v) => !v)}
+                  type="button"
                 >
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                     <span className="material-symbols-outlined">
@@ -151,8 +157,19 @@ function Navbar() {
                           className="block w-full text-left px-4 py-2 text-sm hover:bg-slate-100"
                           onClick={() => {
                             setOpen(false);
+                            navigate("/organizer/dashboard");
+                          }}
+                          type="button"
+                        >
+                          Dashboard
+                        </button>
+                        <button
+                          className="block w-full text-left px-4 py-2 text-sm hover:bg-slate-100"
+                          onClick={() => {
+                            setOpen(false);
                             navigate("/organizer/transactions");
                           }}
+                          type="button"
                         >
                           Review Payments
                         </button>
@@ -160,10 +177,21 @@ function Navbar() {
                           className="block w-full text-left px-4 py-2 text-sm hover:bg-slate-100"
                           onClick={() => {
                             setOpen(false);
-                            navigate("/organizer/create-event");
+                            navigate(organizerEntryPath);
                           }}
+                          type="button"
                         >
                           Create Event
+                        </button>
+                        <button
+                          className="block w-full text-left px-4 py-2 text-sm hover:bg-slate-100"
+                          onClick={() => {
+                            setOpen(false);
+                            navigate(organizerSettingsPath);
+                          }}
+                          type="button"
+                        >
+                          Settings
                         </button>
                       </>
                     ) : (
@@ -173,6 +201,7 @@ function Navbar() {
                           setOpen(false);
                           navigate("/transactions/history");
                         }}
+                        type="button"
                       >
                         My Orders
                       </button>
@@ -180,6 +209,7 @@ function Navbar() {
                     <button
                       className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-slate-100"
                       onClick={handleLogout}
+                      type="button"
                     >
                       Log Out
                     </button>

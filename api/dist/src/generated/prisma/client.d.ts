@@ -54,4 +54,14 @@ export type TicketType = Prisma.TicketTypeModel;
  *
  */
 export type Promotion = Prisma.PromotionModel;
+/**
+ * Model Order
+ *
+ */
+export type Order = Prisma.OrderModel;
+/**
+ * Model Transaction
+ *
+ */
+export type Transaction = Prisma.TransactionModel;
 //# sourceMappingURL=client.d.ts.map

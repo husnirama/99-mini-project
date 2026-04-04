@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import { cacheTags, invalidateCacheTags } from "../lib/cache.js";
 import cloudinary from "../lib/cloudinary.js";
 import { prisma } from "../lib/prisma.js";
 import { AppError } from "../utils/app-error.js";
@@ -62,6 +63,8 @@ export async function createDraftEvent(organizerId, payload, files = []) {
                     name: ticket.name,
                     price: normalizeNumeric(ticket.price, "Ticket price"),
                     quota: Number(normalizeNumeric(ticket.capacity, "Ticket capacity")),
+                    sold: 0,
+                    reserved: 0,
                     salesStartAt: parsedCreateEvent.eventDateStart,
                     salesEndAt: parsedCreateEvent.eventDateEnd,
                     status: "ACTIVE",
@@ -85,7 +88,9 @@ export async function createDraftEvent(organizerId, payload, files = []) {
                             ? normalizeNumeric(promotion.minPurchase, "Promotion min purchase")
                             : null,
                         quota: Number(normalizeNumeric(promotion.quota, "Promotion quota")),
-                        startDate: promotion.startDate ? new Date(promotion.startDate) : null,
+                        startDate: promotion.startDate
+                            ? new Date(promotion.startDate)
+                            : null,
                         endDate: promotion.endDate ? new Date(promotion.endDate) : null,
                     })),
                 });
@@ -106,6 +111,11 @@ export async function createDraftEvent(organizerId, payload, files = []) {
                 },
             });
         });
+        await invalidateCacheTags([
+            cacheTags.eventsList,
+            cacheTags.organizerDashboard(organizerId),
+            cacheTags.organizerScope(organizerId),
+        ]);
         return event;
     }
     catch (error) {
@@ -123,6 +133,48 @@ export async function createDraftEvent(organizerId, payload, files = []) {
                 return null;
             }
         }));
+    }
+}
+export async function getEventList() {
+    try {
+        const events = await prisma.event.findMany({
+            where: {
+                deletedAt: null,
+            },
+            include: {
+                venue: true,
+                ticket: true,
+                eventImage: true,
+            },
+            orderBy: {
+                eventDateStart: "asc",
+            },
+        });
+        return events;
+    }
+    catch (error) {
+        throw new AppError("Failed to fetch event", 400);
+    }
+}
+export async function getUniqueEvent(id) {
+    try {
+        const event = await prisma.event.findUnique({
+            where: {
+                id,
+            },
+            include: {
+                venue: true,
+                ticket: true,
+                eventImage: true,
+            },
+        });
+        if (!event) {
+            throw new AppError("Event not found", 404);
+        }
+        return event;
+    }
+    catch (error) {
+        throw new AppError("Failed to get unique event", 400);
     }
 }
 //# sourceMappingURL=event.service.js.map

@@ -1,4 +1,5 @@
 import type { UserCreateInput } from "../generated/prisma/models.js";
+import { cacheTags, invalidateCacheTags } from "../lib/cache.js";
 import { prisma } from "../lib/prisma.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -8,13 +9,16 @@ import { AppError } from "../utils/app-error.js";
 import { loginSchema, registerSchema } from "../validations/auth.validation.js";
 import SendEmail from "../utils/email.js";
 
+const ACCESS_TOKEN_EXPIRES_IN = "1h";
+
 // register service
 export async function createUser(data: UserCreateInput) {
-  const { referralCode: usedReferralCode, ...rest } = data;
+  const { referralCode: usedReferralCode } = data;
   const dataInput = registerSchema.parse(data);
+  const normalizedEmail = dataInput.email.trim().toLowerCase();
   const existingUser = await prisma.user.findUnique({
     where: {
-      email: data.email,
+      email: normalizedEmail,
     },
   });
 
@@ -37,8 +41,11 @@ export async function createUser(data: UserCreateInput) {
   const newReferralCode = await generateUniqueReferralCode(dataInput.name);
   const user = await prisma.user.create({
     data: {
-      ...dataInput,
+      name: dataInput.name.trim(),
       password: hashedPassword,
+      email: normalizedEmail,
+      role: dataInput.role,
+      address: data.address?.trim() ? data.address.trim() : null,
       referralCode: newReferralCode,
       referredBy: usedReferralCode ?? null,
     },
@@ -58,10 +65,13 @@ export async function createUser(data: UserCreateInput) {
 
 // login service
 export async function loginUser(email: string, pwd: string) {
-  const emailValidation = loginSchema.parse({ email });
+  const parsedCredentials = loginSchema.parse({
+    email: email.trim().toLowerCase(),
+    password: pwd,
+  });
   const user = await prisma.user.findFirst({
     where: {
-      email: emailValidation.email,
+      email: parsedCredentials.email,
       deletedAt: null,
     },
   });
@@ -84,7 +94,7 @@ export async function loginUser(email: string, pwd: string) {
       role: user.role,
     },
     secret,
-    { expiresIn: "1h" },
+    { expiresIn: ACCESS_TOKEN_EXPIRES_IN },
   );
 
   const refreshToken = genereateRefreshToken();
@@ -153,11 +163,11 @@ export async function refreshToken(refreshToken: string) {
     include: { user: true },
   });
 
-  if (!session) throw new Error("Invalid refresh token");
-  if (session.revokedAt) throw new Error("Session revoked");
+  if (!session) throw new AppError("Invalid refresh token", 401);
+  if (session.revokedAt) throw new AppError("Session revoked", 401);
   if (session.expiresAt.getTime() < Date.now())
-    throw new Error("Refresh Token Expired");
-  if (session.user.deletedAt) throw new Error("User not found");
+    throw new AppError("Refresh token expired", 401);
+  if (session.user.deletedAt) throw new AppError("User not found", 404);
 
   const token = jwt.sign(
     {
@@ -165,7 +175,7 @@ export async function refreshToken(refreshToken: string) {
       role: session.user.role,
     },
     secret,
-    { expiresIn: "15m" },
+    { expiresIn: ACCESS_TOKEN_EXPIRES_IN },
   );
 
   // Rotation means: if someone steals an old refresh token, it stops working after one use.
@@ -191,6 +201,15 @@ export async function userLogout(refreshToken: string) {
   if (!refreshToken) {
     throw new AppError("Refresh token required", 400);
   }
+  const existingSession = await prisma.session.findFirst({
+    where: {
+      refreshHash: hashToken(refreshToken),
+      revokedAt: null,
+    },
+    select: {
+      userId: true,
+    },
+  });
   await prisma.session.updateMany({
     where: {
       refreshHash: hashToken(refreshToken),
@@ -200,5 +219,8 @@ export async function userLogout(refreshToken: string) {
       revokedAt: new Date(),
     },
   });
+  if (existingSession) {
+    await invalidateCacheTags([cacheTags.authMe(existingSession.userId)]);
+  }
   return true;
 }

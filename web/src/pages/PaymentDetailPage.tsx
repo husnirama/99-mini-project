@@ -4,7 +4,7 @@ import TransactionStatusBadge from "@/components/TransactionStatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTransactionStore } from "@/store/transaction-store";
-import type { TransactionRecord } from "@/types/orderTransactionTypes";
+import type { TransactionLifecycleRecord } from "@/types/orderTransactionTypes";
 import { formatDate, formatTime } from "@/utils/eventList.utils";
 import {
   canCancelTransaction,
@@ -20,7 +20,7 @@ import {
   getPaymentExpiry,
   getTransactionStatusTone,
 } from "@/utils/orderTransaction.utils";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 
@@ -32,38 +32,93 @@ function formatDateTime(value?: string | null) {
   return `${formatDate(value)} · ${formatTime(value)} WIB`;
 }
 
+function stampRecord(
+  record: TransactionLifecycleRecord,
+  guestToken?: string | null,
+): TransactionLifecycleRecord {
+  return {
+    ...record,
+    guestToken: guestToken ?? record.guestToken ?? null,
+    lastSyncedAt: new Date().toISOString(),
+  };
+}
+
 export default function PaymentDetailPage() {
   const { transactionId } = useParams();
   const navigate = useNavigate();
   const parsedTransactionId = Number(transactionId);
-  const record = useTransactionStore(
-    (state) =>
-      (Number.isFinite(parsedTransactionId)
-        ? state.records[parsedTransactionId]
-        : null) ?? null,
+  const storedRecord = useTransactionStore((state) =>
+    Number.isFinite(parsedTransactionId) ? state.records[parsedTransactionId] ?? null : null,
   );
-  const updateTransaction = useTransactionStore((state) => state.updateTransaction);
-  const updateRecord = useTransactionStore((state) => state.updateRecord);
+  const saveRecord = useTransactionStore((state) => state.saveRecord);
 
+  const [record, setRecord] = useState<TransactionLifecycleRecord | null>(
+    storedRecord ?? null,
+  );
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
   const [selectedProofFile, setSelectedProofFile] = useState<File | null>(null);
-  const [selectedProofPreview, setSelectedProofPreview] = useState<string | null>(
-    null,
-  );
+  const [selectedProofPreview, setSelectedProofPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
 
-  useEffect(() => {
-    if (!record) {
+  async function fetchTransactionDetail() {
+    if (!Number.isFinite(parsedTransactionId)) {
+      setRecord(null);
+      setErrorMessage("Invalid transaction ID.");
       return;
     }
 
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const response = await apiClient.get(
+        API_ENDPOINTS.TRANSACTIONS.DETAIL(parsedTransactionId),
+        {
+          headers: storedRecord?.guestToken
+            ? { "x-guest-token": storedRecord.guestToken }
+            : undefined,
+        },
+      );
+
+      const nextRecord = stampRecord(
+        response.data.data as TransactionLifecycleRecord,
+        storedRecord?.guestToken,
+      );
+
+      setRecord(nextRecord);
+      saveRecord(nextRecord);
+    } catch (error: any) {
+      console.error("Failed to fetch transaction detail", error);
+
+      if (storedRecord) {
+        setRecord(storedRecord);
+        setErrorMessage("Showing the last saved transaction data from this browser.");
+      } else {
+        setRecord(null);
+        setErrorMessage(
+          error?.response?.data?.message || "We couldn't load this transaction.",
+        );
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    setRecord(storedRecord ?? null);
+    fetchTransactionDetail();
+  }, [parsedTransactionId, storedRecord?.guestToken]);
+
+  useEffect(() => {
     const intervalId = window.setInterval(() => {
       setNow(Date.now());
     }, 1000);
 
     return () => window.clearInterval(intervalId);
-  }, [record]);
+  }, []);
 
   useEffect(() => {
     if (!selectedProofFile) {
@@ -77,87 +132,27 @@ export default function PaymentDetailPage() {
     return () => URL.revokeObjectURL(previewUrl);
   }, [selectedProofFile]);
 
-  useEffect(() => {
-    if (!record) {
-      return;
-    }
-
-    const effectiveStatus = getEffectiveTransactionStatus(record, now);
-
-    if (effectiveStatus === "EXPIRED" && record.transaction.status !== "EXPIRED") {
-      updateRecord(record.transaction.id, (current) => ({
-        ...current,
-        order: {
-          ...current.order,
-          status: "EXPIRED",
-        },
-        transaction: {
-          ...current.transaction,
-          status: "EXPIRED",
-        },
-      }));
-    }
-  }, [now, record, updateRecord]);
-
-  const effectiveTransactionStatus = useMemo(() => {
-    if (!record) {
-      return null;
-    }
-
-    return getEffectiveTransactionStatus(record, now);
-  }, [now, record]);
-
-  const effectiveOrderStatus = useMemo(() => {
-    if (!record) {
-      return null;
-    }
-
-    return getEffectiveOrderStatus(record, now);
-  }, [now, record]);
-
-  const activeExpiry = useMemo(() => {
-    if (!record) {
-      return null;
-    }
-
-    return getActiveExpiry(record);
-  }, [record]);
-
-  const paymentExpiry = useMemo(() => {
-    if (!record) {
-      return null;
-    }
-
-    return getPaymentExpiry(record);
-  }, [record]);
-
-  const adminReviewExpiry = useMemo(() => {
-    if (!record) {
-      return null;
-    }
-
-    return getAdminReviewExpiry(record);
-  }, [record]);
-
-  const countdown = useMemo(
-    () => getCountdownParts(activeExpiry, now),
-    [activeExpiry, now],
-  );
-
+  const effectiveTransactionStatus = record
+    ? getEffectiveTransactionStatus(record, now)
+    : null;
+  const effectiveOrderStatus = record ? getEffectiveOrderStatus(record, now) : null;
+  const paymentExpiry = record ? getPaymentExpiry(record) : null;
+  const adminReviewExpiry = record ? getAdminReviewExpiry(record) : null;
+  const activeExpiry = record ? getActiveExpiry(record) : null;
+  const countdown = getCountdownParts(activeExpiry, now);
   const tone = effectiveTransactionStatus
     ? getTransactionStatusTone(effectiveTransactionStatus)
     : null;
-
   const proofPreviewUrl =
     selectedProofPreview || record?.transaction.paymentProof || null;
 
   async function handleUploadPaymentProof() {
-    if (!record || !selectedProofFile) {
+    if (!record || !selectedProofFile || !effectiveTransactionStatus) {
       toast.error("Please choose an image before uploading.");
       return;
     }
 
-    if (!canUploadPaymentProof(effectiveTransactionStatus!)) {
+    if (!canUploadPaymentProof(effectiveTransactionStatus)) {
       toast.error("This transaction is no longer accepting payment proof.");
       return;
     }
@@ -168,7 +163,7 @@ export default function PaymentDetailPage() {
     setIsUploading(true);
 
     try {
-      const response = await apiClient.patch(
+      await apiClient.patch(
         API_ENDPOINTS.TRANSACTIONS.UPLOAD_PAYMENT_PROOF(record.transaction.id),
         formData,
         {
@@ -179,9 +174,9 @@ export default function PaymentDetailPage() {
         },
       );
 
-      updateTransaction(record.transaction.id, response.data.data as TransactionRecord);
       setSelectedProofFile(null);
       toast.success("Payment proof uploaded successfully.");
+      await fetchTransactionDetail();
     } catch (error: any) {
       console.error("Failed to upload payment proof", error);
       toast.error(
@@ -193,7 +188,11 @@ export default function PaymentDetailPage() {
   }
 
   async function handleCancelTransaction() {
-    if (!record || !canCancelTransaction(effectiveTransactionStatus!)) {
+    if (!record || !effectiveTransactionStatus) {
+      return;
+    }
+
+    if (!canCancelTransaction(effectiveTransactionStatus)) {
       toast.error("This transaction can no longer be canceled.");
       return;
     }
@@ -201,7 +200,7 @@ export default function PaymentDetailPage() {
     setIsCancelling(true);
 
     try {
-      const response = await apiClient.patch(
+      await apiClient.patch(
         API_ENDPOINTS.TRANSACTIONS.CANCEL(record.transaction.id),
         {},
         {
@@ -211,8 +210,8 @@ export default function PaymentDetailPage() {
         },
       );
 
-      updateTransaction(record.transaction.id, response.data.data as TransactionRecord);
       toast.success("Transaction canceled.");
+      await fetchTransactionDetail();
     } catch (error: any) {
       console.error("Failed to cancel transaction", error);
       toast.error(
@@ -223,14 +222,24 @@ export default function PaymentDetailPage() {
     }
   }
 
+  if (isLoading && !record) {
+    return (
+      <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/40">
+          Loading transaction detail...
+        </div>
+      </main>
+    );
+  }
+
   if (!record || !effectiveTransactionStatus || !effectiveOrderStatus || !tone) {
     return (
       <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/40">
-          We couldn't find this transaction in the current browser session.
+          {errorMessage || "We couldn't find this transaction."}
           <div className="mt-4 flex flex-wrap gap-3">
             <Link className="font-semibold text-primary hover:underline" to="/transactions/history">
-              Open saved transactions
+              Open transactions
             </Link>
             <button
               className="font-semibold text-slate-700 hover:underline dark:text-slate-300"
@@ -265,11 +274,17 @@ export default function PaymentDetailPage() {
             className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-primary hover:text-primary dark:border-slate-800 dark:text-slate-200"
             to="/transactions/history"
           >
-            Saved transactions
+            Transaction history
           </Link>
           <TransactionStatusBadge status={effectiveTransactionStatus} />
         </div>
       </div>
+
+      {errorMessage ? (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-200">
+          {errorMessage}
+        </div>
+      ) : null}
 
       <div className={`mb-8 rounded-2xl p-6 shadow-sm ${tone.panelClass}`}>
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -315,7 +330,9 @@ export default function PaymentDetailPage() {
                   className="min-w-20 rounded-xl border border-white/50 bg-white/70 px-4 py-3 text-center shadow-sm dark:border-white/10 dark:bg-slate-950/20"
                   key={item.label}
                 >
-                  <p className="text-2xl font-bold">{String(item.value).padStart(2, "0")}</p>
+                  <p className="text-2xl font-bold">
+                    {String(item.value).padStart(2, "0")}
+                  </p>
                   <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                     {item.label}
                   </p>
@@ -361,7 +378,8 @@ export default function PaymentDetailPage() {
                       calendar_month
                     </span>
                     <span>
-                      {formatDate(record.event.eventDateStart)} · {formatTime(record.event.eventDateStart)} -{" "}
+                      {formatDate(record.event.eventDateStart)} ·{" "}
+                      {formatTime(record.event.eventDateStart)} -{" "}
                       {formatTime(record.event.eventDateEnd)} WIB
                     </span>
                   </div>
@@ -380,7 +398,7 @@ export default function PaymentDetailPage() {
                     </span>
                   ) : null}
                   <span className="rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
-                    {formatOrderStatusLabel(record.order.status)}
+                    {formatOrderStatusLabel(effectiveOrderStatus)}
                   </span>
                 </div>
               </div>
@@ -487,8 +505,7 @@ export default function PaymentDetailPage() {
                         No payment proof uploaded yet
                       </p>
                       <p className="mt-1">
-                        Select an image when the transaction is still waiting for
-                        payment.
+                        Select an image when the transaction is still waiting for payment.
                       </p>
                     </div>
                   </div>
@@ -526,10 +543,12 @@ export default function PaymentDetailPage() {
                       <p className="font-semibold text-slate-900 dark:text-white">
                         Payment method
                       </p>
-                      <p className="mt-1">{formatPaymentMethod(record.transaction.paymentMethod)}</p>
+                      <p className="mt-1">
+                        {formatPaymentMethod(record.transaction.paymentMethod)}
+                      </p>
                       <p className="mt-3">
-                        The transaction will move to waiting for admin confirmation as
-                        soon as the proof upload succeeds.
+                        The transaction moves to waiting for admin confirmation as soon
+                        as the upload succeeds.
                       </p>
                     </div>
 

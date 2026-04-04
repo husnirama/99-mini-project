@@ -15,6 +15,8 @@ export const API_ENDPOINTS = {
     CREATE: "/order/creation",
   },
   TRANSACTIONS: {
+    LIST: "/transaction",
+    DETAIL: (transactionId: string | number) => `/transaction/${transactionId}`,
     UPLOAD_PAYMENT_PROOF: (transactionId: string | number) =>
       `/transaction/${transactionId}/paymentProof`,
     APPROVE: (transactionId: string | number) =>
@@ -24,5 +26,14 @@ export const API_ENDPOINTS = {
     CANCEL: (transactionId: string | number) =>
       `/transaction/${transactionId}/cancel`,
   },
-  USERS: {},
+  CUSTOMERS: {
+    PROFILE: "/user/customer/profile",
+    PASSWORD: "/user/customer/profile/password",
+    COUPONS: "/user/customer/coupons",
+  },
+  ORGANIZER: {
+    DASHBOARD: "/organizer/dashboard",
+    PROFILE: "/organizer/profile",
+    PASSWORD: "/organizer/profile/password",
+  },
 };

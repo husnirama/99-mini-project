@@ -48,8 +48,15 @@ link ui from google sticth : https://stitch.withgoogle.com/projects/135849185310
 
 ### 3. Event Management Dashboard (4 point)
 
-- [ ] Dashboard Access: Organizers can view and manage their events ( ex: edit events, etc.), transactions, and basic statistics.
-- [ ] Statistics Visualization: Display event data in graphical visualizations and reports by year, month, and day.
-- [ ] Transaction Management: Organizers can accept, reject, and view user payment proofs.
+- [x] Dashboard Access: Organizers can view and manage their events ( ex: edit events, etc.), transactions, and basic statistics.
+- [x] Statistics Visualization: Display event data in graphical visualizations and reports by year, month, and day.
+- [x] Transaction Management: Organizers can accept, reject, and view user payment proofs.
 - [ ] Notification Emails: Customers receive email notifications when their transaction is accepted or rejected. Ensure points/vouchers/coupons are returned if used in rejected transactions. Additionally, available seats are restored.
-- [ ] Attendee List: Show the list of attendees for each event, including name, ticket quantity, and total price paid.
+- [x] Attendee List: Show the list of attendees for each event, including name, ticket quantity, and total price paid.
+
+## STATUS at 30032026
+
+- [ ] All the features does not using the cache yet (only get method needed)
+- [ ] All features 2.3 done only on UI, backend still on progress
+- [ ] Link UI on all features does not done yet
+- [ ] User Login still broken (have to check token)

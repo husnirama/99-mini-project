@@ -219,6 +219,8 @@ export type UserWhereInput = {
     deletedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null;
     sessions?: Prisma.SessionListRelationFilter;
     event?: Prisma.EventListRelationFilter;
+    orders?: Prisma.OrderListRelationFilter;
+    verifiedTransactions?: Prisma.TransactionListRelationFilter;
 };
 export type UserOrderByWithRelationInput = {
     id?: Prisma.SortOrder;
@@ -234,6 +236,8 @@ export type UserOrderByWithRelationInput = {
     deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder;
     sessions?: Prisma.SessionOrderByRelationAggregateInput;
     event?: Prisma.EventOrderByRelationAggregateInput;
+    orders?: Prisma.OrderOrderByRelationAggregateInput;
+    verifiedTransactions?: Prisma.TransactionOrderByRelationAggregateInput;
 };
 export type UserWhereUniqueInput = Prisma.AtLeast<{
     id?: number;
@@ -252,6 +256,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
     deletedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null;
     sessions?: Prisma.SessionListRelationFilter;
     event?: Prisma.EventListRelationFilter;
+    orders?: Prisma.OrderListRelationFilter;
+    verifiedTransactions?: Prisma.TransactionListRelationFilter;
 }, "id" | "email" | "referralCode">;
 export type UserOrderByWithAggregationInput = {
     id?: Prisma.SortOrder;
@@ -300,6 +306,8 @@ export type UserCreateInput = {
     deletedAt?: Date | string | null;
     sessions?: Prisma.SessionCreateNestedManyWithoutUserInput;
     event?: Prisma.EventCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderCreateNestedManyWithoutUserInput;
+    verifiedTransactions?: Prisma.TransactionCreateNestedManyWithoutAdminInput;
 };
 export type UserUncheckedCreateInput = {
     id?: number;
@@ -315,6 +323,8 @@ export type UserUncheckedCreateInput = {
     deletedAt?: Date | string | null;
     sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput;
     event?: Prisma.EventUncheckedCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput;
+    verifiedTransactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutAdminInput;
 };
 export type UserUpdateInput = {
     name?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -329,6 +339,8 @@ export type UserUpdateInput = {
     deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput;
     event?: Prisma.EventUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUpdateManyWithoutUserNestedInput;
+    verifiedTransactions?: Prisma.TransactionUpdateManyWithoutAdminNestedInput;
 };
 export type UserUncheckedUpdateInput = {
     id?: Prisma.IntFieldUpdateOperationsInput | number;
@@ -344,6 +356,8 @@ export type UserUncheckedUpdateInput = {
     deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput;
     event?: Prisma.EventUncheckedUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput;
+    verifiedTransactions?: Prisma.TransactionUncheckedUpdateManyWithoutAdminNestedInput;
 };
 export type UserCreateManyInput = {
     id?: number;
@@ -432,6 +446,10 @@ export type UserScalarRelationFilter = {
     is?: Prisma.UserWhereInput;
     isNot?: Prisma.UserWhereInput;
 };
+export type UserNullableScalarRelationFilter = {
+    is?: Prisma.UserWhereInput | null;
+    isNot?: Prisma.UserWhereInput | null;
+};
 export type StringFieldUpdateOperationsInput = {
     set?: string;
 };
@@ -478,6 +496,34 @@ export type UserUpdateOneRequiredWithoutEventNestedInput = {
     connect?: Prisma.UserWhereUniqueInput;
     update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutEventInput, Prisma.UserUpdateWithoutEventInput>, Prisma.UserUncheckedUpdateWithoutEventInput>;
 };
+export type UserCreateNestedOneWithoutOrdersInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutOrdersInput, Prisma.UserUncheckedCreateWithoutOrdersInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutOrdersInput;
+    connect?: Prisma.UserWhereUniqueInput;
+};
+export type UserUpdateOneWithoutOrdersNestedInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutOrdersInput, Prisma.UserUncheckedCreateWithoutOrdersInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutOrdersInput;
+    upsert?: Prisma.UserUpsertWithoutOrdersInput;
+    disconnect?: Prisma.UserWhereInput | boolean;
+    delete?: Prisma.UserWhereInput | boolean;
+    connect?: Prisma.UserWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOrdersInput, Prisma.UserUpdateWithoutOrdersInput>, Prisma.UserUncheckedUpdateWithoutOrdersInput>;
+};
+export type UserCreateNestedOneWithoutVerifiedTransactionsInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutVerifiedTransactionsInput, Prisma.UserUncheckedCreateWithoutVerifiedTransactionsInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutVerifiedTransactionsInput;
+    connect?: Prisma.UserWhereUniqueInput;
+};
+export type UserUpdateOneWithoutVerifiedTransactionsNestedInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutVerifiedTransactionsInput, Prisma.UserUncheckedCreateWithoutVerifiedTransactionsInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutVerifiedTransactionsInput;
+    upsert?: Prisma.UserUpsertWithoutVerifiedTransactionsInput;
+    disconnect?: Prisma.UserWhereInput | boolean;
+    delete?: Prisma.UserWhereInput | boolean;
+    connect?: Prisma.UserWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutVerifiedTransactionsInput, Prisma.UserUpdateWithoutVerifiedTransactionsInput>, Prisma.UserUncheckedUpdateWithoutVerifiedTransactionsInput>;
+};
 export type UserCreateWithoutSessionsInput = {
     name: string;
     password: string;
@@ -490,6 +536,8 @@ export type UserCreateWithoutSessionsInput = {
     updatedAt?: Date | string;
     deletedAt?: Date | string | null;
     event?: Prisma.EventCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderCreateNestedManyWithoutUserInput;
+    verifiedTransactions?: Prisma.TransactionCreateNestedManyWithoutAdminInput;
 };
 export type UserUncheckedCreateWithoutSessionsInput = {
     id?: number;
@@ -504,6 +552,8 @@ export type UserUncheckedCreateWithoutSessionsInput = {
     updatedAt?: Date | string;
     deletedAt?: Date | string | null;
     event?: Prisma.EventUncheckedCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput;
+    verifiedTransactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutAdminInput;
 };
 export type UserCreateOrConnectWithoutSessionsInput = {
     where: Prisma.UserWhereUniqueInput;
@@ -530,6 +580,8 @@ export type UserUpdateWithoutSessionsInput = {
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     event?: Prisma.EventUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUpdateManyWithoutUserNestedInput;
+    verifiedTransactions?: Prisma.TransactionUpdateManyWithoutAdminNestedInput;
 };
 export type UserUncheckedUpdateWithoutSessionsInput = {
     id?: Prisma.IntFieldUpdateOperationsInput | number;
@@ -544,6 +596,8 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     event?: Prisma.EventUncheckedUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput;
+    verifiedTransactions?: Prisma.TransactionUncheckedUpdateManyWithoutAdminNestedInput;
 };
 export type UserCreateWithoutEventInput = {
     name: string;
@@ -557,6 +611,8 @@ export type UserCreateWithoutEventInput = {
     updatedAt?: Date | string;
     deletedAt?: Date | string | null;
     sessions?: Prisma.SessionCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderCreateNestedManyWithoutUserInput;
+    verifiedTransactions?: Prisma.TransactionCreateNestedManyWithoutAdminInput;
 };
 export type UserUncheckedCreateWithoutEventInput = {
     id?: number;
@@ -571,6 +627,8 @@ export type UserUncheckedCreateWithoutEventInput = {
     updatedAt?: Date | string;
     deletedAt?: Date | string | null;
     sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput;
+    verifiedTransactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutAdminInput;
 };
 export type UserCreateOrConnectWithoutEventInput = {
     where: Prisma.UserWhereUniqueInput;
@@ -597,6 +655,8 @@ export type UserUpdateWithoutEventInput = {
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUpdateManyWithoutUserNestedInput;
+    verifiedTransactions?: Prisma.TransactionUpdateManyWithoutAdminNestedInput;
 };
 export type UserUncheckedUpdateWithoutEventInput = {
     id?: Prisma.IntFieldUpdateOperationsInput | number;
@@ -611,6 +671,158 @@ export type UserUncheckedUpdateWithoutEventInput = {
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput;
+    verifiedTransactions?: Prisma.TransactionUncheckedUpdateManyWithoutAdminNestedInput;
+};
+export type UserCreateWithoutOrdersInput = {
+    name: string;
+    password: string;
+    email: string;
+    address?: string | null;
+    role?: $Enums.Role;
+    referralCode: string;
+    referredBy?: string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    deletedAt?: Date | string | null;
+    sessions?: Prisma.SessionCreateNestedManyWithoutUserInput;
+    event?: Prisma.EventCreateNestedManyWithoutUserInput;
+    verifiedTransactions?: Prisma.TransactionCreateNestedManyWithoutAdminInput;
+};
+export type UserUncheckedCreateWithoutOrdersInput = {
+    id?: number;
+    name: string;
+    password: string;
+    email: string;
+    address?: string | null;
+    role?: $Enums.Role;
+    referralCode: string;
+    referredBy?: string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    deletedAt?: Date | string | null;
+    sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput;
+    event?: Prisma.EventUncheckedCreateNestedManyWithoutUserInput;
+    verifiedTransactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutAdminInput;
+};
+export type UserCreateOrConnectWithoutOrdersInput = {
+    where: Prisma.UserWhereUniqueInput;
+    create: Prisma.XOR<Prisma.UserCreateWithoutOrdersInput, Prisma.UserUncheckedCreateWithoutOrdersInput>;
+};
+export type UserUpsertWithoutOrdersInput = {
+    update: Prisma.XOR<Prisma.UserUpdateWithoutOrdersInput, Prisma.UserUncheckedUpdateWithoutOrdersInput>;
+    create: Prisma.XOR<Prisma.UserCreateWithoutOrdersInput, Prisma.UserUncheckedCreateWithoutOrdersInput>;
+    where?: Prisma.UserWhereInput;
+};
+export type UserUpdateToOneWithWhereWithoutOrdersInput = {
+    where?: Prisma.UserWhereInput;
+    data: Prisma.XOR<Prisma.UserUpdateWithoutOrdersInput, Prisma.UserUncheckedUpdateWithoutOrdersInput>;
+};
+export type UserUpdateWithoutOrdersInput = {
+    name?: Prisma.StringFieldUpdateOperationsInput | string;
+    password?: Prisma.StringFieldUpdateOperationsInput | string;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role;
+    referralCode?: Prisma.StringFieldUpdateOperationsInput | string;
+    referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput;
+    event?: Prisma.EventUpdateManyWithoutUserNestedInput;
+    verifiedTransactions?: Prisma.TransactionUpdateManyWithoutAdminNestedInput;
+};
+export type UserUncheckedUpdateWithoutOrdersInput = {
+    id?: Prisma.IntFieldUpdateOperationsInput | number;
+    name?: Prisma.StringFieldUpdateOperationsInput | string;
+    password?: Prisma.StringFieldUpdateOperationsInput | string;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role;
+    referralCode?: Prisma.StringFieldUpdateOperationsInput | string;
+    referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput;
+    event?: Prisma.EventUncheckedUpdateManyWithoutUserNestedInput;
+    verifiedTransactions?: Prisma.TransactionUncheckedUpdateManyWithoutAdminNestedInput;
+};
+export type UserCreateWithoutVerifiedTransactionsInput = {
+    name: string;
+    password: string;
+    email: string;
+    address?: string | null;
+    role?: $Enums.Role;
+    referralCode: string;
+    referredBy?: string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    deletedAt?: Date | string | null;
+    sessions?: Prisma.SessionCreateNestedManyWithoutUserInput;
+    event?: Prisma.EventCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderCreateNestedManyWithoutUserInput;
+};
+export type UserUncheckedCreateWithoutVerifiedTransactionsInput = {
+    id?: number;
+    name: string;
+    password: string;
+    email: string;
+    address?: string | null;
+    role?: $Enums.Role;
+    referralCode: string;
+    referredBy?: string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    deletedAt?: Date | string | null;
+    sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput;
+    event?: Prisma.EventUncheckedCreateNestedManyWithoutUserInput;
+    orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput;
+};
+export type UserCreateOrConnectWithoutVerifiedTransactionsInput = {
+    where: Prisma.UserWhereUniqueInput;
+    create: Prisma.XOR<Prisma.UserCreateWithoutVerifiedTransactionsInput, Prisma.UserUncheckedCreateWithoutVerifiedTransactionsInput>;
+};
+export type UserUpsertWithoutVerifiedTransactionsInput = {
+    update: Prisma.XOR<Prisma.UserUpdateWithoutVerifiedTransactionsInput, Prisma.UserUncheckedUpdateWithoutVerifiedTransactionsInput>;
+    create: Prisma.XOR<Prisma.UserCreateWithoutVerifiedTransactionsInput, Prisma.UserUncheckedCreateWithoutVerifiedTransactionsInput>;
+    where?: Prisma.UserWhereInput;
+};
+export type UserUpdateToOneWithWhereWithoutVerifiedTransactionsInput = {
+    where?: Prisma.UserWhereInput;
+    data: Prisma.XOR<Prisma.UserUpdateWithoutVerifiedTransactionsInput, Prisma.UserUncheckedUpdateWithoutVerifiedTransactionsInput>;
+};
+export type UserUpdateWithoutVerifiedTransactionsInput = {
+    name?: Prisma.StringFieldUpdateOperationsInput | string;
+    password?: Prisma.StringFieldUpdateOperationsInput | string;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role;
+    referralCode?: Prisma.StringFieldUpdateOperationsInput | string;
+    referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput;
+    event?: Prisma.EventUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUpdateManyWithoutUserNestedInput;
+};
+export type UserUncheckedUpdateWithoutVerifiedTransactionsInput = {
+    id?: Prisma.IntFieldUpdateOperationsInput | number;
+    name?: Prisma.StringFieldUpdateOperationsInput | string;
+    password?: Prisma.StringFieldUpdateOperationsInput | string;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role;
+    referralCode?: Prisma.StringFieldUpdateOperationsInput | string;
+    referredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput;
+    event?: Prisma.EventUncheckedUpdateManyWithoutUserNestedInput;
+    orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput;
 };
 /**
  * Count Type UserCountOutputType
@@ -618,10 +830,14 @@ export type UserUncheckedUpdateWithoutEventInput = {
 export type UserCountOutputType = {
     sessions: number;
     event: number;
+    orders: number;
+    verifiedTransactions: number;
 };
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     sessions?: boolean | UserCountOutputTypeCountSessionsArgs;
     event?: boolean | UserCountOutputTypeCountEventArgs;
+    orders?: boolean | UserCountOutputTypeCountOrdersArgs;
+    verifiedTransactions?: boolean | UserCountOutputTypeCountVerifiedTransactionsArgs;
 };
 /**
  * UserCountOutputType without action
@@ -644,6 +860,18 @@ export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.E
 export type UserCountOutputTypeCountEventArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     where?: Prisma.EventWhereInput;
 };
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountOrdersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.OrderWhereInput;
+};
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountVerifiedTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.TransactionWhereInput;
+};
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
     name?: boolean;
@@ -658,6 +886,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
     deletedAt?: boolean;
     sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>;
     event?: boolean | Prisma.User$eventArgs<ExtArgs>;
+    orders?: boolean | Prisma.User$ordersArgs<ExtArgs>;
+    verifiedTransactions?: boolean | Prisma.User$verifiedTransactionsArgs<ExtArgs>;
     _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["user"]>;
 export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -703,6 +933,8 @@ export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>;
     event?: boolean | Prisma.User$eventArgs<ExtArgs>;
+    orders?: boolean | Prisma.User$ordersArgs<ExtArgs>;
+    verifiedTransactions?: boolean | Prisma.User$verifiedTransactionsArgs<ExtArgs>;
     _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {};
@@ -712,6 +944,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     objects: {
         sessions: Prisma.$SessionPayload<ExtArgs>[];
         event: Prisma.$EventPayload<ExtArgs>[];
+        orders: Prisma.$OrderPayload<ExtArgs>[];
+        verifiedTransactions: Prisma.$TransactionPayload<ExtArgs>[];
     };
     scalars: runtime.Types.Extensions.GetPayloadResult<{
         id: number;
@@ -1056,6 +1290,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
     readonly [Symbol.toStringTag]: "PrismaPromise";
     sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     event<T extends Prisma.User$eventArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$eventArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    orders<T extends Prisma.User$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    verifiedTransactions<T extends Prisma.User$verifiedTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$verifiedTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1507,6 +1743,52 @@ export type User$eventArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
     take?: number;
     skip?: number;
     distinct?: Prisma.EventScalarFieldEnum | Prisma.EventScalarFieldEnum[];
+};
+/**
+ * User.orders
+ */
+export type User$ordersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Order
+     */
+    select?: Prisma.OrderSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Order
+     */
+    omit?: Prisma.OrderOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.OrderInclude<ExtArgs> | null;
+    where?: Prisma.OrderWhereInput;
+    orderBy?: Prisma.OrderOrderByWithRelationInput | Prisma.OrderOrderByWithRelationInput[];
+    cursor?: Prisma.OrderWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.OrderScalarFieldEnum | Prisma.OrderScalarFieldEnum[];
+};
+/**
+ * User.verifiedTransactions
+ */
+export type User$verifiedTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Transaction
+     */
+    select?: Prisma.TransactionSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Transaction
+     */
+    omit?: Prisma.TransactionOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.TransactionInclude<ExtArgs> | null;
+    where?: Prisma.TransactionWhereInput;
+    orderBy?: Prisma.TransactionOrderByWithRelationInput | Prisma.TransactionOrderByWithRelationInput[];
+    cursor?: Prisma.TransactionWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.TransactionScalarFieldEnum | Prisma.TransactionScalarFieldEnum[];
 };
 /**
  * User without action

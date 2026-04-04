@@ -1,12 +1,14 @@
 import { apiClient } from "@/api/clients";
 import { API_ENDPOINTS } from "@/api/endpoint";
+import { getOrganizerEntryPath } from "@/config/site-navigation";
 import EventCard from "@/components/EventCard";
 import FeatureEventCard from "@/components/FeatureCard";
 import type { EventItem } from "@/types/eventListTypes";
 import { formatPrice, getLowestPrice } from "@/utils/eventList.utils";
 import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
+import { useAuthStore } from "@/store/auth-store";
 
 type DatePreset = "ANY" | "TODAY" | "THIS_WEEKEND" | "NEXT_WEEK";
 type SortOption = "RECOMMENDED" | "NEWEST" | "PRICE_LOW" | "PRICE_HIGH";
@@ -91,9 +93,12 @@ function getEventLocationText(event: EventItem) {
 }
 
 export default function Home() {
+  const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
   const [events, setEvents] = useState<EventItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [locationQuery, setLocationQuery] = useState("");
+  const [subscriptionEmail, setSubscriptionEmail] = useState("");
   const [selectedDatePreset, setSelectedDatePreset] = useState<DatePreset>("ANY");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [minPriceInput, setMinPriceInput] = useState("");
@@ -106,6 +111,7 @@ export default function Home() {
     const searchParams = new URLSearchParams(location.search);
     return searchParams.get("q") ?? "";
   }, [location.search]);
+  const organizerEntryPath = getOrganizerEntryPath(user);
 
   useEffect(() => {
     async function fetchEvents() {
@@ -271,6 +277,17 @@ export default function Home() {
     setCustomDateStart("");
     setCustomDateEnd("");
     setSortBy("RECOMMENDED");
+  }
+
+  function handleSubscription() {
+    const normalizedEmail = subscriptionEmail.trim();
+
+    if (!normalizedEmail) {
+      toast.error("Enter your email address first.");
+      return;
+    }
+
+    navigate(`/auth/register?email=${encodeURIComponent(normalizedEmail)}`);
   }
 
   return (
@@ -520,8 +537,12 @@ export default function Home() {
                 <p className="text-xs text-slate-600 dark:text-slate-400 mb-5 leading-relaxed">
                   Reach thousands of people looking for experiences like yours.
                 </p>
-                <button className="w-full bg-primary text-white text-xs font-bold py-3 rounded-xl hover:bg-primary-dark shadow-lg shadow-primary/20 transition-all">
-                  Get Started
+                <button
+                  className="w-full bg-primary text-white text-xs font-bold py-3 rounded-xl hover:bg-primary-dark shadow-lg shadow-primary/20 transition-all"
+                  onClick={() => navigate(organizerEntryPath)}
+                  type="button"
+                >
+                  {user?.role === "EVENT_ORGANIZER" ? "Create Event" : "Get Started"}
                 </button>
               </div>
             </div>
@@ -611,10 +632,16 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4">
               <input
                 className="flex-1 px-8 py-5 rounded-2xl text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-400/50 border-none placeholder:text-slate-400 text-lg shadow-2xl"
+                onChange={(event) => setSubscriptionEmail(event.target.value)}
                 placeholder="Email address"
                 type="email"
+                value={subscriptionEmail}
               />
-              <button className="bg-slate-950 text-white font-extrabold px-10 py-5 rounded-2xl hover:bg-black transition-all transform active:scale-95 shadow-2xl">
+              <button
+                className="bg-slate-950 text-white font-extrabold px-10 py-5 rounded-2xl hover:bg-black transition-all transform active:scale-95 shadow-2xl"
+                onClick={handleSubscription}
+                type="button"
+              >
                 Subscribe
               </button>
             </div>

@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/store/auth-store";
 import { useTransactionStore } from "@/store/transaction-store";
 import type { EventDetail } from "@/types/eventDetailTypes";
-import type { TicketType } from "@/types/eventListTypes";
 import type {
   CreateOrderPayload,
   PaymentMethod,
@@ -82,7 +81,9 @@ export default function OrderStep1Page() {
       setIsLoading(true);
 
       try {
-        const response = await apiClient.get(API_ENDPOINTS.EVENTS.FIND(parsedEventId));
+        const response = await apiClient.get(
+          API_ENDPOINTS.EVENTS.FIND(parsedEventId),
+        );
         setEvent(response.data.data as EventDetail);
       } catch (error) {
         console.error("Failed to fetch checkout event", error);
@@ -109,7 +110,10 @@ export default function OrderStep1Page() {
       : null;
 
     setSelectedTicketId((previous) => {
-      if (previous && availableTickets.some((ticket) => ticket.id === previous)) {
+      if (
+        previous &&
+        availableTickets.some((ticket) => ticket.id === previous)
+      ) {
         return previous;
       }
 
@@ -122,7 +126,8 @@ export default function OrderStep1Page() {
   }, [availableTickets, requestedTicketId]);
 
   const selectedTicket = useMemo(
-    () => availableTickets.find((ticket) => ticket.id === selectedTicketId) ?? null,
+    () =>
+      availableTickets.find((ticket) => ticket.id === selectedTicketId) ?? null,
     [availableTickets, selectedTicketId],
   );
 
@@ -166,7 +171,10 @@ export default function OrderStep1Page() {
       return;
     }
 
-    if (!buyerForm.buyerEmail.trim() || !/\S+@\S+\.\S+/.test(buyerForm.buyerEmail)) {
+    if (
+      !buyerForm.buyerEmail.trim() ||
+      !/\S+@\S+\.\S+/.test(buyerForm.buyerEmail)
+    ) {
       toast.error("Enter a valid buyer email.");
       return;
     }
@@ -193,8 +201,12 @@ export default function OrderStep1Page() {
     setIsSubmitting(true);
 
     try {
-      const response = await apiClient.post(API_ENDPOINTS.ORDERS.CREATE, payload);
-      const checkoutResponse = response.data.data as TransactionCheckoutResponse;
+      const response = await apiClient.post(
+        API_ENDPOINTS.ORDERS.CREATE,
+        payload,
+      );
+      const checkoutResponse = response.data
+        .data as TransactionCheckoutResponse;
       const lifecycleRecord = buildLifecycleRecord({
         response: checkoutResponse,
         event,
@@ -204,11 +216,9 @@ export default function OrderStep1Page() {
       saveRecord(lifecycleRecord);
       toast.success("Order created. Finish the payment before it expires.");
       navigate(`/transactions/${checkoutResponse.transaction.id}`);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to create order", error);
-      toast.error(
-        error?.response?.data?.message || "We couldn't create your order.",
-      );
+      toast.error("We couldn't create your order.");
     } finally {
       setIsSubmitting(false);
     }
@@ -226,8 +236,8 @@ export default function OrderStep1Page() {
     return (
       <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/40">
-          This checkout could not be prepared. Please return to the event page and
-          choose an active ticket.
+          This checkout could not be prepared. Please return to the event page
+          and choose an active ticket.
           <div className="mt-4">
             <Link className="font-semibold text-primary hover:underline" to="/">
               Back to events
@@ -247,7 +257,9 @@ export default function OrderStep1Page() {
 
           <div className="relative flex flex-col items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/20">
-              <span className="material-symbols-outlined text-lg">fact_check</span>
+              <span className="material-symbols-outlined text-lg">
+                fact_check
+              </span>
             </div>
             <span className="text-xs font-semibold text-primary">Checkout</span>
           </div>
@@ -309,7 +321,8 @@ export default function OrderStep1Page() {
                         calendar_month
                       </span>
                       <span>
-                        {formatDate(event.eventDateStart)} · {formatTime(event.eventDateStart)} -{" "}
+                        {formatDate(event.eventDateStart)} ·{" "}
+                        {formatTime(event.eventDateStart)} -{" "}
                         {formatTime(event.eventDateEnd)} WIB
                       </span>
                     </div>
@@ -376,15 +389,21 @@ export default function OrderStep1Page() {
                           ) : null}
                         </div>
                         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                          {ticket.description || "Standard admission for this event."}
+                          {ticket.description ||
+                            "Standard admission for this event."}
                         </p>
                         <div className="mt-3 flex flex-wrap gap-4 text-xs font-medium text-slate-500 dark:text-slate-400">
                           <span>
-                            Quota: {typeof ticket.quota === "number" ? ticket.quota : "TBA"}
+                            Quota:{" "}
+                            {typeof ticket.quota === "number"
+                              ? ticket.quota
+                              : "TBA"}
                           </span>
                           <span>
                             Sales end:{" "}
-                            {ticket.salesEndAt ? formatDate(ticket.salesEndAt) : "Follows event date"}
+                            {ticket.salesEndAt
+                              ? formatDate(ticket.salesEndAt)
+                              : "Follows event date"}
                           </span>
                         </div>
                       </div>
@@ -409,7 +428,9 @@ export default function OrderStep1Page() {
                   <tr>
                     <th className="px-4 py-3 font-semibold">Ticket</th>
                     <th className="px-4 py-3 font-semibold text-center">Qty</th>
-                    <th className="px-4 py-3 font-semibold text-right">Price</th>
+                    <th className="px-4 py-3 font-semibold text-right">
+                      Price
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -426,10 +447,14 @@ export default function OrderStep1Page() {
                       <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-2 py-1 dark:border-slate-700 dark:bg-slate-900">
                         <button
                           className="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                          onClick={() => setQuantity((previous) => Math.max(1, previous - 1))}
+                          onClick={() =>
+                            setQuantity((previous) => Math.max(1, previous - 1))
+                          }
                           type="button"
                         >
-                          <span className="material-symbols-outlined text-base">remove</span>
+                          <span className="material-symbols-outlined text-base">
+                            remove
+                          </span>
                         </button>
                         <span className="min-w-8 text-center font-semibold text-slate-900 dark:text-white">
                           {quantity}
@@ -438,11 +463,15 @@ export default function OrderStep1Page() {
                           className="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
                           disabled={quantity >= maxQuantity}
                           onClick={() =>
-                            setQuantity((previous) => Math.min(maxQuantity, previous + 1))
+                            setQuantity((previous) =>
+                              Math.min(maxQuantity, previous + 1),
+                            )
                           }
                           type="button"
                         >
-                          <span className="material-symbols-outlined text-base">add</span>
+                          <span className="material-symbols-outlined text-base">
+                            add
+                          </span>
                         </button>
                       </div>
                     </td>
@@ -461,7 +490,8 @@ export default function OrderStep1Page() {
                 Buyer Information
               </h2>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                We will use this contact for payment updates and ticket delivery.
+                We will use this contact for payment updates and ticket
+                delivery.
               </p>
             </div>
 
@@ -472,7 +502,9 @@ export default function OrderStep1Page() {
                 </Label>
                 <Input
                   className="h-11 border-slate-200 bg-white px-4 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900"
-                  onChange={(event) => updateBuyerField("buyerName", event.target.value)}
+                  onChange={(event) =>
+                    updateBuyerField("buyerName", event.target.value)
+                  }
                   placeholder="Alex Johnson"
                   value={buyerForm.buyerName}
                 />
@@ -484,7 +516,9 @@ export default function OrderStep1Page() {
                 </Label>
                 <Input
                   className="h-11 border-slate-200 bg-white px-4 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900"
-                  onChange={(event) => updateBuyerField("buyerEmail", event.target.value)}
+                  onChange={(event) =>
+                    updateBuyerField("buyerEmail", event.target.value)
+                  }
                   placeholder="name@example.com"
                   type="email"
                   value={buyerForm.buyerEmail}
@@ -497,7 +531,9 @@ export default function OrderStep1Page() {
                 </Label>
                 <Input
                   className="h-11 border-slate-200 bg-white px-4 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900"
-                  onChange={(event) => updateBuyerField("buyerPhone", event.target.value)}
+                  onChange={(event) =>
+                    updateBuyerField("buyerPhone", event.target.value)
+                  }
                   placeholder="+628123456789"
                   value={buyerForm.buyerPhone}
                 />
@@ -531,7 +567,8 @@ export default function OrderStep1Page() {
                   value: "CARD" as PaymentMethod,
                   icon: "credit_card",
                   title: "Card",
-                  description: "Use the same payment proof flow required by the backend.",
+                  description:
+                    "Use the same payment proof flow required by the backend.",
                 },
               ].map((option) => {
                 const isSelected = option.value === paymentMethod;
@@ -582,7 +619,9 @@ export default function OrderStep1Page() {
         <div className="space-y-6">
           <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
             <div className="mb-4 flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary">sell</span>
+              <span className="material-symbols-outlined text-primary">
+                sell
+              </span>
               <h2 className="font-bold text-slate-900 dark:text-white">
                 Voucher Code
               </h2>
@@ -594,12 +633,15 @@ export default function OrderStep1Page() {
               </Label>
               <Input
                 className="h-11 border-slate-200 bg-slate-50 px-4 text-sm uppercase shadow-none dark:border-slate-700 dark:bg-slate-900"
-                onChange={(event) => setVoucherCode(event.target.value.toUpperCase())}
+                onChange={(event) =>
+                  setVoucherCode(event.target.value.toUpperCase())
+                }
                 placeholder="PROMO10"
                 value={voucherCode}
               />
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Any discount will be validated and applied when the order is created.
+                Any discount will be validated and applied when the order is
+                created.
               </p>
             </div>
           </section>
@@ -634,7 +676,9 @@ export default function OrderStep1Page() {
               <div className="flex items-center justify-between gap-4">
                 <span className="text-slate-500">Discount</span>
                 <span className="font-medium text-slate-900 dark:text-white">
-                  {voucherCode ? "Validated after checkout" : formatCurrency(estimatedDiscount)}
+                  {voucherCode
+                    ? "Validated after checkout"
+                    : formatCurrency(estimatedDiscount)}
                 </span>
               </div>
 
@@ -676,8 +720,8 @@ export default function OrderStep1Page() {
                     Payment countdown starts immediately after checkout success.
                   </p>
                   <p className="mt-1">
-                    You will be redirected to the payment detail page to upload your
-                    proof and track the transaction status.
+                    You will be redirected to the payment detail page to upload
+                    your proof and track the transaction status.
                   </p>
                 </div>
               </div>
@@ -686,14 +730,17 @@ export default function OrderStep1Page() {
 
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
             <div className="flex gap-3">
-              <span className="material-symbols-outlined text-slate-400">info</span>
+              <span className="material-symbols-outlined text-slate-400">
+                info
+              </span>
               <div>
                 <p className="text-xs font-bold text-slate-900 dark:text-white">
                   Need a quick review?
                 </p>
                 <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                  Order creation and transaction creation happen in one step, so make
-                  sure your buyer information and ticket selection are correct.
+                  Order creation and transaction creation happen in one step, so
+                  make sure your buyer information and ticket selection are
+                  correct.
                 </p>
               </div>
             </div>

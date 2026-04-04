@@ -25,6 +25,7 @@ export async function getTicketInfo(ticketTypeId: number, eventId: number) {
       event: {
         select: {
           id: true,
+          organizeBy: true,
           deletedAt: true,
         },
       },

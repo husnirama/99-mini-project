@@ -1,4 +1,4 @@
-import { createDraftEvent } from "../services/event.service.js";
+import { createDraftEvent, getEventList, getUniqueEvent, } from "../services/event.service.js";
 export async function handleCreateEvent(req, res, next) {
     try {
         const organizerId = req.user.userId;
@@ -10,6 +10,36 @@ export async function handleCreateEvent(req, res, next) {
         return res.status(201).json({
             message: "Event created successfully",
             data: result,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+}
+export async function getEvents(req, res, next) {
+    try {
+        const events = await getEventList();
+        return res.status(200).json({
+            message: "Event fetch success",
+            data: events,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+}
+export async function getEvent(req, res, next) {
+    try {
+        const EventId = Number(req.params.id);
+        if (Number.isNaN(EventId)) {
+            return res.status(400).json({
+                message: "Invalid event id",
+            });
+        }
+        const event = await getUniqueEvent(EventId);
+        return res.status(200).json({
+            message: "Unique Event Fetch Success",
+            data: event,
         });
     }
     catch (error) {

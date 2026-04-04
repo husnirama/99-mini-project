@@ -74,7 +74,9 @@ export const ModelName = {
     EventImage: 'EventImage',
     Venue: 'Venue',
     TicketType: 'TicketType',
-    Promotion: 'Promotion'
+    Promotion: 'Promotion',
+    Order: 'Order',
+    Transaction: 'Transaction'
 };
 /**
  * Enums
@@ -147,6 +149,8 @@ export const TicketTypeScalarFieldEnum = {
     name: 'name',
     price: 'price',
     quota: 'quota',
+    sold: 'sold',
+    reserved: 'reserved',
     description: 'description',
     salesStartAt: 'salesStartAt',
     salesEndAt: 'salesEndAt',
@@ -165,11 +169,48 @@ export const PromotionScalarFieldEnum = {
     maxDiscount: 'maxDiscount',
     minPurchase: 'minPurchase',
     quota: 'quota',
+    usedCount: 'usedCount',
     startDate: 'startDate',
     endDate: 'endDate',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     deletedAt: 'deletedAt'
+};
+export const OrderScalarFieldEnum = {
+    id: 'id',
+    customerId: 'customerId',
+    eventId: 'eventId',
+    ticketTypeId: 'ticketTypeId',
+    quantity: 'quantity',
+    unitPrice: 'unitPrice',
+    subTotalAmount: 'subTotalAmount',
+    discountAmount: 'discountAmount',
+    totalAmount: 'totalAmount',
+    promotionId: 'promotionId',
+    voucherCode: 'voucherCode',
+    buyerName: 'buyerName',
+    buyerEmail: 'buyerEmail',
+    buyerPhone: 'buyerPhone',
+    guestTokenHash: 'guestTokenHash',
+    status: 'status',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    expiresAt: 'expiresAt'
+};
+export const TransactionScalarFieldEnum = {
+    id: 'id',
+    orderId: 'orderId',
+    paymentMethod: 'paymentMethod',
+    paymentProof: 'paymentProof',
+    status: 'status',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    paidAt: 'paidAt',
+    verifiedBy: 'verifiedBy',
+    verifiedAt: 'verifiedAt',
+    canceledAt: 'canceledAt',
+    canceledBy: 'canceledBy',
+    rejectedReason: 'rejectedReason'
 };
 export const SortOrder = {
     asc: 'asc',

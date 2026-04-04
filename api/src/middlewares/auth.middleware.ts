@@ -1,8 +1,9 @@
 import type { Request, Response, NextFunction } from "express";
 import "dotenv/config";
 import jwt from "jsonwebtoken";
+import type { CustomJwtPayload } from "../types/express.js";
 
-type jwtPayload = { userId: Number; role: string };
+type JwtTokenPayload = { userId: number; role: string };
 
 export default function requireAuth(
   req: Request,
@@ -20,15 +21,20 @@ export default function requireAuth(
     const secret = process.env.JWT_SECRET;
     if (!secret) throw new Error("JWT_SECRET not Defined");
 
-    const decoded = jwt.verify(token, secret) as jwtPayload;
+    const decoded = jwt.verify(token, secret) as JwtTokenPayload;
 
-    (req as any).user = decoded;
+    req.user = {
+      ...decoded,
+      id: Number(decoded.userId),
+      userId: Number(decoded.userId),
+      role: decoded.role as CustomJwtPayload["role"],
+    };
 
     next();
   } catch (err: any) {
     if (err?.name === "TokenExpiredError") {
       return res.status(401).json({ message: "Token expired" });
     }
-    return res.status(401).json({ message: "Unathorized" });
+    return res.status(401).json({ message: "Unauthorized" });
   }
 }

@@ -32,9 +32,9 @@ export default function FeatureEventCard({ event }: EventCardProps) {
             {day}
           </span>
         </div>
-        <button className="absolute top-4 right-4 w-10 h-10 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-colors">
+        <span className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-colors">
           <span className="material-symbols-outlined font-light">favorite</span>
-        </button>
+        </span>
         <div className="absolute bottom-4 left-4">
           <span className="bg-primary text-white text-[10px] font-bold px-2.5 py-1 rounded shadow-lg uppercase tracking-wider">
             Selling Fast
@@ -61,12 +61,12 @@ export default function FeatureEventCard({ event }: EventCardProps) {
                 ? "Price TBA"
                 : lowestPrice === 0
                   ? "FREE"
-                  : `IDR ${formatPrice(lowestPrice)}`}
+                : `IDR ${formatPrice(lowestPrice)}`}
             </span>
           </div>
-          <button className="bg-primary/10 text-primary font-bold px-5 py-2.5 rounded-lg hover:bg-primary hover:text-white transition-all transform active:scale-95">
+          <span className="rounded-lg bg-primary/10 px-5 py-2.5 font-bold text-primary transition-all group-hover:bg-primary group-hover:text-white">
             Get Tickets
-          </button>
+          </span>
         </div>
       </div>
     </Link>
