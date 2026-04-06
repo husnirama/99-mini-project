@@ -1,16 +1,17 @@
 import type { UserCreateInput } from "../generated/prisma/models.js";
 export declare function createUser(data: UserCreateInput): Promise<{
     id: number;
+    email: string;
+    referralCode: string;
     name: string;
     password: string;
-    email: string;
     address: string | null;
+    profilePicture: string | null;
     role: import("../generated/prisma/enums.js").Role;
-    referralCode: string;
     referredBy: string | null;
     createdAt: Date;
-    updatedAt: Date;
     deletedAt: Date | null;
+    updatedAt: Date;
 }>;
 export declare function loginUser(email: string, pwd: string): Promise<{
     user: {
@@ -18,17 +19,19 @@ export declare function loginUser(email: string, pwd: string): Promise<{
         name: string;
         email: string;
         role: import("../generated/prisma/enums.js").Role;
+        profilePicture: string | null;
     };
     token: string;
     refreshToken: string;
 }>;
 export declare function authorizeMe(userId: number): Promise<{
     id: number;
-    name: string;
     email: string;
-    address: string | null;
-    role: import("../generated/prisma/enums.js").Role;
     referralCode: string;
+    name: string;
+    address: string | null;
+    profilePicture: string | null;
+    role: import("../generated/prisma/enums.js").Role;
     referredBy: string | null;
     createdAt: Date;
     updatedAt: Date;

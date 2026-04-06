@@ -1,7 +1,7 @@
 export declare function getUserInfo(customerId: number): Promise<{
     id: number;
-    name: string;
     email: string;
+    name: string;
 } | null>;
 export declare function getTicketInfo(ticketTypeId: number, eventId: number): Promise<{
     event: {
@@ -15,16 +15,16 @@ export declare function getTicketInfo(ticketTypeId: number, eventId: number): Pr
     salesStartAt: Date;
     salesEndAt: Date;
 } | null>;
-export declare function getPromotionInfo(voucherCode: string): Promise<{
-    discountType: import("../../generated/prisma/enums.js").promotionDiscountType;
+export declare function getPromotionInfo(voucherCode: string, eventId: number): Promise<{
     id: number;
+    discountType: import("../../generated/prisma/enums.js").promotionDiscountType;
     discountValue: import("@prisma/client-runtime-utils").Decimal;
     maxDiscount: import("@prisma/client-runtime-utils").Decimal | null;
     minPurchase: import("@prisma/client-runtime-utils").Decimal | null;
     quota: number;
-    usedCount: number | null;
     startDate: Date | null;
     endDate: Date | null;
+    usedCount: number | null;
 } | null>;
 export declare function resolveBuyerInfo(customerId: number): Promise<{
     buyerName: string;
@@ -42,8 +42,20 @@ export declare function validateTicketAvailability(ticket: {
         deletedAt: Date | null;
     };
 } | null): void;
-export declare function resolvePromotion(voucherCode: string | undefined, subTotal: number): Promise<{
+export declare function getCustomerAvailablePoints(customerId: number): Promise<number>;
+export declare function normalizeRedeemedPoints(redeemedPoints?: number): number;
+export declare function calculatePromotionDiscount(promotion: {
+    discountType: "PERCENTAGE" | "FIXED";
+    discountValue: number | string | {
+        toString(): string;
+    };
+    maxDiscount?: number | string | {
+        toString(): string;
+    } | null;
+}, subTotal: number): number;
+export declare function calculatePointsDiscount(redeemedPoints: number, availablePoints: number, remainingAmount: number): number;
+export declare function resolvePromotion(voucherCode: string | undefined, subTotal: number, eventId: number): Promise<{
     promotionId: number | null;
-    discountAmount: number;
+    voucherDiscountAmount: number;
 }>;
 //# sourceMappingURL=order.helper.d.ts.map

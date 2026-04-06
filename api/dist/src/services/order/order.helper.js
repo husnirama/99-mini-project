@@ -1,3 +1,4 @@
+import { srLatn } from "date-fns/locale";
 import { prisma } from "../../lib/prisma.js";
 import { AppError } from "../../utils/app-error.js";
 export async function getUserInfo(customerId) {
@@ -29,10 +30,11 @@ export async function getTicketInfo(ticketTypeId, eventId) {
         },
     });
 }
-export async function getPromotionInfo(voucherCode) {
+export async function getPromotionInfo(voucherCode, eventId) {
     return prisma.promotion.findFirst({
         where: {
             code: voucherCode,
+            eventId,
             deletedAt: null,
         },
         select: {
@@ -67,7 +69,9 @@ export function calculateOrderAmounts(quantity, unitPrice, discountAmount) {
     };
 }
 export function validateTicketAvailability(ticket) {
-    const now = new Date();
+    const now = new Date(new Date().toLocaleTimeString("en-US", {
+        timeZone: "Asia/Jakarta",
+    }));
     if (!ticket || ticket.event.deletedAt) {
         throw new AppError("Ticket not found", 404);
     }
@@ -75,20 +79,55 @@ export function validateTicketAvailability(ticket) {
         throw new AppError("Ticket sales has ended", 400);
     }
     if (ticket.salesStartAt && now < ticket.salesStartAt) {
+        console.log("Sales Start At:", ticket.salesStartAt, now);
         throw new AppError("Ticket sales has not started yet", 400);
     }
     if (ticket.status !== "ACTIVE") {
         throw new AppError("Ticket is not active", 400);
     }
 }
-export async function resolvePromotion(voucherCode, subTotal) {
+export async function getCustomerAvailablePoints(customerId) {
+    const pointsBalance = await prisma.points.aggregate({
+        where: {
+            userId: customerId,
+            deletedAt: null,
+        },
+        _sum: {
+            points: true,
+        },
+    });
+    return Math.max(0, pointsBalance._sum.points ?? 0);
+}
+export function normalizeRedeemedPoints(redeemedPoints) {
+    if (!Number.isFinite(redeemedPoints)) {
+        return 0;
+    }
+    return Math.max(0, Math.floor(redeemedPoints ?? 0));
+}
+export function calculatePromotionDiscount(promotion, subTotal) {
+    let discountAmount = 0;
+    if (promotion.discountType === "PERCENTAGE") {
+        discountAmount = Math.floor((subTotal * Number(promotion.discountValue)) / 100);
+        if (promotion.maxDiscount !== null && promotion.maxDiscount !== undefined) {
+            discountAmount = Math.min(discountAmount, Number(promotion.maxDiscount));
+        }
+    }
+    if (promotion.discountType === "FIXED") {
+        discountAmount = Number(promotion.discountValue);
+    }
+    return Math.min(discountAmount, subTotal);
+}
+export function calculatePointsDiscount(redeemedPoints, availablePoints, remainingAmount) {
+    return Math.min(normalizeRedeemedPoints(redeemedPoints), Math.max(0, availablePoints), Math.max(0, remainingAmount));
+}
+export async function resolvePromotion(voucherCode, subTotal, eventId) {
     if (!voucherCode) {
         return {
             promotionId: null,
-            discountAmount: 0,
+            voucherDiscountAmount: 0,
         };
     }
-    const promotionInfo = await getPromotionInfo(voucherCode);
+    const promotionInfo = await getPromotionInfo(voucherCode, eventId);
     if (!promotionInfo) {
         throw new AppError("Voucher Code is invalid", 400);
     }
@@ -108,17 +147,9 @@ export async function resolvePromotion(voucherCode, subTotal) {
     if (quota !== null && usedCount >= quota) {
         throw new AppError("Voucher quota has been execeeded", 400);
     }
-    let discountAmount = 0;
-    if (promotionInfo.discountType === "PERCENTAGE") {
-        discountAmount = Math.floor((subTotal * Number(promotionInfo.discountValue)) / 100);
-    }
-    if (promotionInfo.discountType === "FIXED") {
-        discountAmount = Number(promotionInfo.discountValue);
-    }
-    discountAmount = Math.min(discountAmount, subTotal);
     return {
         promotionId: promotionInfo.id,
-        discountAmount,
+        voucherDiscountAmount: calculatePromotionDiscount(promotionInfo, subTotal),
     };
 }
 //# sourceMappingURL=order.helper.js.map

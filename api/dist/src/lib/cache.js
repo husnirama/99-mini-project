@@ -56,7 +56,11 @@ export function createGetCacheMiddleware(options) {
         try {
             const cachedValue = await redis.get(cacheKey);
             if (cachedValue) {
-                res.status(200).json(JSON.parse(cachedValue));
+                const parsedValue = JSON.parse(cachedValue);
+                res.status(200).json({
+                    ...parsedValue,
+                    source: "cache",
+                });
                 return;
             }
         }
@@ -119,5 +123,10 @@ export const cacheTags = {
     transactionsUser: (userId) => `transactions:user:${userId}`,
     transactionsOrganizer: (userId) => `transactions:organizer:${userId}`,
     transaction: (transactionId) => `transaction:${transactionId}`,
+    customerScope: (userId) => `customer:user:${userId}`,
+    customerProfile: (userId) => `customer:profile:user:${userId}`,
+    customerPoints: (userId) => `customer:points:user:${userId}`,
+    customerTickets: (userId) => `customer:tickets:user:${userId}`,
+    customerReviews: (userId) => `customer:reviews:user:${userId}`,
 };
 //# sourceMappingURL=cache.js.map

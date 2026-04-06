@@ -48,4 +48,8 @@ export const cancelActor = {
     USER: 'USER',
     ADMIN: 'ADMIN'
 };
+export const pointsSource = {
+    REFERRAL: 'REFERRAL',
+    PURCHASE: 'PURCHASE'
+};
 //# sourceMappingURL=enums.js.map

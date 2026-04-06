@@ -19,7 +19,7 @@ const app: Application = express();
 const PORT: number = Number(process.env.PORT);
 
 app.use(express.json());
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors({ origin: process.env.CORS_ORIGIN || "http://localhost:8080" }));
 
 app.get("/api/status", (req: Request, res: Response) => {
   res

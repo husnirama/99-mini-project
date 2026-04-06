@@ -5,6 +5,11 @@ export declare const createEventSchema: z.ZodObject<{
     eventDescription: z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<string | undefined, string | undefined>>;
     eventDateStart: z.ZodCoercedDate<unknown>;
     eventDateEnd: z.ZodCoercedDate<unknown>;
+    status: z.ZodOptional<z.ZodEnum<{
+        DRAFT: "DRAFT";
+        PUBLISHED: "PUBLISHED";
+        CANCELLED: "CANCELLED";
+    }>>;
     termsAccepted: z.ZodPipe<z.ZodTransform<unknown, unknown>, z.ZodBoolean>;
     venue: z.ZodPipe<z.ZodTransform<any, unknown>, z.ZodObject<{
         name: z.ZodString;
@@ -16,6 +21,7 @@ export declare const createEventSchema: z.ZodObject<{
         longitude: z.ZodOptional<z.ZodString>;
     }, z.core.$strip>>;
     ticketTypes: z.ZodPipe<z.ZodTransform<any, unknown>, z.ZodArray<z.ZodObject<{
+        id: z.ZodOptional<z.ZodCoercedNumber<unknown>>;
         name: z.ZodString;
         availability: z.ZodEnum<{
             Paid: "Paid";
@@ -31,6 +37,7 @@ export declare const createEventSchema: z.ZodObject<{
         phoneNumber: z.ZodString;
     }, z.core.$strip>>;
     promotions: z.ZodDefault<z.ZodPipe<z.ZodTransform<any, unknown>, z.ZodOptional<z.ZodArray<z.ZodObject<{
+        id: z.ZodOptional<z.ZodCoercedNumber<unknown>>;
         name: z.ZodString;
         code: z.ZodString;
         discountType: z.ZodEnum<{

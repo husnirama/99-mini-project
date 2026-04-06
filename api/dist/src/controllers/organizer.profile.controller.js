@@ -1,4 +1,4 @@
-import { getOrganizerProfile, updateOrganizerPassword, updateOrganizerProfile, } from "../services/organizerProfile/organizer.profile.service.js";
+import { getOrganizerProfile, updateOrganizerPassword, updateOrganizerProfile, updateOrganizerProfilePicture, } from "../services/organizerProfile/organizer.profile.service.js";
 import { AppError } from "../utils/app-error.js";
 function getAuthorizedOrganizerId(req) {
     const organizerId = req.user?.userId ?? req.user?.id;
@@ -40,6 +40,19 @@ export async function handleUpdateOrganizerPassword(req, res, next) {
         return res.status(200).json({
             message: "Organizer password updated successfully",
             data: null,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+}
+export async function handleUpdateOrganizerProfilePicture(req, res, next) {
+    try {
+        const organizerId = getAuthorizedOrganizerId(req);
+        const profile = await updateOrganizerProfilePicture(organizerId, req.file);
+        return res.status(200).json({
+            message: "Organizer profile image updated successfully",
+            data: profile,
         });
     }
     catch (error) {

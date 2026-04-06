@@ -1,4 +1,16 @@
-import type { CreateOrderPayload } from "../../types/order-type.js";
+import type { CreateOrderPayload, PreviewOrderPayload } from "../../types/order-type.js";
+export declare function previewOrderPricing(payload: PreviewOrderPayload, customerId: number): Promise<{
+    unitPrice: number;
+    quantity: number;
+    subTotalAmount: number;
+    voucherDiscountAmount: number;
+    pointsDiscountAmount: number;
+    totalDiscountAmount: number;
+    totalAmount: number;
+    availablePoints: number;
+    appliedRedeemedPoints: number;
+    voucherCode: string | null;
+}>;
 export default function orderCreation(payload: CreateOrderPayload, customerId: number): Promise<{
     order: {
         id: number;
@@ -27,11 +39,11 @@ export default function orderCreation(payload: CreateOrderPayload, customerId: n
         updatedAt: Date;
         status: import("../../generated/prisma/enums.js").transactionStatus;
         orderId: number;
+        paidAt: Date | null;
         paymentMethod: import("../../generated/prisma/enums.js").paymentMethod;
         paymentProof: string | null;
-        paidAt: Date | null;
-        verifiedBy: number | null;
         verifiedAt: Date | null;
+        verifiedBy: number | null;
         canceledAt: Date | null;
         canceledBy: import("../../generated/prisma/enums.js").cancelActor | null;
         rejectedReason: string | null;

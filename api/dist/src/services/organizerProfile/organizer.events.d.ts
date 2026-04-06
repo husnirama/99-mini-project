@@ -17,8 +17,8 @@ export declare function getEventsByOrganizer(userId: number): Promise<{
     id: number;
     createdAt: Date;
     title: string;
-    category: string | null;
     status: import("../../generated/prisma/enums.js").eventStatus;
+    category: string | null;
     ticket: {
         quota: number;
         sold: number;

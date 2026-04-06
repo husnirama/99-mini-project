@@ -47,7 +47,10 @@ export const ModelName = {
     TicketType: 'TicketType',
     Promotion: 'Promotion',
     Order: 'Order',
-    Transaction: 'Transaction'
+    Transaction: 'Transaction',
+    Points: 'Points',
+    UserPromotion: 'UserPromotion',
+    Reviews: 'Reviews'
 };
 /*
  * Enums
@@ -64,12 +67,13 @@ export const UserScalarFieldEnum = {
     password: 'password',
     email: 'email',
     address: 'address',
+    profilePicture: 'profilePicture',
     role: 'role',
     referralCode: 'referralCode',
     referredBy: 'referredBy',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
-    deletedAt: 'deletedAt'
+    deletedAt: 'deletedAt',
+    updatedAt: 'updatedAt'
 };
 export const SessionScalarFieldEnum = {
     id: 'id',
@@ -83,17 +87,17 @@ export const EventScalarFieldEnum = {
     id: 'id',
     organizeBy: 'organizeBy',
     title: 'title',
-    category: 'category',
-    image: 'image',
     eventDateStart: 'eventDateStart',
     eventDateEnd: 'eventDateEnd',
     status: 'status',
     eventDescription: 'eventDescription',
     eventTnC: 'eventTnC',
-    termsAccepted: 'termsAccepted',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    deletedAt: 'deletedAt'
+    deletedAt: 'deletedAt',
+    image: 'image',
+    category: 'category',
+    termsAccepted: 'termsAccepted'
 };
 export const EventImageScalarFieldEnum = {
     id: 'id',
@@ -120,15 +124,15 @@ export const TicketTypeScalarFieldEnum = {
     name: 'name',
     price: 'price',
     quota: 'quota',
-    sold: 'sold',
-    reserved: 'reserved',
     description: 'description',
     salesStartAt: 'salesStartAt',
     salesEndAt: 'salesEndAt',
     status: 'status',
     contactPerson: 'contactPerson',
     emailContactPerson: 'emailContactPerson',
-    phoneContactPerson: 'phoneContactPerson'
+    phoneContactPerson: 'phoneContactPerson',
+    reserved: 'reserved',
+    sold: 'sold'
 };
 export const PromotionScalarFieldEnum = {
     id: 'id',
@@ -140,12 +144,12 @@ export const PromotionScalarFieldEnum = {
     maxDiscount: 'maxDiscount',
     minPurchase: 'minPurchase',
     quota: 'quota',
-    usedCount: 'usedCount',
     startDate: 'startDate',
     endDate: 'endDate',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    deletedAt: 'deletedAt'
+    deletedAt: 'deletedAt',
+    usedCount: 'usedCount'
 };
 export const OrderScalarFieldEnum = {
     id: 'id',
@@ -162,26 +166,56 @@ export const OrderScalarFieldEnum = {
     buyerName: 'buyerName',
     buyerEmail: 'buyerEmail',
     buyerPhone: 'buyerPhone',
-    guestTokenHash: 'guestTokenHash',
     status: 'status',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    expiresAt: 'expiresAt'
+    expiresAt: 'expiresAt',
+    guestTokenHash: 'guestTokenHash'
 };
 export const TransactionScalarFieldEnum = {
     id: 'id',
-    orderId: 'orderId',
-    paymentMethod: 'paymentMethod',
-    paymentProof: 'paymentProof',
     status: 'status',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
+    orderId: 'orderId',
     paidAt: 'paidAt',
-    verifiedBy: 'verifiedBy',
+    paymentMethod: 'paymentMethod',
+    paymentProof: 'paymentProof',
     verifiedAt: 'verifiedAt',
+    verifiedBy: 'verifiedBy',
     canceledAt: 'canceledAt',
     canceledBy: 'canceledBy',
     rejectedReason: 'rejectedReason'
+};
+export const PointsScalarFieldEnum = {
+    id: 'id',
+    userId: 'userId',
+    points: 'points',
+    discount: 'discount',
+    source: 'source',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    expiresAt: 'expiresAt',
+    deletedAt: 'deletedAt'
+};
+export const UserPromotionScalarFieldEnum = {
+    id: 'id',
+    userId: 'userId',
+    promotionId: 'promotionId',
+    createdAt: 'createdAt',
+    expiresAt: 'expiresAt',
+    usedAt: 'usedAt',
+    status: 'status'
+};
+export const ReviewsScalarFieldEnum = {
+    id: 'id',
+    userId: 'userId',
+    eventId: 'eventId',
+    rating: 'rating',
+    comment: 'comment',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    deletedAt: 'deletedAt'
 };
 export const SortOrder = {
     asc: 'asc',

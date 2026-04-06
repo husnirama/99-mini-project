@@ -1,4 +1,11 @@
 import { prisma } from "../src/lib/prisma.js";
+import bcrypt from "bcrypt";
+import { generateUniqueReferralCode } from "../src/utils/referral.js";
+const SEED_ORGANIZER = {
+    name: "Joko",
+    email: "joko@mail.com",
+    password: "Joko1234!",
+};
 const dummyEvents = [
     {
         eventName: "Jakarta AI Future Summit 2026",
@@ -389,9 +396,6 @@ const REGION_BY_CITY = {
     Surakarta: "Jawa Tengah",
     Medan: "Sumatera Utara",
 };
-function randomItem(items) {
-    return items[Math.floor(Math.random() * items.length)];
-}
 function mapPromotionDiscountType(discountType) {
     return discountType === "Percentage" ? "PERCENTAGE" : "FIXED";
 }
@@ -415,20 +419,67 @@ function getSalesEndAt(eventStartTime) {
 async function seed() {
     try {
         console.info("🌱 Seeding started...");
-        const organizers = await prisma.user.findMany({
-            where: { role: "EVENT_ORGANIZER" },
-            select: { id: true },
+        const normalizedEmail = SEED_ORGANIZER.email.trim().toLowerCase();
+        const hashedPassword = await bcrypt.hash(SEED_ORGANIZER.password, 10);
+        const existingOrganizer = await prisma.user.findUnique({
+            where: {
+                email: normalizedEmail,
+            },
+            select: {
+                id: true,
+            },
         });
-        if (organizers.length === 0) {
-            throw new Error("No EVENT_ORGANIZER users found.");
-        }
-        const organizerIds = organizers.map((user) => user.id);
+        const organizer = existingOrganizer
+            ? await prisma.user.update({
+                where: {
+                    id: existingOrganizer.id,
+                },
+                data: {
+                    name: SEED_ORGANIZER.name,
+                    email: normalizedEmail,
+                    password: hashedPassword,
+                    role: "EVENT_ORGANIZER",
+                    deletedAt: null,
+                },
+                select: {
+                    id: true,
+                    email: true,
+                },
+            })
+            : await prisma.user.create({
+                data: {
+                    name: SEED_ORGANIZER.name,
+                    email: normalizedEmail,
+                    password: hashedPassword,
+                    role: "EVENT_ORGANIZER",
+                    referralCode: await generateUniqueReferralCode(SEED_ORGANIZER.name),
+                },
+                select: {
+                    id: true,
+                    email: true,
+                },
+            });
+        console.info(`Using organizer account: ${organizer.email}`);
         for (const dummyEvent of dummyEvents) {
-            const organizerId = randomItem(organizerIds);
             await prisma.$transaction(async (tx) => {
+                const existingEvent = await tx.event.findUnique({
+                    where: {
+                        organizeBy_title: {
+                            organizeBy: organizer.id,
+                            title: dummyEvent.eventName,
+                        },
+                    },
+                    select: {
+                        id: true,
+                    },
+                });
+                if (existingEvent) {
+                    console.log(`Skipped existing event: ${dummyEvent.eventName}`);
+                    return;
+                }
                 const createdEvent = await tx.event.create({
                     data: {
-                        organizeBy: organizerId,
+                        organizeBy: organizer.id,
                         title: dummyEvent.eventName,
                         category: dummyEvent.category,
                         image: dummyEvent.eventCoverImage,

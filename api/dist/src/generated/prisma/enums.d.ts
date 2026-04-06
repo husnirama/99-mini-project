@@ -47,4 +47,9 @@ export declare const cancelActor: {
     readonly ADMIN: "ADMIN";
 };
 export type cancelActor = (typeof cancelActor)[keyof typeof cancelActor];
+export declare const pointsSource: {
+    readonly REFERRAL: "REFERRAL";
+    readonly PURCHASE: "PURCHASE";
+};
+export type pointsSource = (typeof pointsSource)[keyof typeof pointsSource];
 //# sourceMappingURL=enums.d.ts.map

@@ -1,2 +1,2 @@
-import { Prisma, paymentMethod, transactionStatus } from "../generated/prisma/client.js";
+import { paymentMethod, transactionStatus, } from "../generated/prisma/client.js";
 //# sourceMappingURL=transaction-type.js.map

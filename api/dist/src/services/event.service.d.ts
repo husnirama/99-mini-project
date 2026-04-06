@@ -3,8 +3,8 @@ export declare function createDraftEvent(organizerId: number, payload: CreateEve
     eventImage: {
         id: number;
         createdAt: Date;
-        updatedAt: Date;
         deletedAt: Date | null;
+        updatedAt: Date;
         imageURL: string;
         eventId: number;
     }[];
@@ -20,21 +20,21 @@ export declare function createDraftEvent(organizerId: number, payload: CreateEve
         longitude: import("@prisma/client-runtime-utils").Decimal | null;
     }[];
     promotion: {
-        discountType: import("../generated/prisma/enums.js").promotionDiscountType;
         id: number;
         name: string;
         createdAt: Date;
-        updatedAt: Date;
         deletedAt: Date | null;
+        updatedAt: Date;
+        discountType: import("../generated/prisma/enums.js").promotionDiscountType;
         eventId: number;
         code: string;
         discountValue: import("@prisma/client-runtime-utils").Decimal;
         maxDiscount: import("@prisma/client-runtime-utils").Decimal | null;
         minPurchase: import("@prisma/client-runtime-utils").Decimal | null;
         quota: number;
-        usedCount: number | null;
         startDate: Date | null;
         endDate: Date | null;
+        usedCount: number | null;
     }[];
     ticket: {
         id: number;
@@ -43,37 +43,175 @@ export declare function createDraftEvent(organizerId: number, payload: CreateEve
         eventId: number;
         quota: number;
         price: import("@prisma/client-runtime-utils").Decimal;
-        sold: number;
-        reserved: number;
         description: string | null;
         salesStartAt: Date;
         salesEndAt: Date;
         contactPerson: string;
         emailContactPerson: string;
         phoneContactPerson: string;
+        reserved: number;
+        sold: number;
     }[];
 } & {
     id: number;
     createdAt: Date;
-    updatedAt: Date;
     deletedAt: Date | null;
+    updatedAt: Date;
+    organizeBy: number;
     title: string;
-    category: string | null;
-    image: string | null;
     eventDateStart: Date;
     eventDateEnd: Date;
     status: import("../generated/prisma/enums.js").eventStatus;
     eventDescription: string | null;
     eventTnC: string | null;
+    image: string | null;
+    category: string | null;
     termsAccepted: boolean;
+}) | null>;
+export declare function getOrganizerOwnedEvent(organizerId: number, eventId: number): Promise<{
+    eventImage: {
+        id: number;
+        createdAt: Date;
+        deletedAt: Date | null;
+        updatedAt: Date;
+        imageURL: string;
+        eventId: number;
+    }[];
+    venue: {
+        id: number;
+        name: string;
+        eventId: number;
+        addressLine: string;
+        city: string;
+        region: string | null;
+        country: string;
+        latitude: import("@prisma/client-runtime-utils").Decimal | null;
+        longitude: import("@prisma/client-runtime-utils").Decimal | null;
+    }[];
+    promotion: {
+        id: number;
+        name: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        updatedAt: Date;
+        discountType: import("../generated/prisma/enums.js").promotionDiscountType;
+        eventId: number;
+        code: string;
+        discountValue: import("@prisma/client-runtime-utils").Decimal;
+        maxDiscount: import("@prisma/client-runtime-utils").Decimal | null;
+        minPurchase: import("@prisma/client-runtime-utils").Decimal | null;
+        quota: number;
+        startDate: Date | null;
+        endDate: Date | null;
+        usedCount: number | null;
+    }[];
+    ticket: {
+        id: number;
+        name: string;
+        status: import("../generated/prisma/enums.js").ticketStatus;
+        eventId: number;
+        quota: number;
+        price: import("@prisma/client-runtime-utils").Decimal;
+        description: string | null;
+        salesStartAt: Date;
+        salesEndAt: Date;
+        contactPerson: string;
+        emailContactPerson: string;
+        phoneContactPerson: string;
+        reserved: number;
+        sold: number;
+    }[];
+} & {
+    id: number;
+    createdAt: Date;
+    deletedAt: Date | null;
+    updatedAt: Date;
     organizeBy: number;
+    title: string;
+    eventDateStart: Date;
+    eventDateEnd: Date;
+    status: import("../generated/prisma/enums.js").eventStatus;
+    eventDescription: string | null;
+    eventTnC: string | null;
+    image: string | null;
+    category: string | null;
+    termsAccepted: boolean;
+}>;
+export declare function updateEventByOrganizer(organizerId: number, eventId: number, payload: CreateEventInput, files?: Express.Multer.File[]): Promise<({
+    eventImage: {
+        id: number;
+        createdAt: Date;
+        deletedAt: Date | null;
+        updatedAt: Date;
+        imageURL: string;
+        eventId: number;
+    }[];
+    venue: {
+        id: number;
+        name: string;
+        eventId: number;
+        addressLine: string;
+        city: string;
+        region: string | null;
+        country: string;
+        latitude: import("@prisma/client-runtime-utils").Decimal | null;
+        longitude: import("@prisma/client-runtime-utils").Decimal | null;
+    }[];
+    promotion: {
+        id: number;
+        name: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        updatedAt: Date;
+        discountType: import("../generated/prisma/enums.js").promotionDiscountType;
+        eventId: number;
+        code: string;
+        discountValue: import("@prisma/client-runtime-utils").Decimal;
+        maxDiscount: import("@prisma/client-runtime-utils").Decimal | null;
+        minPurchase: import("@prisma/client-runtime-utils").Decimal | null;
+        quota: number;
+        startDate: Date | null;
+        endDate: Date | null;
+        usedCount: number | null;
+    }[];
+    ticket: {
+        id: number;
+        name: string;
+        status: import("../generated/prisma/enums.js").ticketStatus;
+        eventId: number;
+        quota: number;
+        price: import("@prisma/client-runtime-utils").Decimal;
+        description: string | null;
+        salesStartAt: Date;
+        salesEndAt: Date;
+        contactPerson: string;
+        emailContactPerson: string;
+        phoneContactPerson: string;
+        reserved: number;
+        sold: number;
+    }[];
+} & {
+    id: number;
+    createdAt: Date;
+    deletedAt: Date | null;
+    updatedAt: Date;
+    organizeBy: number;
+    title: string;
+    eventDateStart: Date;
+    eventDateEnd: Date;
+    status: import("../generated/prisma/enums.js").eventStatus;
+    eventDescription: string | null;
+    eventTnC: string | null;
+    image: string | null;
+    category: string | null;
+    termsAccepted: boolean;
 }) | null>;
 export declare function getEventList(): Promise<({
     eventImage: {
         id: number;
         createdAt: Date;
-        updatedAt: Date;
         deletedAt: Date | null;
+        updatedAt: Date;
         imageURL: string;
         eventId: number;
     }[];
@@ -95,37 +233,52 @@ export declare function getEventList(): Promise<({
         eventId: number;
         quota: number;
         price: import("@prisma/client-runtime-utils").Decimal;
-        sold: number;
-        reserved: number;
         description: string | null;
         salesStartAt: Date;
         salesEndAt: Date;
         contactPerson: string;
         emailContactPerson: string;
         phoneContactPerson: string;
+        reserved: number;
+        sold: number;
     }[];
 } & {
     id: number;
     createdAt: Date;
-    updatedAt: Date;
     deletedAt: Date | null;
+    updatedAt: Date;
+    organizeBy: number;
     title: string;
-    category: string | null;
-    image: string | null;
     eventDateStart: Date;
     eventDateEnd: Date;
     status: import("../generated/prisma/enums.js").eventStatus;
     eventDescription: string | null;
     eventTnC: string | null;
+    image: string | null;
+    category: string | null;
     termsAccepted: boolean;
-    organizeBy: number;
 })[]>;
 export declare function getUniqueEvent(id: number): Promise<{
-    eventImage: {
+    reviewStats: {
+        totalReviews: number;
+        averageRating: number | null;
+    };
+    reviews: {
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        user: {
+            name: string;
+            profilePicture: string | null;
+        };
+        rating: number;
+        comment: string | null;
+    }[];
+    eventImage: {
+        id: number;
+        createdAt: Date;
         deletedAt: Date | null;
+        updatedAt: Date;
         imageURL: string;
         eventId: number;
     }[];
@@ -147,29 +300,28 @@ export declare function getUniqueEvent(id: number): Promise<{
         eventId: number;
         quota: number;
         price: import("@prisma/client-runtime-utils").Decimal;
-        sold: number;
-        reserved: number;
         description: string | null;
         salesStartAt: Date;
         salesEndAt: Date;
         contactPerson: string;
         emailContactPerson: string;
         phoneContactPerson: string;
+        reserved: number;
+        sold: number;
     }[];
-} & {
     id: number;
     createdAt: Date;
-    updatedAt: Date;
     deletedAt: Date | null;
+    updatedAt: Date;
+    organizeBy: number;
     title: string;
-    category: string | null;
-    image: string | null;
     eventDateStart: Date;
     eventDateEnd: Date;
     status: import("../generated/prisma/enums.js").eventStatus;
     eventDescription: string | null;
     eventTnC: string | null;
+    image: string | null;
+    category: string | null;
     termsAccepted: boolean;
-    organizeBy: number;
 }>;
 //# sourceMappingURL=event.service.d.ts.map

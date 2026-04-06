@@ -210,6 +210,39 @@ export interface PrismaClient<in LogOpts extends Prisma.LogLevel = never, in out
     get transaction(): Prisma.TransactionDelegate<ExtArgs, {
         omit: OmitOpts;
     }>;
+    /**
+     * `prisma.points`: Exposes CRUD operations for the **Points** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more Points
+      * const points = await prisma.points.findMany()
+      * ```
+      */
+    get points(): Prisma.PointsDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.userPromotion`: Exposes CRUD operations for the **UserPromotion** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more UserPromotions
+      * const userPromotions = await prisma.userPromotion.findMany()
+      * ```
+      */
+    get userPromotion(): Prisma.UserPromotionDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.reviews`: Exposes CRUD operations for the **Reviews** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more Reviews
+      * const reviews = await prisma.reviews.findMany()
+      * ```
+      */
+    get reviews(): Prisma.ReviewsDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
 }
 export declare function getPrismaClientClass(): PrismaClientConstructor;
 //# sourceMappingURL=class.d.ts.map

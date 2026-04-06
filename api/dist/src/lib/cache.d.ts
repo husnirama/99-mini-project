@@ -18,6 +18,11 @@ export declare const cacheTags: {
     transactionsUser: (userId: number) => string;
     transactionsOrganizer: (userId: number) => string;
     transaction: (transactionId: number) => string;
+    customerScope: (userId: number) => string;
+    customerProfile: (userId: number) => string;
+    customerPoints: (userId: number) => string;
+    customerTickets: (userId: number) => string;
+    customerReviews: (userId: number) => string;
 };
 export {};
 //# sourceMappingURL=cache.d.ts.map

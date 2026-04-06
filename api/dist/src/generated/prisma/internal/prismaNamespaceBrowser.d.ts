@@ -35,6 +35,9 @@ export declare const ModelName: {
     readonly Promotion: "Promotion";
     readonly Order: "Order";
     readonly Transaction: "Transaction";
+    readonly Points: "Points";
+    readonly UserPromotion: "UserPromotion";
+    readonly Reviews: "Reviews";
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
 export declare const TransactionIsolationLevel: {
@@ -50,12 +53,13 @@ export declare const UserScalarFieldEnum: {
     readonly password: "password";
     readonly email: "email";
     readonly address: "address";
+    readonly profilePicture: "profilePicture";
     readonly role: "role";
     readonly referralCode: "referralCode";
     readonly referredBy: "referredBy";
     readonly createdAt: "createdAt";
-    readonly updatedAt: "updatedAt";
     readonly deletedAt: "deletedAt";
+    readonly updatedAt: "updatedAt";
 };
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum];
 export declare const SessionScalarFieldEnum: {
@@ -71,17 +75,17 @@ export declare const EventScalarFieldEnum: {
     readonly id: "id";
     readonly organizeBy: "organizeBy";
     readonly title: "title";
-    readonly category: "category";
-    readonly image: "image";
     readonly eventDateStart: "eventDateStart";
     readonly eventDateEnd: "eventDateEnd";
     readonly status: "status";
     readonly eventDescription: "eventDescription";
     readonly eventTnC: "eventTnC";
-    readonly termsAccepted: "termsAccepted";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
     readonly deletedAt: "deletedAt";
+    readonly image: "image";
+    readonly category: "category";
+    readonly termsAccepted: "termsAccepted";
 };
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum];
 export declare const EventImageScalarFieldEnum: {
@@ -111,8 +115,6 @@ export declare const TicketTypeScalarFieldEnum: {
     readonly name: "name";
     readonly price: "price";
     readonly quota: "quota";
-    readonly sold: "sold";
-    readonly reserved: "reserved";
     readonly description: "description";
     readonly salesStartAt: "salesStartAt";
     readonly salesEndAt: "salesEndAt";
@@ -120,6 +122,8 @@ export declare const TicketTypeScalarFieldEnum: {
     readonly contactPerson: "contactPerson";
     readonly emailContactPerson: "emailContactPerson";
     readonly phoneContactPerson: "phoneContactPerson";
+    readonly reserved: "reserved";
+    readonly sold: "sold";
 };
 export type TicketTypeScalarFieldEnum = (typeof TicketTypeScalarFieldEnum)[keyof typeof TicketTypeScalarFieldEnum];
 export declare const PromotionScalarFieldEnum: {
@@ -132,12 +136,12 @@ export declare const PromotionScalarFieldEnum: {
     readonly maxDiscount: "maxDiscount";
     readonly minPurchase: "minPurchase";
     readonly quota: "quota";
-    readonly usedCount: "usedCount";
     readonly startDate: "startDate";
     readonly endDate: "endDate";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
     readonly deletedAt: "deletedAt";
+    readonly usedCount: "usedCount";
 };
 export type PromotionScalarFieldEnum = (typeof PromotionScalarFieldEnum)[keyof typeof PromotionScalarFieldEnum];
 export declare const OrderScalarFieldEnum: {
@@ -155,29 +159,62 @@ export declare const OrderScalarFieldEnum: {
     readonly buyerName: "buyerName";
     readonly buyerEmail: "buyerEmail";
     readonly buyerPhone: "buyerPhone";
-    readonly guestTokenHash: "guestTokenHash";
     readonly status: "status";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
     readonly expiresAt: "expiresAt";
+    readonly guestTokenHash: "guestTokenHash";
 };
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum];
 export declare const TransactionScalarFieldEnum: {
     readonly id: "id";
-    readonly orderId: "orderId";
-    readonly paymentMethod: "paymentMethod";
-    readonly paymentProof: "paymentProof";
     readonly status: "status";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
+    readonly orderId: "orderId";
     readonly paidAt: "paidAt";
-    readonly verifiedBy: "verifiedBy";
+    readonly paymentMethod: "paymentMethod";
+    readonly paymentProof: "paymentProof";
     readonly verifiedAt: "verifiedAt";
+    readonly verifiedBy: "verifiedBy";
     readonly canceledAt: "canceledAt";
     readonly canceledBy: "canceledBy";
     readonly rejectedReason: "rejectedReason";
 };
 export type TransactionScalarFieldEnum = (typeof TransactionScalarFieldEnum)[keyof typeof TransactionScalarFieldEnum];
+export declare const PointsScalarFieldEnum: {
+    readonly id: "id";
+    readonly userId: "userId";
+    readonly points: "points";
+    readonly discount: "discount";
+    readonly source: "source";
+    readonly createdAt: "createdAt";
+    readonly updatedAt: "updatedAt";
+    readonly expiresAt: "expiresAt";
+    readonly deletedAt: "deletedAt";
+};
+export type PointsScalarFieldEnum = (typeof PointsScalarFieldEnum)[keyof typeof PointsScalarFieldEnum];
+export declare const UserPromotionScalarFieldEnum: {
+    readonly id: "id";
+    readonly userId: "userId";
+    readonly promotionId: "promotionId";
+    readonly createdAt: "createdAt";
+    readonly expiresAt: "expiresAt";
+    readonly usedAt: "usedAt";
+    readonly status: "status";
+};
+export type UserPromotionScalarFieldEnum = (typeof UserPromotionScalarFieldEnum)[keyof typeof UserPromotionScalarFieldEnum];
+export declare const ReviewsScalarFieldEnum: {
+    readonly id: "id";
+    readonly userId: "userId";
+    readonly eventId: "eventId";
+    readonly rating: "rating";
+    readonly comment: "comment";
+    readonly createdAt: "createdAt";
+    readonly updatedAt: "updatedAt";
+    readonly deletedAt: "deletedAt";
+};
+export type ReviewsScalarFieldEnum = (typeof ReviewsScalarFieldEnum)[keyof typeof ReviewsScalarFieldEnum];
 export declare const SortOrder: {
     readonly asc: "asc";
     readonly desc: "desc";

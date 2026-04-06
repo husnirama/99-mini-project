@@ -240,6 +240,9 @@ export declare const ModelName: {
     readonly Promotion: "Promotion";
     readonly Order: "Order";
     readonly Transaction: "Transaction";
+    readonly Points: "Points";
+    readonly UserPromotion: "UserPromotion";
+    readonly Reviews: "Reviews";
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
 export interface TypeMapCb<GlobalOmitOptions = {}> extends runtime.Types.Utils.Fn<{
@@ -252,7 +255,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         omit: GlobalOmitOptions;
     };
     meta: {
-        modelProps: "user" | "session" | "event" | "eventImage" | "venue" | "ticketType" | "promotion" | "order" | "transaction";
+        modelProps: "user" | "session" | "event" | "eventImage" | "venue" | "ticketType" | "promotion" | "order" | "transaction" | "points" | "userPromotion" | "reviews";
         txIsolationLevel: TransactionIsolationLevel;
     };
     model: {
@@ -922,6 +925,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
                 };
             };
         };
+        Points: {
+            payload: Prisma.$PointsPayload<ExtArgs>;
+            fields: Prisma.PointsFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.PointsFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.PointsFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload>;
+                };
+                findFirst: {
+                    args: Prisma.PointsFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.PointsFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload>;
+                };
+                findMany: {
+                    args: Prisma.PointsFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload>[];
+                };
+                create: {
+                    args: Prisma.PointsCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload>;
+                };
+                createMany: {
+                    args: Prisma.PointsCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                createManyAndReturn: {
+                    args: Prisma.PointsCreateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload>[];
+                };
+                delete: {
+                    args: Prisma.PointsDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload>;
+                };
+                update: {
+                    args: Prisma.PointsUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload>;
+                };
+                deleteMany: {
+                    args: Prisma.PointsDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.PointsUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateManyAndReturn: {
+                    args: Prisma.PointsUpdateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload>[];
+                };
+                upsert: {
+                    args: Prisma.PointsUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PointsPayload>;
+                };
+                aggregate: {
+                    args: Prisma.PointsAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregatePoints>;
+                };
+                groupBy: {
+                    args: Prisma.PointsGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.PointsGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.PointsCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.PointsCountAggregateOutputType> | number;
+                };
+            };
+        };
+        UserPromotion: {
+            payload: Prisma.$UserPromotionPayload<ExtArgs>;
+            fields: Prisma.UserPromotionFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.UserPromotionFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.UserPromotionFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload>;
+                };
+                findFirst: {
+                    args: Prisma.UserPromotionFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.UserPromotionFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload>;
+                };
+                findMany: {
+                    args: Prisma.UserPromotionFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload>[];
+                };
+                create: {
+                    args: Prisma.UserPromotionCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload>;
+                };
+                createMany: {
+                    args: Prisma.UserPromotionCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                createManyAndReturn: {
+                    args: Prisma.UserPromotionCreateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload>[];
+                };
+                delete: {
+                    args: Prisma.UserPromotionDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload>;
+                };
+                update: {
+                    args: Prisma.UserPromotionUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload>;
+                };
+                deleteMany: {
+                    args: Prisma.UserPromotionDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.UserPromotionUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateManyAndReturn: {
+                    args: Prisma.UserPromotionUpdateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload>[];
+                };
+                upsert: {
+                    args: Prisma.UserPromotionUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload>;
+                };
+                aggregate: {
+                    args: Prisma.UserPromotionAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregateUserPromotion>;
+                };
+                groupBy: {
+                    args: Prisma.UserPromotionGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.UserPromotionGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.UserPromotionCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.UserPromotionCountAggregateOutputType> | number;
+                };
+            };
+        };
+        Reviews: {
+            payload: Prisma.$ReviewsPayload<ExtArgs>;
+            fields: Prisma.ReviewsFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.ReviewsFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.ReviewsFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload>;
+                };
+                findFirst: {
+                    args: Prisma.ReviewsFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.ReviewsFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload>;
+                };
+                findMany: {
+                    args: Prisma.ReviewsFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload>[];
+                };
+                create: {
+                    args: Prisma.ReviewsCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload>;
+                };
+                createMany: {
+                    args: Prisma.ReviewsCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                createManyAndReturn: {
+                    args: Prisma.ReviewsCreateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload>[];
+                };
+                delete: {
+                    args: Prisma.ReviewsDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload>;
+                };
+                update: {
+                    args: Prisma.ReviewsUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload>;
+                };
+                deleteMany: {
+                    args: Prisma.ReviewsDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.ReviewsUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateManyAndReturn: {
+                    args: Prisma.ReviewsUpdateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload>[];
+                };
+                upsert: {
+                    args: Prisma.ReviewsUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload>;
+                };
+                aggregate: {
+                    args: Prisma.ReviewsAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregateReviews>;
+                };
+                groupBy: {
+                    args: Prisma.ReviewsGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.ReviewsGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.ReviewsCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.ReviewsCountAggregateOutputType> | number;
+                };
+            };
+        };
     };
 } & {
     other: {
@@ -962,12 +1187,13 @@ export declare const UserScalarFieldEnum: {
     readonly password: "password";
     readonly email: "email";
     readonly address: "address";
+    readonly profilePicture: "profilePicture";
     readonly role: "role";
     readonly referralCode: "referralCode";
     readonly referredBy: "referredBy";
     readonly createdAt: "createdAt";
-    readonly updatedAt: "updatedAt";
     readonly deletedAt: "deletedAt";
+    readonly updatedAt: "updatedAt";
 };
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum];
 export declare const SessionScalarFieldEnum: {
@@ -983,17 +1209,17 @@ export declare const EventScalarFieldEnum: {
     readonly id: "id";
     readonly organizeBy: "organizeBy";
     readonly title: "title";
-    readonly category: "category";
-    readonly image: "image";
     readonly eventDateStart: "eventDateStart";
     readonly eventDateEnd: "eventDateEnd";
     readonly status: "status";
     readonly eventDescription: "eventDescription";
     readonly eventTnC: "eventTnC";
-    readonly termsAccepted: "termsAccepted";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
     readonly deletedAt: "deletedAt";
+    readonly image: "image";
+    readonly category: "category";
+    readonly termsAccepted: "termsAccepted";
 };
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum];
 export declare const EventImageScalarFieldEnum: {
@@ -1023,8 +1249,6 @@ export declare const TicketTypeScalarFieldEnum: {
     readonly name: "name";
     readonly price: "price";
     readonly quota: "quota";
-    readonly sold: "sold";
-    readonly reserved: "reserved";
     readonly description: "description";
     readonly salesStartAt: "salesStartAt";
     readonly salesEndAt: "salesEndAt";
@@ -1032,6 +1256,8 @@ export declare const TicketTypeScalarFieldEnum: {
     readonly contactPerson: "contactPerson";
     readonly emailContactPerson: "emailContactPerson";
     readonly phoneContactPerson: "phoneContactPerson";
+    readonly reserved: "reserved";
+    readonly sold: "sold";
 };
 export type TicketTypeScalarFieldEnum = (typeof TicketTypeScalarFieldEnum)[keyof typeof TicketTypeScalarFieldEnum];
 export declare const PromotionScalarFieldEnum: {
@@ -1044,12 +1270,12 @@ export declare const PromotionScalarFieldEnum: {
     readonly maxDiscount: "maxDiscount";
     readonly minPurchase: "minPurchase";
     readonly quota: "quota";
-    readonly usedCount: "usedCount";
     readonly startDate: "startDate";
     readonly endDate: "endDate";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
     readonly deletedAt: "deletedAt";
+    readonly usedCount: "usedCount";
 };
 export type PromotionScalarFieldEnum = (typeof PromotionScalarFieldEnum)[keyof typeof PromotionScalarFieldEnum];
 export declare const OrderScalarFieldEnum: {
@@ -1067,29 +1293,62 @@ export declare const OrderScalarFieldEnum: {
     readonly buyerName: "buyerName";
     readonly buyerEmail: "buyerEmail";
     readonly buyerPhone: "buyerPhone";
-    readonly guestTokenHash: "guestTokenHash";
     readonly status: "status";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
     readonly expiresAt: "expiresAt";
+    readonly guestTokenHash: "guestTokenHash";
 };
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum];
 export declare const TransactionScalarFieldEnum: {
     readonly id: "id";
-    readonly orderId: "orderId";
-    readonly paymentMethod: "paymentMethod";
-    readonly paymentProof: "paymentProof";
     readonly status: "status";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
+    readonly orderId: "orderId";
     readonly paidAt: "paidAt";
-    readonly verifiedBy: "verifiedBy";
+    readonly paymentMethod: "paymentMethod";
+    readonly paymentProof: "paymentProof";
     readonly verifiedAt: "verifiedAt";
+    readonly verifiedBy: "verifiedBy";
     readonly canceledAt: "canceledAt";
     readonly canceledBy: "canceledBy";
     readonly rejectedReason: "rejectedReason";
 };
 export type TransactionScalarFieldEnum = (typeof TransactionScalarFieldEnum)[keyof typeof TransactionScalarFieldEnum];
+export declare const PointsScalarFieldEnum: {
+    readonly id: "id";
+    readonly userId: "userId";
+    readonly points: "points";
+    readonly discount: "discount";
+    readonly source: "source";
+    readonly createdAt: "createdAt";
+    readonly updatedAt: "updatedAt";
+    readonly expiresAt: "expiresAt";
+    readonly deletedAt: "deletedAt";
+};
+export type PointsScalarFieldEnum = (typeof PointsScalarFieldEnum)[keyof typeof PointsScalarFieldEnum];
+export declare const UserPromotionScalarFieldEnum: {
+    readonly id: "id";
+    readonly userId: "userId";
+    readonly promotionId: "promotionId";
+    readonly createdAt: "createdAt";
+    readonly expiresAt: "expiresAt";
+    readonly usedAt: "usedAt";
+    readonly status: "status";
+};
+export type UserPromotionScalarFieldEnum = (typeof UserPromotionScalarFieldEnum)[keyof typeof UserPromotionScalarFieldEnum];
+export declare const ReviewsScalarFieldEnum: {
+    readonly id: "id";
+    readonly userId: "userId";
+    readonly eventId: "eventId";
+    readonly rating: "rating";
+    readonly comment: "comment";
+    readonly createdAt: "createdAt";
+    readonly updatedAt: "updatedAt";
+    readonly deletedAt: "deletedAt";
+};
+export type ReviewsScalarFieldEnum = (typeof ReviewsScalarFieldEnum)[keyof typeof ReviewsScalarFieldEnum];
 export declare const SortOrder: {
     readonly asc: "asc";
     readonly desc: "desc";
@@ -1185,14 +1444,6 @@ export type EnumorderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pris
  */
 export type ListEnumorderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'orderStatus[]'>;
 /**
- * Reference to a field of type 'paymentMethod'
- */
-export type EnumpaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'paymentMethod'>;
-/**
- * Reference to a field of type 'paymentMethod[]'
- */
-export type ListEnumpaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'paymentMethod[]'>;
-/**
  * Reference to a field of type 'transactionStatus'
  */
 export type EnumtransactionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'transactionStatus'>;
@@ -1201,6 +1452,14 @@ export type EnumtransactionStatusFieldRefInput<$PrismaModel> = FieldRefInputType
  */
 export type ListEnumtransactionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'transactionStatus[]'>;
 /**
+ * Reference to a field of type 'paymentMethod'
+ */
+export type EnumpaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'paymentMethod'>;
+/**
+ * Reference to a field of type 'paymentMethod[]'
+ */
+export type ListEnumpaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'paymentMethod[]'>;
+/**
  * Reference to a field of type 'cancelActor'
  */
 export type EnumcancelActorFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'cancelActor'>;
@@ -1208,6 +1467,14 @@ export type EnumcancelActorFieldRefInput<$PrismaModel> = FieldRefInputType<$Pris
  * Reference to a field of type 'cancelActor[]'
  */
 export type ListEnumcancelActorFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'cancelActor[]'>;
+/**
+ * Reference to a field of type 'pointsSource'
+ */
+export type EnumpointsSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'pointsSource'>;
+/**
+ * Reference to a field of type 'pointsSource[]'
+ */
+export type ListEnumpointsSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'pointsSource[]'>;
 /**
  * Reference to a field of type 'Float'
  */
@@ -1319,6 +1586,9 @@ export type GlobalOmitConfig = {
     promotion?: Prisma.PromotionOmit;
     order?: Prisma.OrderOmit;
     transaction?: Prisma.TransactionOmit;
+    points?: Prisma.PointsOmit;
+    userPromotion?: Prisma.UserPromotionOmit;
+    reviews?: Prisma.ReviewsOmit;
 };
 export type LogLevel = 'info' | 'query' | 'warn' | 'error';
 export type LogDefinition = {
