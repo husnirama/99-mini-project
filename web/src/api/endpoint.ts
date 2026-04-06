@@ -10,7 +10,7 @@ export const API_ENDPOINTS = {
     CREATE: "/event/draft",
     SHOW: "/event/event-list",
     FIND: (id: string | number) => `/event/${id}`,
-    MANAGE_FIND: (id: string | number) => `/event/manage/${id}`,
+    MANAGE_FIND: (id: string | number | undefined) => `/event/manage/${id}`,
     UPDATE: (id: string | number) => `/event/${id}`,
   },
   ORDERS: {
