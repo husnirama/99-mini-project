@@ -2,6 +2,8 @@
 
 link ui from google sticth : https://stitch.withgoogle.com/projects/13584918531067192384
 
+# LINK FOR THE APPS : https://app.husniramandalubis.com
+
 ## FEATURE 1
 
 ### 1 Event Discovery, Details, Creation, and Promotion (4 point)
