@@ -2,11 +2,8 @@ import { apiClient } from "@/api/clients";
 import { API_ENDPOINTS } from "@/api/endpoint";
 import TransactionStatusBadge from "@/components/TransactionStatusBadge";
 import { Button } from "@/components/ui/button";
-import { useAuthStore } from "@/store/auth-store";
-import { useTransactionStore } from "@/store/transaction-store";
 import type {
   TransactionLifecycleRecord,
-  TransactionRecord,
   TransactionStatus,
 } from "@/types/orderTransactionTypes";
 import { formatDate, formatTime } from "@/utils/eventList.utils";
@@ -60,15 +57,6 @@ function stampRecord(
 }
 
 export default function CustomerTransactionsPage() {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const guestRecords = useTransactionStore((state) =>
-    Object.values(state.records).filter((record) => Boolean(record.guestToken)),
-  );
-  const saveRecords = useTransactionStore((state) => state.saveRecords);
-  const updateTransaction = useTransactionStore(
-    (state) => state.updateTransaction,
-  );
-
   const [activeFilter, setActiveFilter] = useState<"ALL" | TransactionStatus>(
     "ALL",
   );
@@ -79,11 +67,6 @@ export default function CustomerTransactionsPage() {
   >(null);
 
   async function fetchTransactions() {
-    if (!isAuthenticated) {
-      setRecords([]);
-      return;
-    }
-
     setIsLoading(true);
 
     try {
@@ -96,7 +79,6 @@ export default function CustomerTransactionsPage() {
       ).map(stampRecord);
 
       setRecords(nextRecords);
-      saveRecords(nextRecords);
     } catch (error) {
       console.error("Failed to fetch transactions", error);
       toast.error("We couldn't load your transactions.");
@@ -107,28 +89,14 @@ export default function CustomerTransactionsPage() {
 
   useEffect(() => {
     fetchTransactions();
-  }, [activeFilter, isAuthenticated]);
+  }, [activeFilter]);
 
-  async function handleCancelTransaction(
-    transactionId: number,
-    guestToken?: string | null,
-  ) {
+  async function handleCancelTransaction(transactionId: number) {
     setPendingTransactionId(transactionId);
 
     try {
-      const response = await apiClient.patch(
-        API_ENDPOINTS.TRANSACTIONS.CANCEL(transactionId),
-        {},
-        {
-          headers: guestToken ? { "x-guest-token": guestToken } : undefined,
-        },
-      );
-
-      updateTransaction(transactionId, response.data.data as TransactionRecord);
-
-      if (isAuthenticated) {
-        await fetchTransactions();
-      }
+      await apiClient.patch(API_ENDPOINTS.TRANSACTIONS.CANCEL(transactionId), {});
+      await fetchTransactions();
 
       toast.success("Transaction canceled.");
     } catch (error) {
@@ -139,13 +107,10 @@ export default function CustomerTransactionsPage() {
     }
   }
 
-  const sourceRecords = isAuthenticated ? records : guestRecords;
   const filteredRecords =
     activeFilter === "ALL"
-      ? sourceRecords
-      : sourceRecords.filter(
-          (record) => record.transaction.status === activeFilter,
-        );
+      ? records
+      : records.filter((record) => record.transaction.status === activeFilter);
   const sortedRecords = [...filteredRecords].sort((left, right) => {
     const leftTime = new Date(
       left.transaction.createdAt || left.order.createdAt || left.lastSyncedAt,
@@ -164,15 +129,13 @@ export default function CustomerTransactionsPage() {
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-            Customer History
+            Account History
           </p>
           <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Transactions
+            Transaction History
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-            {isAuthenticated
-              ? "Your transaction list is loaded from the backend."
-              : "You're viewing guest transactions saved in this browser."}
+            Your transaction list is loaded from your active account.
           </p>
         </div>
 
@@ -326,10 +289,7 @@ export default function CustomerTransactionsPage() {
                             pendingTransactionId === record.transaction.id
                           }
                           onClick={() =>
-                            handleCancelTransaction(
-                              record.transaction.id,
-                              record.guestToken,
-                            )
+                            handleCancelTransaction(record.transaction.id)
                           }
                           type="button"
                           variant="outline"

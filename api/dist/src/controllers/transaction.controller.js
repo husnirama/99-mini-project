@@ -1,11 +1,10 @@
 import { approveTransaction, cancelTransaction, getTransactionDetail, listTransactions, rejectTransaction, uploadPaymentProof, } from "../services/transaction.service.js";
 import { transactionListQuerySchema } from "../validations/transaction.validation.js";
 function getActorFromRequest(req) {
-    const userId = req.user?.id ?? null;
+    const userId = req.user?.userId ?? req.user?.id ?? null;
     return {
         userId,
         role: req.user?.role ?? null,
-        guestToken: req.headers["x-guest-token"],
     };
 }
 export async function handleGetTransactions(req, res, next) {

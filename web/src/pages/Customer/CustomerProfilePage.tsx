@@ -31,6 +31,18 @@ function formatMembershipDate(value?: string) {
   });
 }
 
+function formatDateLabel(value?: string | null) {
+  if (!value) {
+    return "No active expiry";
+  }
+
+  return new Date(value).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 export default function CustomerProfilePage() {
   const user = useAuthStore((state) => state.user);
   const [profile, setProfile] = useState<CustomerProfile | null>(null);
@@ -264,6 +276,18 @@ export default function CustomerProfilePage() {
                   </p>
                 </div>
                 <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/30">
+                  <p className="text-slate-500 dark:text-slate-400">Available Points</p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">
+                    Rp {(profile?.stats.availablePoints ?? 0).toLocaleString("id-ID")}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/30">
+                  <p className="text-slate-500 dark:text-slate-400">Next Points Expiry</p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">
+                    {formatDateLabel(profile?.stats.nextPointsExpiry)}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/30">
                   <p className="text-slate-500 dark:text-slate-400">Referred By</p>
                   <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">
                     {profile?.referredBy || "No referral linked"}
@@ -273,6 +297,12 @@ export default function CustomerProfilePage() {
                   <p className="text-slate-500 dark:text-slate-400">Referrer Account</p>
                   <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">
                     {profile?.referrer?.name || "Not available"}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/30">
+                  <p className="text-slate-500 dark:text-slate-400">Successful Referrals</p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">
+                    {profile?.stats.successfulReferrals ?? 0}
                   </p>
                 </div>
                 <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/30">

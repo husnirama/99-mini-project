@@ -24,6 +24,26 @@ function getCouponTone(status: "ACTIVE" | "USED" | "EXPIRED") {
   return "border-rose-200 bg-rose-50 text-rose-700";
 }
 
+function formatDiscount(coupon: CustomerCoupon) {
+  if (coupon.discountType === "PERCENTAGE") {
+    return `${coupon.discountAmount}%`;
+  }
+
+  return `Rp ${coupon.discountAmount.toLocaleString("id-ID")}`;
+}
+
+function getExpiryLabel(value: string) {
+  const expiresAt = new Date(value);
+  const remainingMs = expiresAt.getTime() - Date.now();
+
+  if (remainingMs <= 0) {
+    return "Expired";
+  }
+
+  const remainingDays = Math.ceil(remainingMs / (1000 * 60 * 60 * 24));
+  return `${remainingDays} day${remainingDays === 1 ? "" : "s"} left`;
+}
+
 export default function CustomerCouponsPage() {
   const [coupons, setCoupons] = useState<CustomerCoupon[]>([]);
   const [summary, setSummary] = useState<CouponSummary | null>(null);
@@ -76,11 +96,11 @@ export default function CustomerCouponsPage() {
                 Customer Coupons
               </p>
               <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                Referral-linked coupons
+                Your reward coupons
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                This page reads your existing customer referral data and shows
-                coupon benefits derived from it.
+                This page reads your active user-owned reward coupons and shows
+                their discount value and expiry window.
               </p>
             </div>
             <Button asChild variant="outline">
@@ -137,11 +157,16 @@ export default function CustomerCouponsPage() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-lg font-semibold text-slate-900 dark:text-white">
-                    Referral Benefit
+                    {coupon.name || "Promotion Code"}
                   </p>
                   <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
                     {coupon.description}
                   </p>
+                  {coupon.eventTitle ? (
+                    <p className="mt-2 text-xs font-medium uppercase tracking-[0.14em] text-slate-400">
+                      Event: {coupon.eventTitle}
+                    </p>
+                  ) : null}
                 </div>
                 <span
                   className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${getCouponTone(
@@ -161,13 +186,29 @@ export default function CustomerCouponsPage() {
                 </p>
               </div>
 
-              <div className="mt-5 grid gap-3 text-sm text-slate-500 dark:text-slate-400">
+                <div className="mt-5 grid gap-3 text-sm text-slate-500 dark:text-slate-400">
                 <div>
-                  <p>Discount Value</p>
+                  <p>Discount</p>
                   <p className="mt-1 font-medium text-slate-900 dark:text-white">
-                    Rp {coupon.discountAmount.toLocaleString("id-ID")}
+                    {formatDiscount(coupon)}
                   </p>
                 </div>
+                {coupon.maxDiscount ? (
+                  <div>
+                    <p>Max Discount</p>
+                    <p className="mt-1 font-medium text-slate-900 dark:text-white">
+                      Rp {coupon.maxDiscount.toLocaleString("id-ID")}
+                    </p>
+                  </div>
+                ) : null}
+                {coupon.minPurchase ? (
+                  <div>
+                    <p>Min Purchase</p>
+                    <p className="mt-1 font-medium text-slate-900 dark:text-white">
+                      Rp {coupon.minPurchase.toLocaleString("id-ID")}
+                    </p>
+                  </div>
+                ) : null}
                 <div>
                   <p>Expires</p>
                   <p className="mt-1 font-medium text-slate-900 dark:text-white">
@@ -176,6 +217,9 @@ export default function CustomerCouponsPage() {
                       day: "numeric",
                       year: "numeric",
                     })}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    {getExpiryLabel(coupon.expiresAt)}
                   </p>
                 </div>
               </div>

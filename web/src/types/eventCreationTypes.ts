@@ -1,7 +1,7 @@
 export interface UploadedFile {
   id: string;
   name: string;
-  rawFile: File;
+  rawFile?: File | null;
   preview: string;
 }
 
@@ -14,6 +14,7 @@ export type TicketAvailability = "Paid" | "Free";
 
 export interface TicketTier {
   id: string;
+  persistedId?: number;
   name: string;
   availability: TicketAvailability;
   price: string;
@@ -24,6 +25,7 @@ export type PromotionDiscountType = "PERCENTAGE" | "FIXED";
 
 export interface PromotionVoucher {
   id: string;
+  persistedId?: number;
   name: string;
   code: string;
   discountType: PromotionDiscountType;

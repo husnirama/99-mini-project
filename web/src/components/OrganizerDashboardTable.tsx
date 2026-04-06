@@ -39,6 +39,12 @@ export default function OrganizerDashboardTable({ event }: EventsSummary) {
           >
             View
           </Link>
+          <Link
+            className="text-slate-500 hover:text-primary hover:underline"
+            to={`/organizer/events/${event.id}/edit`}
+          >
+            Edit
+          </Link>
           {organizerId ? (
             <Link
               className="text-slate-500 hover:text-primary hover:underline"

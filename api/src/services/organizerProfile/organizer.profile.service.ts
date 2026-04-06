@@ -1,5 +1,7 @@
+import fs from "node:fs/promises";
 import bcrypt from "bcrypt";
 import { cacheTags, invalidateCacheTags } from "../../lib/cache.js";
+import cloudinary from "../../lib/cloudinary.js";
 import { prisma } from "../../lib/prisma.js";
 import { AppError } from "../../utils/app-error.js";
 import {
@@ -14,6 +16,7 @@ const organizerProfileSelect = {
   name: true,
   email: true,
   address: true,
+  profilePicture: true,
   role: true,
   referralCode: true,
   referredBy: true,
@@ -182,4 +185,51 @@ export async function updateOrganizerPassword(
   ]);
 
   return true;
+}
+
+export async function updateOrganizerProfilePicture(
+  userId: number,
+  file?: Express.Multer.File,
+) {
+  await ensureOrganizerExists(userId);
+
+  if (!file) {
+    throw new AppError("Profile image is required", 400);
+  }
+
+  let uploadedPublicId: string | null = null;
+
+  try {
+    const uploadResult = await cloudinary.uploader.upload(file.path);
+    uploadedPublicId = uploadResult.public_id;
+
+    await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        profilePicture: uploadResult.secure_url,
+      },
+    });
+
+    await invalidateCacheTags([
+      cacheTags.authMe(userId),
+      cacheTags.organizerProfile(userId),
+      cacheTags.organizerScope(userId),
+    ]);
+
+    return buildOrganizerProfile(userId);
+  } catch (error) {
+    if (uploadedPublicId) {
+      await cloudinary.uploader.destroy(uploadedPublicId).catch(() => null);
+    }
+
+    throw error;
+  } finally {
+    try {
+      await fs.unlink(file.path);
+    } catch {
+      return null;
+    }
+  }
 }

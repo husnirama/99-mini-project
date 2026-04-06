@@ -7,6 +7,7 @@ export interface User {
   role: UserRole;
   password?: string;
   address?: string | null;
+  profilePicture?: string | null;
   referralCode?: string;
   referredBy?: string | null;
   createdAt?: string;
@@ -38,6 +39,7 @@ export interface OrganizerProfile {
   name: string;
   email: string;
   address?: string | null;
+  profilePicture?: string | null;
   role: UserRole;
   referralCode?: string;
   referredBy?: string | null;
@@ -55,6 +57,7 @@ export interface CustomerProfile {
   name: string;
   email: string;
   address?: string | null;
+  profilePicture?: string | null;
   role: UserRole;
   referralCode?: string;
   referredBy?: string | null;
@@ -64,6 +67,8 @@ export interface CustomerProfile {
     totalOrders: number;
     completedOrders: number;
     availablePoints: number;
+    nextPointsExpiry?: string | null;
+    successfulReferrals?: number;
     activeCoupons: number;
   };
   referrer: {
@@ -74,9 +79,14 @@ export interface CustomerProfile {
 
 export interface CustomerCoupon {
   id: number;
+  name?: string;
+  eventTitle?: string;
   code: string;
   description: string;
+  discountType?: "PERCENTAGE" | "FIXED";
   discountAmount: number;
+  maxDiscount?: number | null;
+  minPurchase?: number | null;
   createdAt: string;
   expiresAt: string;
   usedAt?: string | null;

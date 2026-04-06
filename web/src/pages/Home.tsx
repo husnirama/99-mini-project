@@ -387,7 +387,7 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <section className="mb-20">
-          <div className="flex justify-between items-end mb-10">
+          <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Featured Experiences

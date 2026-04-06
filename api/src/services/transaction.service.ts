@@ -11,13 +11,11 @@ import type {
   CreateTransactionTxPayload,
   TransactionListQuery,
 } from "../types/transaction-type.js";
-import { hashGuestToken } from "../utils/guest-token.js";
 import { AppError } from "../utils/app-error.js";
 
 interface TransactionActor {
   userId?: number | null;
   role?: Role | string | null;
-  guestToken?: string | null;
 }
 
 const transactionLifecycleInclude = {
@@ -46,7 +44,8 @@ export async function createTransaction(
     data: {
       orderId: payload.orderId,
       paymentMethod: payload.paymentMethod,
-      status: "WAITING_FOR_PAYMENT",
+      status: payload.status ?? "WAITING_FOR_PAYMENT",
+      paidAt: payload.paidAt ?? null,
     },
   });
 }
@@ -60,7 +59,6 @@ async function getTransactionForAction(transactionId: number) {
           id: true,
           customerId: true,
           eventId: true,
-          guestTokenHash: true,
           ticketTypeId: true,
           quantity: true,
           promotionId: true,
@@ -87,24 +85,12 @@ function assertCustomerOwnership(
   transaction: NonNullable<Awaited<ReturnType<typeof getTransactionForAction>>>,
   actor: TransactionActor,
 ) {
-  if (transaction.order.customerId) {
-    if (!actor.userId || transaction.order.customerId !== actor.userId) {
-      throw new AppError("Forbidden Action, Not the right user", 403);
-    }
-    return;
+  if (!actor.userId) {
+    throw new AppError("Unauthorized", 401);
   }
 
-  if (!actor.guestToken) {
-    throw new AppError("Guest Token is Required", 401);
-  }
-
-  const hashedToken = hashGuestToken(actor.guestToken);
-
-  if (
-    !transaction.order.guestTokenHash ||
-    hashedToken !== transaction.order.guestTokenHash
-  ) {
-    throw new AppError("Invalid guest Token", 403);
+  if (!transaction.order.customerId || transaction.order.customerId !== actor.userId) {
+    throw new AppError("Forbidden Action, Not the right user", 403);
   }
 }
 
@@ -120,7 +106,12 @@ async function invalidateTransactionCache(
     cacheTags.eventsList,
     cacheTags.event(transaction.order.eventId),
     ...(transaction.order.customerId
-      ? [cacheTags.transactionsUser(transaction.order.customerId)]
+      ? [
+          cacheTags.transactionsUser(transaction.order.customerId),
+          cacheTags.customerPoints(transaction.order.customerId),
+          cacheTags.customerProfile(transaction.order.customerId),
+          cacheTags.customerScope(transaction.order.customerId),
+        ]
       : []),
   ]);
 }
@@ -165,24 +156,12 @@ function assertLifecycleAccess(
     return;
   }
 
-  if (transaction.order.customerId) {
-    if (!actor.userId || transaction.order.customerId !== actor.userId) {
-      throw new AppError("Forbidden Action, Not the right user", 403);
-    }
-    return;
+  if (!actor.userId) {
+    throw new AppError("Unauthorized", 401);
   }
 
-  if (!actor.guestToken) {
-    throw new AppError("Guest Token is Required", 401);
-  }
-
-  const hashedToken = hashGuestToken(actor.guestToken);
-
-  if (
-    !transaction.order.guestTokenHash ||
-    hashedToken !== transaction.order.guestTokenHash
-  ) {
-    throw new AppError("Invalid guest Token", 403);
+  if (!transaction.order.customerId || transaction.order.customerId !== actor.userId) {
+    throw new AppError("Forbidden Action, Not the right user", 403);
   }
 }
 
@@ -286,6 +265,8 @@ function buildTransactionListWhere(
 async function restoreOrderResources(
   tx: Prisma.TransactionClient,
   data: {
+    orderId: number;
+    customerId: number | null;
     ticketTypeId: number;
     quantity: number;
     promotionId: number | null;
@@ -335,6 +316,20 @@ async function restoreOrderResources(
         },
       });
     }
+  }
+
+  if (data.customerId) {
+    await tx.points.updateMany({
+      where: {
+        userId: data.customerId,
+        source: "PURCHASE",
+        discount: data.orderId,
+        deletedAt: null,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
   }
 }
 
@@ -510,6 +505,8 @@ export async function rejectTransaction(
 
   const updatedTransaction = await prisma.$transaction(async (tx) => {
     await restoreOrderResources(tx, {
+      orderId: transaction.order.id,
+      customerId: transaction.order.customerId,
       ticketTypeId: transaction.order.ticketTypeId,
       quantity: transaction.order.quantity,
       promotionId: transaction.order.promotionId,
@@ -556,6 +553,8 @@ export async function cancelTransaction(
 
   const updatedTransaction = await prisma.$transaction(async (tx) => {
     await restoreOrderResources(tx, {
+      orderId: transaction.order.id,
+      customerId: transaction.order.customerId,
       ticketTypeId: transaction.order.ticketTypeId,
       quantity: transaction.order.quantity,
       promotionId: transaction.order.promotionId,
@@ -598,6 +597,8 @@ export async function expireTransaction(transactionId: number) {
 
   const updatedTransaction = await prisma.$transaction(async (tx) => {
     await restoreOrderResources(tx, {
+      orderId: transaction.order.id,
+      customerId: transaction.order.customerId,
       ticketTypeId: transaction.order.ticketTypeId,
       quantity: transaction.order.quantity,
       promotionId: transaction.order.promotionId,

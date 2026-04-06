@@ -10,7 +10,6 @@ import {
   handleUploadPaymentProof,
 } from "../controllers/transaction.controller.js";
 import requireAuth from "../middlewares/auth.middleware.js";
-import optionalAuth from "../middlewares/optional-auth.middleware.js";
 import requireRole from "../middlewares/role.middleware.js";
 
 const router = express.Router();
@@ -32,7 +31,7 @@ router.get(
 );
 router.get(
   "/:transactionId",
-  optionalAuth,
+  requireAuth,
   createGetCacheMiddleware({
     namespace: "transactions:detail",
     ttlSeconds: 30,
@@ -56,7 +55,7 @@ router.get(
 
 router.patch(
   "/:transactionId/paymentProof",
-  optionalAuth,
+  requireAuth,
   upload.single("paymentProof"),
   handleUploadPaymentProof,
 );
@@ -75,6 +74,6 @@ router.patch(
   handleRejectTransaction,
 );
 
-router.patch("/:transactionId/cancel", optionalAuth, handleCancelTransaction);
+router.patch("/:transactionId/cancel", requireAuth, handleCancelTransaction);
 
 export default router;

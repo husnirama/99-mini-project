@@ -20,6 +20,7 @@ const venueSchema = z.object({
 });
 
 const ticketTypeSchema = z.object({
+  id: z.coerce.number().int().positive().optional(),
   name: z.string().min(1, "Ticket type name is required"),
   availability: z.enum(["Paid", "Free"]),
   price: z.string().min(1, "Ticket price is required"),
@@ -34,6 +35,7 @@ const contactInfoSchema = z.object({
 });
 
 const promotionSchema = z.object({
+  id: z.coerce.number().int().positive().optional(),
   name: z.string().min(1, "Promotion name is required"),
   code: z.string().min(1, "Promotion code is required"),
   discountType: z.enum(["PERCENTAGE", "FIXED"]),
@@ -62,6 +64,7 @@ export const createEventSchema = z
     eventDateEnd: z.coerce.date({
       message: "Event date end must be formatted YYYY-MM-DDTHH:mm:ssZ",
     }),
+    status: z.enum(["DRAFT", "PUBLISHED", "CANCELLED"]).optional(),
     termsAccepted: z.preprocess((value) => {
       if (value === "true") return true;
       if (value === "false") return false;

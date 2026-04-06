@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -13,40 +7,239 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Role{
-  CUSTOMER
-  EVENT_ORGANIZER
+model User {
+  id                   Int             @id @default(autoincrement())
+  name                 String
+  password             String
+  email                String          @unique
+  address              String?
+  profilePicture       String?
+  role                 Role            @default(CUSTOMER)
+  referralCode         String          @unique
+  referredBy           String?
+  createdAt            DateTime        @default(now())
+  deletedAt            DateTime?
+  updatedAt            DateTime        @updatedAt
+  event                Event[]
+  orders               Order[]
+  points               Points[]
+  sessions             Session[]
+  verifiedTransactions Transaction[]   @relation("AdminVerifiedTransaction")
+  UserPromotion        UserPromotion[]
+  reviews              Reviews[]
 }
 
-model User {
-     id           Int      @id @default(autoincrement())
-     name         String
-     password     String
-     email        String   @unique
-     address      String?
-     role         Role     @default(CUSTOMER)
-     referralCode String   @unique
-     referredBy   String?
-     createdAt DateTime @default(now())
-     updatedAt DateTime @updatedAt
-     deletedAt DateTime?
-
-     sessions Session[]
-     event Event[]
-     orders Order[]
-     verifiedTransactions Transaction[] @relation("AdminVerifiedTransaction")
-   }
-
 model Session {
-  id Int @id @default(autoincrement())
-  userId Int
-  refreshHash String @unique
-  expiresAt DateTime
-  revokedAt DateTime?
-  createdAt DateTime @default(now())
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  refreshHash String    @unique
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id])
 
-  user User @relation(fields: [userId], references: [id])
   @@index([userId])
+}
+
+model Event {
+  id               Int          @id @default(autoincrement())
+  organizeBy       Int
+  title            String
+  eventDateStart   DateTime
+  eventDateEnd     DateTime
+  status           eventStatus  @default(DRAFT)
+  eventDescription String?
+  eventTnC         String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  deletedAt        DateTime?
+  image            String?
+  category         String?
+  termsAccepted    Boolean      @default(false)
+  user             User         @relation(fields: [organizeBy], references: [id])
+  eventImage       EventImage[]
+  order            Order[]
+  promotion        Promotion[]
+  ticket           TicketType[]
+  venue            Venue[]
+  reviews          Reviews[]
+
+  @@unique([organizeBy, title])
+  @@index([organizeBy])
+}
+
+model EventImage {
+  id        Int       @id @default(autoincrement())
+  eventId   Int
+  imageURL  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  event     Event     @relation(fields: [eventId], references: [id])
+
+  @@index([eventId])
+}
+
+model Venue {
+  id          Int      @id @default(autoincrement())
+  eventId     Int
+  name        String
+  addressLine String
+  city        String
+  region      String?
+  country     String
+  latitude    Decimal?
+  longitude   Decimal?
+  event       Event    @relation(fields: [eventId], references: [id])
+
+  @@index([eventId])
+}
+
+model TicketType {
+  id                 Int          @id @default(autoincrement())
+  eventId            Int
+  name               String
+  price              Decimal
+  quota              Int
+  description        String?
+  salesStartAt       DateTime
+  salesEndAt         DateTime
+  status             ticketStatus @default(HIDDEN)
+  contactPerson      String
+  emailContactPerson String
+  phoneContactPerson String
+  reserved           Int          @default(0)
+  sold               Int          @default(0)
+  order              Order[]
+  event              Event        @relation(fields: [eventId], references: [id])
+
+  @@index([eventId])
+}
+
+model Promotion {
+  id            Int                   @id @default(autoincrement())
+  eventId       Int
+  name          String
+  code          String
+  discountType  promotionDiscountType
+  discountValue Decimal
+  maxDiscount   Decimal?
+  minPurchase   Decimal?
+  quota         Int
+  startDate     DateTime?
+  endDate       DateTime?
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  deletedAt     DateTime?
+  usedCount     Int?
+  order         Order[]
+  event         Event                 @relation(fields: [eventId], references: [id])
+  UserPromotion UserPromotion[]
+
+  @@index([eventId])
+  @@index([code])
+}
+
+model Order {
+  id             Int           @id @unique @default(autoincrement())
+  customerId     Int?
+  eventId        Int
+  ticketTypeId   Int
+  quantity       Int
+  unitPrice      Int
+  subTotalAmount Int
+  discountAmount Int           @default(0)
+  totalAmount    Int
+  promotionId    Int?
+  voucherCode    String?
+  buyerName      String
+  buyerEmail     String
+  buyerPhone     String
+  status         orderStatus   @default(PENDING)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  expiresAt      DateTime
+  guestTokenHash String?
+  user           User?         @relation(fields: [customerId], references: [id])
+  event          Event         @relation(fields: [eventId], references: [id])
+  promotion      Promotion?    @relation(fields: [promotionId], references: [id])
+  ticket         TicketType    @relation(fields: [ticketTypeId], references: [id])
+  transaction    Transaction[]
+
+  @@index([customerId])
+  @@index([eventId])
+  @@index([status])
+}
+
+model Transaction {
+  id             Int               @id @default(autoincrement())
+  status         transactionStatus @default(WAITING_FOR_PAYMENT)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  orderId        Int
+  paidAt         DateTime?
+  paymentMethod  paymentMethod
+  paymentProof   String?
+  verifiedAt     DateTime?
+  verifiedBy     Int?
+  canceledAt     DateTime?
+  canceledBy     cancelActor?
+  rejectedReason String?
+  order          Order             @relation(fields: [orderId], references: [id])
+  admin          User?             @relation("AdminVerifiedTransaction", fields: [verifiedBy], references: [id])
+
+  @@index([orderId])
+  @@index([status])
+}
+
+model Points {
+  id        Int          @id @default(autoincrement())
+  userId    Int
+  points    Int          @default(0)
+  discount  Int          @default(0)
+  source    pointsSource
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  expiresAt DateTime
+  deletedAt DateTime?
+  user      User         @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model UserPromotion {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  promotionId Int
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  expiresAt   DateTime  @db.Timestamp(6)
+  usedAt      DateTime? @db.Timestamp(6)
+  status      String    @default("ACTIVE")
+  Promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  User        User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, promotionId])
+}
+
+model Reviews {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  eventId   Int
+  rating    Int
+  comment   String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  user      User      @relation(fields: [userId], references: [id])
+  event     Event     @relation(fields: [eventId], references: [id])
+
+  @@index([userId])
+  @@index([eventId])
+}
+
+enum Role {
+  CUSTOMER
+  EVENT_ORGANIZER
 }
 
 enum eventStatus {
@@ -55,69 +248,13 @@ enum eventStatus {
   CANCELLED
 }
 
-model Event {
-  id Int @id @default(autoincrement())
-  organizeBy Int
-  title String
-  category String?
-  image String? 
-  eventDateStart DateTime
-  eventDateEnd DateTime
-  status eventStatus @default(DRAFT)
-  eventDescription String?
-  eventTnC String?
-  termsAccepted Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
-
-  venue Venue[]
-  ticket TicketType[]
-  eventImage EventImage[]
-  promotion Promotion[]
-  order Order[]
-  user User @relation(fields: [organizeBy], references: [id])
-  @@index([organizeBy])
-  @@unique([organizeBy, title])
-}
-
-model EventImage{
-  id Int @id @default(autoincrement())
-  eventId Int 
-  imageURL String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
-
-  event Event @relation(fields:[eventId], references: [id])
-  @@index([eventId])
-
-}
-
-
-model Venue{
-  id Int @id @default(autoincrement())
-  eventId Int
-  name String
-  addressLine String
-  city String
-  region String?
-  country String
-  latitude Decimal?
-  longitude Decimal?
-
-  event Event @relation(fields: [eventId], references: [id])
-  @@index([eventId])
-}
-
-enum ticketStatus{
+enum ticketStatus {
   ACTIVE
   SOLD_OUT
   HIDDEN
 }
 
-enum promotionDiscountType{
+enum promotionDiscountType {
   PERCENTAGE
   FIXED
 }
@@ -144,112 +281,12 @@ enum paymentMethod {
   BANK_TRANSFER
 }
 
-model TicketType{
-  id Int @id @default(autoincrement())
-  eventId Int
-  name String
-  price Decimal
-  quota Int
-  sold Int @default(0)
-  reserved Int @default(0)
-  description String?
-  salesStartAt DateTime
-  salesEndAt DateTime
-  status ticketStatus @default(HIDDEN)
-  contactPerson String
-  emailContactPerson String
-  phoneContactPerson String
-
-  event Event @relation(fields: [eventId], references: [id])
-  order Order[]
-  @@index([eventId])
-}
-
-model Promotion{
-  id Int @id @default(autoincrement())
-  eventId Int
-  name String
-  code String
-  discountType promotionDiscountType
-  discountValue Decimal
-  maxDiscount Decimal?
-  minPurchase Decimal?
-  quota Int
-  usedCount Int?
-  startDate DateTime?
-  endDate DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
-
-  event Event @relation(fields: [eventId], references: [id])
-  order Order[]
-  @@index([eventId])
-  @@index([code])
-}
-
-model Order {
-  id Int @unique @id @default(autoincrement())
-  customerId Int?
-  eventId Int
-  ticketTypeId Int
-  quantity Int
-  unitPrice Int
-  subTotalAmount Int
-  discountAmount Int @default(0)
-  totalAmount Int
-
-  promotionId Int?
-  voucherCode String?
-
-  buyerName String
-  buyerEmail String
-  buyerPhone String
-  guestTokenHash String?
-
-  status orderStatus @default(PENDING)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  expiresAt DateTime
-
-  user User? @relation(fields: [customerId], references: [id])
-  event Event @relation(fields: [eventId], references: [id])
-  ticket TicketType @relation(fields: [ticketTypeId], references: [id])
-  promotion Promotion? @relation(fields: [promotionId], references: [id])
-
-  transaction Transaction[]
-  @@index([customerId])
-@@index([eventId])
-@@index([status])
-}
-
-enum cancelActor{
+enum cancelActor {
   USER
   ADMIN
 }
 
-model Transaction {
-  id Int @id @default(autoincrement())
-  orderId Int
-  paymentMethod paymentMethod
-  paymentProof String?
-  status transactionStatus @default(WAITING_FOR_PAYMENT)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  paidAt DateTime?
-
-  verifiedBy Int?
-  verifiedAt DateTime?
-
-  canceledAt DateTime?
-  canceledBy cancelActor?
-  rejectedReason String?
-  
-
-  order Order @relation(fields: [orderId], references: [id])
-  admin User? @relation("AdminVerifiedTransaction", fields: [verifiedBy], references: [id])
-
-  @@index([orderId])
-@@index([status])
+enum pointsSource {
+  REFERRAL
+  PURCHASE
 }

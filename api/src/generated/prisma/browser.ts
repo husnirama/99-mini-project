@@ -62,3 +62,18 @@ export type Order = Prisma.OrderModel
  * 
  */
 export type Transaction = Prisma.TransactionModel
+/**
+ * Model Points
+ * 
+ */
+export type Points = Prisma.PointsModel
+/**
+ * Model UserPromotion
+ * 
+ */
+export type UserPromotion = Prisma.UserPromotionModel
+/**
+ * Model Reviews
+ * 
+ */
+export type Reviews = Prisma.ReviewsModel

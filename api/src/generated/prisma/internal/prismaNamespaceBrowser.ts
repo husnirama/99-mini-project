@@ -59,7 +59,10 @@ export const ModelName = {
   TicketType: 'TicketType',
   Promotion: 'Promotion',
   Order: 'Order',
-  Transaction: 'Transaction'
+  Transaction: 'Transaction',
+  Points: 'Points',
+  UserPromotion: 'UserPromotion',
+  Reviews: 'Reviews'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -84,12 +87,13 @@ export const UserScalarFieldEnum = {
   password: 'password',
   email: 'email',
   address: 'address',
+  profilePicture: 'profilePicture',
   role: 'role',
   referralCode: 'referralCode',
   referredBy: 'referredBy',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
+  deletedAt: 'deletedAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -111,17 +115,17 @@ export const EventScalarFieldEnum = {
   id: 'id',
   organizeBy: 'organizeBy',
   title: 'title',
-  category: 'category',
-  image: 'image',
   eventDateStart: 'eventDateStart',
   eventDateEnd: 'eventDateEnd',
   status: 'status',
   eventDescription: 'eventDescription',
   eventTnC: 'eventTnC',
-  termsAccepted: 'termsAccepted',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
+  deletedAt: 'deletedAt',
+  image: 'image',
+  category: 'category',
+  termsAccepted: 'termsAccepted'
 } as const
 
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
@@ -160,15 +164,15 @@ export const TicketTypeScalarFieldEnum = {
   name: 'name',
   price: 'price',
   quota: 'quota',
-  sold: 'sold',
-  reserved: 'reserved',
   description: 'description',
   salesStartAt: 'salesStartAt',
   salesEndAt: 'salesEndAt',
   status: 'status',
   contactPerson: 'contactPerson',
   emailContactPerson: 'emailContactPerson',
-  phoneContactPerson: 'phoneContactPerson'
+  phoneContactPerson: 'phoneContactPerson',
+  reserved: 'reserved',
+  sold: 'sold'
 } as const
 
 export type TicketTypeScalarFieldEnum = (typeof TicketTypeScalarFieldEnum)[keyof typeof TicketTypeScalarFieldEnum]
@@ -184,12 +188,12 @@ export const PromotionScalarFieldEnum = {
   maxDiscount: 'maxDiscount',
   minPurchase: 'minPurchase',
   quota: 'quota',
-  usedCount: 'usedCount',
   startDate: 'startDate',
   endDate: 'endDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
+  deletedAt: 'deletedAt',
+  usedCount: 'usedCount'
 } as const
 
 export type PromotionScalarFieldEnum = (typeof PromotionScalarFieldEnum)[keyof typeof PromotionScalarFieldEnum]
@@ -210,11 +214,11 @@ export const OrderScalarFieldEnum = {
   buyerName: 'buyerName',
   buyerEmail: 'buyerEmail',
   buyerPhone: 'buyerPhone',
-  guestTokenHash: 'guestTokenHash',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  expiresAt: 'expiresAt'
+  expiresAt: 'expiresAt',
+  guestTokenHash: 'guestTokenHash'
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
@@ -222,21 +226,63 @@ export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof Or
 
 export const TransactionScalarFieldEnum = {
   id: 'id',
-  orderId: 'orderId',
-  paymentMethod: 'paymentMethod',
-  paymentProof: 'paymentProof',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  orderId: 'orderId',
   paidAt: 'paidAt',
-  verifiedBy: 'verifiedBy',
+  paymentMethod: 'paymentMethod',
+  paymentProof: 'paymentProof',
   verifiedAt: 'verifiedAt',
+  verifiedBy: 'verifiedBy',
   canceledAt: 'canceledAt',
   canceledBy: 'canceledBy',
   rejectedReason: 'rejectedReason'
 } as const
 
 export type TransactionScalarFieldEnum = (typeof TransactionScalarFieldEnum)[keyof typeof TransactionScalarFieldEnum]
+
+
+export const PointsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  points: 'points',
+  discount: 'discount',
+  source: 'source',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  expiresAt: 'expiresAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type PointsScalarFieldEnum = (typeof PointsScalarFieldEnum)[keyof typeof PointsScalarFieldEnum]
+
+
+export const UserPromotionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  promotionId: 'promotionId',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  status: 'status'
+} as const
+
+export type UserPromotionScalarFieldEnum = (typeof UserPromotionScalarFieldEnum)[keyof typeof UserPromotionScalarFieldEnum]
+
+
+export const ReviewsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  eventId: 'eventId',
+  rating: 'rating',
+  comment: 'comment',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type ReviewsScalarFieldEnum = (typeof ReviewsScalarFieldEnum)[keyof typeof ReviewsScalarFieldEnum]
 
 
 export const SortOrder = {

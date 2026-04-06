@@ -40,15 +40,15 @@ export type TransactionSumAggregateOutputType = {
 
 export type TransactionMinAggregateOutputType = {
   id: number | null
-  orderId: number | null
-  paymentMethod: $Enums.paymentMethod | null
-  paymentProof: string | null
   status: $Enums.transactionStatus | null
   createdAt: Date | null
   updatedAt: Date | null
+  orderId: number | null
   paidAt: Date | null
-  verifiedBy: number | null
+  paymentMethod: $Enums.paymentMethod | null
+  paymentProof: string | null
   verifiedAt: Date | null
+  verifiedBy: number | null
   canceledAt: Date | null
   canceledBy: $Enums.cancelActor | null
   rejectedReason: string | null
@@ -56,15 +56,15 @@ export type TransactionMinAggregateOutputType = {
 
 export type TransactionMaxAggregateOutputType = {
   id: number | null
-  orderId: number | null
-  paymentMethod: $Enums.paymentMethod | null
-  paymentProof: string | null
   status: $Enums.transactionStatus | null
   createdAt: Date | null
   updatedAt: Date | null
+  orderId: number | null
   paidAt: Date | null
-  verifiedBy: number | null
+  paymentMethod: $Enums.paymentMethod | null
+  paymentProof: string | null
   verifiedAt: Date | null
+  verifiedBy: number | null
   canceledAt: Date | null
   canceledBy: $Enums.cancelActor | null
   rejectedReason: string | null
@@ -72,15 +72,15 @@ export type TransactionMaxAggregateOutputType = {
 
 export type TransactionCountAggregateOutputType = {
   id: number
-  orderId: number
-  paymentMethod: number
-  paymentProof: number
   status: number
   createdAt: number
   updatedAt: number
+  orderId: number
   paidAt: number
-  verifiedBy: number
+  paymentMethod: number
+  paymentProof: number
   verifiedAt: number
+  verifiedBy: number
   canceledAt: number
   canceledBy: number
   rejectedReason: number
@@ -102,15 +102,15 @@ export type TransactionSumAggregateInputType = {
 
 export type TransactionMinAggregateInputType = {
   id?: true
-  orderId?: true
-  paymentMethod?: true
-  paymentProof?: true
   status?: true
   createdAt?: true
   updatedAt?: true
+  orderId?: true
   paidAt?: true
-  verifiedBy?: true
+  paymentMethod?: true
+  paymentProof?: true
   verifiedAt?: true
+  verifiedBy?: true
   canceledAt?: true
   canceledBy?: true
   rejectedReason?: true
@@ -118,15 +118,15 @@ export type TransactionMinAggregateInputType = {
 
 export type TransactionMaxAggregateInputType = {
   id?: true
-  orderId?: true
-  paymentMethod?: true
-  paymentProof?: true
   status?: true
   createdAt?: true
   updatedAt?: true
+  orderId?: true
   paidAt?: true
-  verifiedBy?: true
+  paymentMethod?: true
+  paymentProof?: true
   verifiedAt?: true
+  verifiedBy?: true
   canceledAt?: true
   canceledBy?: true
   rejectedReason?: true
@@ -134,15 +134,15 @@ export type TransactionMaxAggregateInputType = {
 
 export type TransactionCountAggregateInputType = {
   id?: true
-  orderId?: true
-  paymentMethod?: true
-  paymentProof?: true
   status?: true
   createdAt?: true
   updatedAt?: true
+  orderId?: true
   paidAt?: true
-  verifiedBy?: true
+  paymentMethod?: true
+  paymentProof?: true
   verifiedAt?: true
+  verifiedBy?: true
   canceledAt?: true
   canceledBy?: true
   rejectedReason?: true
@@ -237,15 +237,15 @@ export type TransactionGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
 
 export type TransactionGroupByOutputType = {
   id: number
-  orderId: number
-  paymentMethod: $Enums.paymentMethod
-  paymentProof: string | null
   status: $Enums.transactionStatus
   createdAt: Date
   updatedAt: Date
+  orderId: number
   paidAt: Date | null
-  verifiedBy: number | null
+  paymentMethod: $Enums.paymentMethod
+  paymentProof: string | null
   verifiedAt: Date | null
+  verifiedBy: number | null
   canceledAt: Date | null
   canceledBy: $Enums.cancelActor | null
   rejectedReason: string | null
@@ -276,15 +276,15 @@ export type TransactionWhereInput = {
   OR?: Prisma.TransactionWhereInput[]
   NOT?: Prisma.TransactionWhereInput | Prisma.TransactionWhereInput[]
   id?: Prisma.IntFilter<"Transaction"> | number
-  orderId?: Prisma.IntFilter<"Transaction"> | number
-  paymentMethod?: Prisma.EnumpaymentMethodFilter<"Transaction"> | $Enums.paymentMethod
-  paymentProof?: Prisma.StringNullableFilter<"Transaction"> | string | null
   status?: Prisma.EnumtransactionStatusFilter<"Transaction"> | $Enums.transactionStatus
   createdAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
+  orderId?: Prisma.IntFilter<"Transaction"> | number
   paidAt?: Prisma.DateTimeNullableFilter<"Transaction"> | Date | string | null
-  verifiedBy?: Prisma.IntNullableFilter<"Transaction"> | number | null
+  paymentMethod?: Prisma.EnumpaymentMethodFilter<"Transaction"> | $Enums.paymentMethod
+  paymentProof?: Prisma.StringNullableFilter<"Transaction"> | string | null
   verifiedAt?: Prisma.DateTimeNullableFilter<"Transaction"> | Date | string | null
+  verifiedBy?: Prisma.IntNullableFilter<"Transaction"> | number | null
   canceledAt?: Prisma.DateTimeNullableFilter<"Transaction"> | Date | string | null
   canceledBy?: Prisma.EnumcancelActorNullableFilter<"Transaction"> | $Enums.cancelActor | null
   rejectedReason?: Prisma.StringNullableFilter<"Transaction"> | string | null
@@ -294,15 +294,15 @@ export type TransactionWhereInput = {
 
 export type TransactionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  orderId?: Prisma.SortOrder
-  paymentMethod?: Prisma.SortOrder
-  paymentProof?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  orderId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  verifiedBy?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrder
+  paymentProof?: Prisma.SortOrderInput | Prisma.SortOrder
   verifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  verifiedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   canceledAt?: Prisma.SortOrderInput | Prisma.SortOrder
   canceledBy?: Prisma.SortOrderInput | Prisma.SortOrder
   rejectedReason?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -315,15 +315,15 @@ export type TransactionWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.TransactionWhereInput | Prisma.TransactionWhereInput[]
   OR?: Prisma.TransactionWhereInput[]
   NOT?: Prisma.TransactionWhereInput | Prisma.TransactionWhereInput[]
-  orderId?: Prisma.IntFilter<"Transaction"> | number
-  paymentMethod?: Prisma.EnumpaymentMethodFilter<"Transaction"> | $Enums.paymentMethod
-  paymentProof?: Prisma.StringNullableFilter<"Transaction"> | string | null
   status?: Prisma.EnumtransactionStatusFilter<"Transaction"> | $Enums.transactionStatus
   createdAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
+  orderId?: Prisma.IntFilter<"Transaction"> | number
   paidAt?: Prisma.DateTimeNullableFilter<"Transaction"> | Date | string | null
-  verifiedBy?: Prisma.IntNullableFilter<"Transaction"> | number | null
+  paymentMethod?: Prisma.EnumpaymentMethodFilter<"Transaction"> | $Enums.paymentMethod
+  paymentProof?: Prisma.StringNullableFilter<"Transaction"> | string | null
   verifiedAt?: Prisma.DateTimeNullableFilter<"Transaction"> | Date | string | null
+  verifiedBy?: Prisma.IntNullableFilter<"Transaction"> | number | null
   canceledAt?: Prisma.DateTimeNullableFilter<"Transaction"> | Date | string | null
   canceledBy?: Prisma.EnumcancelActorNullableFilter<"Transaction"> | $Enums.cancelActor | null
   rejectedReason?: Prisma.StringNullableFilter<"Transaction"> | string | null
@@ -333,15 +333,15 @@ export type TransactionWhereUniqueInput = Prisma.AtLeast<{
 
 export type TransactionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  orderId?: Prisma.SortOrder
-  paymentMethod?: Prisma.SortOrder
-  paymentProof?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  orderId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  verifiedBy?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrder
+  paymentProof?: Prisma.SortOrderInput | Prisma.SortOrder
   verifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  verifiedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   canceledAt?: Prisma.SortOrderInput | Prisma.SortOrder
   canceledBy?: Prisma.SortOrderInput | Prisma.SortOrder
   rejectedReason?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -357,27 +357,27 @@ export type TransactionScalarWhereWithAggregatesInput = {
   OR?: Prisma.TransactionScalarWhereWithAggregatesInput[]
   NOT?: Prisma.TransactionScalarWhereWithAggregatesInput | Prisma.TransactionScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"Transaction"> | number
-  orderId?: Prisma.IntWithAggregatesFilter<"Transaction"> | number
-  paymentMethod?: Prisma.EnumpaymentMethodWithAggregatesFilter<"Transaction"> | $Enums.paymentMethod
-  paymentProof?: Prisma.StringNullableWithAggregatesFilter<"Transaction"> | string | null
   status?: Prisma.EnumtransactionStatusWithAggregatesFilter<"Transaction"> | $Enums.transactionStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Transaction"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Transaction"> | Date | string
+  orderId?: Prisma.IntWithAggregatesFilter<"Transaction"> | number
   paidAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Transaction"> | Date | string | null
-  verifiedBy?: Prisma.IntNullableWithAggregatesFilter<"Transaction"> | number | null
+  paymentMethod?: Prisma.EnumpaymentMethodWithAggregatesFilter<"Transaction"> | $Enums.paymentMethod
+  paymentProof?: Prisma.StringNullableWithAggregatesFilter<"Transaction"> | string | null
   verifiedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Transaction"> | Date | string | null
+  verifiedBy?: Prisma.IntNullableWithAggregatesFilter<"Transaction"> | number | null
   canceledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Transaction"> | Date | string | null
   canceledBy?: Prisma.EnumcancelActorNullableWithAggregatesFilter<"Transaction"> | $Enums.cancelActor | null
   rejectedReason?: Prisma.StringNullableWithAggregatesFilter<"Transaction"> | string | null
 }
 
 export type TransactionCreateInput = {
-  paymentMethod: $Enums.paymentMethod
-  paymentProof?: string | null
   status?: $Enums.transactionStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   paidAt?: Date | string | null
+  paymentMethod: $Enums.paymentMethod
+  paymentProof?: string | null
   verifiedAt?: Date | string | null
   canceledAt?: Date | string | null
   canceledBy?: $Enums.cancelActor | null
@@ -388,27 +388,27 @@ export type TransactionCreateInput = {
 
 export type TransactionUncheckedCreateInput = {
   id?: number
-  orderId: number
-  paymentMethod: $Enums.paymentMethod
-  paymentProof?: string | null
   status?: $Enums.transactionStatus
   createdAt?: Date | string
   updatedAt?: Date | string
+  orderId: number
   paidAt?: Date | string | null
-  verifiedBy?: number | null
+  paymentMethod: $Enums.paymentMethod
+  paymentProof?: string | null
   verifiedAt?: Date | string | null
+  verifiedBy?: number | null
   canceledAt?: Date | string | null
   canceledBy?: $Enums.cancelActor | null
   rejectedReason?: string | null
 }
 
 export type TransactionUpdateInput = {
-  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
-  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumtransactionStatusFieldUpdateOperationsInput | $Enums.transactionStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
+  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   canceledBy?: Prisma.NullableEnumcancelActorFieldUpdateOperationsInput | $Enums.cancelActor | null
@@ -419,15 +419,15 @@ export type TransactionUpdateInput = {
 
 export type TransactionUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  orderId?: Prisma.IntFieldUpdateOperationsInput | number
-  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
-  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumtransactionStatusFieldUpdateOperationsInput | $Enums.transactionStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orderId?: Prisma.IntFieldUpdateOperationsInput | number
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  verifiedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
+  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  verifiedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   canceledBy?: Prisma.NullableEnumcancelActorFieldUpdateOperationsInput | $Enums.cancelActor | null
   rejectedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -435,27 +435,27 @@ export type TransactionUncheckedUpdateInput = {
 
 export type TransactionCreateManyInput = {
   id?: number
-  orderId: number
-  paymentMethod: $Enums.paymentMethod
-  paymentProof?: string | null
   status?: $Enums.transactionStatus
   createdAt?: Date | string
   updatedAt?: Date | string
+  orderId: number
   paidAt?: Date | string | null
-  verifiedBy?: number | null
+  paymentMethod: $Enums.paymentMethod
+  paymentProof?: string | null
   verifiedAt?: Date | string | null
+  verifiedBy?: number | null
   canceledAt?: Date | string | null
   canceledBy?: $Enums.cancelActor | null
   rejectedReason?: string | null
 }
 
 export type TransactionUpdateManyMutationInput = {
-  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
-  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumtransactionStatusFieldUpdateOperationsInput | $Enums.transactionStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
+  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   canceledBy?: Prisma.NullableEnumcancelActorFieldUpdateOperationsInput | $Enums.cancelActor | null
@@ -464,15 +464,15 @@ export type TransactionUpdateManyMutationInput = {
 
 export type TransactionUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  orderId?: Prisma.IntFieldUpdateOperationsInput | number
-  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
-  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumtransactionStatusFieldUpdateOperationsInput | $Enums.transactionStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orderId?: Prisma.IntFieldUpdateOperationsInput | number
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  verifiedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
+  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  verifiedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   canceledBy?: Prisma.NullableEnumcancelActorFieldUpdateOperationsInput | $Enums.cancelActor | null
   rejectedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -490,15 +490,15 @@ export type TransactionOrderByRelationAggregateInput = {
 
 export type TransactionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  orderId?: Prisma.SortOrder
-  paymentMethod?: Prisma.SortOrder
-  paymentProof?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  orderId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
-  verifiedBy?: Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrder
+  paymentProof?: Prisma.SortOrder
   verifiedAt?: Prisma.SortOrder
+  verifiedBy?: Prisma.SortOrder
   canceledAt?: Prisma.SortOrder
   canceledBy?: Prisma.SortOrder
   rejectedReason?: Prisma.SortOrder
@@ -512,15 +512,15 @@ export type TransactionAvgOrderByAggregateInput = {
 
 export type TransactionMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  orderId?: Prisma.SortOrder
-  paymentMethod?: Prisma.SortOrder
-  paymentProof?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  orderId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
-  verifiedBy?: Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrder
+  paymentProof?: Prisma.SortOrder
   verifiedAt?: Prisma.SortOrder
+  verifiedBy?: Prisma.SortOrder
   canceledAt?: Prisma.SortOrder
   canceledBy?: Prisma.SortOrder
   rejectedReason?: Prisma.SortOrder
@@ -528,15 +528,15 @@ export type TransactionMaxOrderByAggregateInput = {
 
 export type TransactionMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  orderId?: Prisma.SortOrder
-  paymentMethod?: Prisma.SortOrder
-  paymentProof?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  orderId?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
-  verifiedBy?: Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrder
+  paymentProof?: Prisma.SortOrder
   verifiedAt?: Prisma.SortOrder
+  verifiedBy?: Prisma.SortOrder
   canceledAt?: Prisma.SortOrder
   canceledBy?: Prisma.SortOrder
   rejectedReason?: Prisma.SortOrder
@@ -632,12 +632,12 @@ export type TransactionUncheckedUpdateManyWithoutOrderNestedInput = {
   deleteMany?: Prisma.TransactionScalarWhereInput | Prisma.TransactionScalarWhereInput[]
 }
 
-export type EnumpaymentMethodFieldUpdateOperationsInput = {
-  set?: $Enums.paymentMethod
-}
-
 export type EnumtransactionStatusFieldUpdateOperationsInput = {
   set?: $Enums.transactionStatus
+}
+
+export type EnumpaymentMethodFieldUpdateOperationsInput = {
+  set?: $Enums.paymentMethod
 }
 
 export type NullableEnumcancelActorFieldUpdateOperationsInput = {
@@ -645,12 +645,12 @@ export type NullableEnumcancelActorFieldUpdateOperationsInput = {
 }
 
 export type TransactionCreateWithoutAdminInput = {
-  paymentMethod: $Enums.paymentMethod
-  paymentProof?: string | null
   status?: $Enums.transactionStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   paidAt?: Date | string | null
+  paymentMethod: $Enums.paymentMethod
+  paymentProof?: string | null
   verifiedAt?: Date | string | null
   canceledAt?: Date | string | null
   canceledBy?: $Enums.cancelActor | null
@@ -660,13 +660,13 @@ export type TransactionCreateWithoutAdminInput = {
 
 export type TransactionUncheckedCreateWithoutAdminInput = {
   id?: number
-  orderId: number
-  paymentMethod: $Enums.paymentMethod
-  paymentProof?: string | null
   status?: $Enums.transactionStatus
   createdAt?: Date | string
   updatedAt?: Date | string
+  orderId: number
   paidAt?: Date | string | null
+  paymentMethod: $Enums.paymentMethod
+  paymentProof?: string | null
   verifiedAt?: Date | string | null
   canceledAt?: Date | string | null
   canceledBy?: $Enums.cancelActor | null
@@ -704,27 +704,27 @@ export type TransactionScalarWhereInput = {
   OR?: Prisma.TransactionScalarWhereInput[]
   NOT?: Prisma.TransactionScalarWhereInput | Prisma.TransactionScalarWhereInput[]
   id?: Prisma.IntFilter<"Transaction"> | number
-  orderId?: Prisma.IntFilter<"Transaction"> | number
-  paymentMethod?: Prisma.EnumpaymentMethodFilter<"Transaction"> | $Enums.paymentMethod
-  paymentProof?: Prisma.StringNullableFilter<"Transaction"> | string | null
   status?: Prisma.EnumtransactionStatusFilter<"Transaction"> | $Enums.transactionStatus
   createdAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
+  orderId?: Prisma.IntFilter<"Transaction"> | number
   paidAt?: Prisma.DateTimeNullableFilter<"Transaction"> | Date | string | null
-  verifiedBy?: Prisma.IntNullableFilter<"Transaction"> | number | null
+  paymentMethod?: Prisma.EnumpaymentMethodFilter<"Transaction"> | $Enums.paymentMethod
+  paymentProof?: Prisma.StringNullableFilter<"Transaction"> | string | null
   verifiedAt?: Prisma.DateTimeNullableFilter<"Transaction"> | Date | string | null
+  verifiedBy?: Prisma.IntNullableFilter<"Transaction"> | number | null
   canceledAt?: Prisma.DateTimeNullableFilter<"Transaction"> | Date | string | null
   canceledBy?: Prisma.EnumcancelActorNullableFilter<"Transaction"> | $Enums.cancelActor | null
   rejectedReason?: Prisma.StringNullableFilter<"Transaction"> | string | null
 }
 
 export type TransactionCreateWithoutOrderInput = {
-  paymentMethod: $Enums.paymentMethod
-  paymentProof?: string | null
   status?: $Enums.transactionStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   paidAt?: Date | string | null
+  paymentMethod: $Enums.paymentMethod
+  paymentProof?: string | null
   verifiedAt?: Date | string | null
   canceledAt?: Date | string | null
   canceledBy?: $Enums.cancelActor | null
@@ -734,14 +734,14 @@ export type TransactionCreateWithoutOrderInput = {
 
 export type TransactionUncheckedCreateWithoutOrderInput = {
   id?: number
-  paymentMethod: $Enums.paymentMethod
-  paymentProof?: string | null
   status?: $Enums.transactionStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   paidAt?: Date | string | null
-  verifiedBy?: number | null
+  paymentMethod: $Enums.paymentMethod
+  paymentProof?: string | null
   verifiedAt?: Date | string | null
+  verifiedBy?: number | null
   canceledAt?: Date | string | null
   canceledBy?: $Enums.cancelActor | null
   rejectedReason?: string | null
@@ -775,13 +775,13 @@ export type TransactionUpdateManyWithWhereWithoutOrderInput = {
 
 export type TransactionCreateManyAdminInput = {
   id?: number
-  orderId: number
-  paymentMethod: $Enums.paymentMethod
-  paymentProof?: string | null
   status?: $Enums.transactionStatus
   createdAt?: Date | string
   updatedAt?: Date | string
+  orderId: number
   paidAt?: Date | string | null
+  paymentMethod: $Enums.paymentMethod
+  paymentProof?: string | null
   verifiedAt?: Date | string | null
   canceledAt?: Date | string | null
   canceledBy?: $Enums.cancelActor | null
@@ -789,12 +789,12 @@ export type TransactionCreateManyAdminInput = {
 }
 
 export type TransactionUpdateWithoutAdminInput = {
-  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
-  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumtransactionStatusFieldUpdateOperationsInput | $Enums.transactionStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
+  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   canceledBy?: Prisma.NullableEnumcancelActorFieldUpdateOperationsInput | $Enums.cancelActor | null
@@ -804,13 +804,13 @@ export type TransactionUpdateWithoutAdminInput = {
 
 export type TransactionUncheckedUpdateWithoutAdminInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  orderId?: Prisma.IntFieldUpdateOperationsInput | number
-  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
-  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumtransactionStatusFieldUpdateOperationsInput | $Enums.transactionStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orderId?: Prisma.IntFieldUpdateOperationsInput | number
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
+  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   canceledBy?: Prisma.NullableEnumcancelActorFieldUpdateOperationsInput | $Enums.cancelActor | null
@@ -819,13 +819,13 @@ export type TransactionUncheckedUpdateWithoutAdminInput = {
 
 export type TransactionUncheckedUpdateManyWithoutAdminInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  orderId?: Prisma.IntFieldUpdateOperationsInput | number
-  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
-  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumtransactionStatusFieldUpdateOperationsInput | $Enums.transactionStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orderId?: Prisma.IntFieldUpdateOperationsInput | number
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
+  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   canceledBy?: Prisma.NullableEnumcancelActorFieldUpdateOperationsInput | $Enums.cancelActor | null
@@ -834,26 +834,26 @@ export type TransactionUncheckedUpdateManyWithoutAdminInput = {
 
 export type TransactionCreateManyOrderInput = {
   id?: number
-  paymentMethod: $Enums.paymentMethod
-  paymentProof?: string | null
   status?: $Enums.transactionStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   paidAt?: Date | string | null
-  verifiedBy?: number | null
+  paymentMethod: $Enums.paymentMethod
+  paymentProof?: string | null
   verifiedAt?: Date | string | null
+  verifiedBy?: number | null
   canceledAt?: Date | string | null
   canceledBy?: $Enums.cancelActor | null
   rejectedReason?: string | null
 }
 
 export type TransactionUpdateWithoutOrderInput = {
-  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
-  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumtransactionStatusFieldUpdateOperationsInput | $Enums.transactionStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
+  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   canceledBy?: Prisma.NullableEnumcancelActorFieldUpdateOperationsInput | $Enums.cancelActor | null
@@ -863,14 +863,14 @@ export type TransactionUpdateWithoutOrderInput = {
 
 export type TransactionUncheckedUpdateWithoutOrderInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
-  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumtransactionStatusFieldUpdateOperationsInput | $Enums.transactionStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  verifiedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
+  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  verifiedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   canceledBy?: Prisma.NullableEnumcancelActorFieldUpdateOperationsInput | $Enums.cancelActor | null
   rejectedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -878,14 +878,14 @@ export type TransactionUncheckedUpdateWithoutOrderInput = {
 
 export type TransactionUncheckedUpdateManyWithoutOrderInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
-  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumtransactionStatusFieldUpdateOperationsInput | $Enums.transactionStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  verifiedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paymentMethod?: Prisma.EnumpaymentMethodFieldUpdateOperationsInput | $Enums.paymentMethod
+  paymentProof?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  verifiedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   canceledBy?: Prisma.NullableEnumcancelActorFieldUpdateOperationsInput | $Enums.cancelActor | null
   rejectedReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -895,15 +895,15 @@ export type TransactionUncheckedUpdateManyWithoutOrderInput = {
 
 export type TransactionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  orderId?: boolean
-  paymentMethod?: boolean
-  paymentProof?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  orderId?: boolean
   paidAt?: boolean
-  verifiedBy?: boolean
+  paymentMethod?: boolean
+  paymentProof?: boolean
   verifiedAt?: boolean
+  verifiedBy?: boolean
   canceledAt?: boolean
   canceledBy?: boolean
   rejectedReason?: boolean
@@ -913,15 +913,15 @@ export type TransactionSelect<ExtArgs extends runtime.Types.Extensions.InternalA
 
 export type TransactionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  orderId?: boolean
-  paymentMethod?: boolean
-  paymentProof?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  orderId?: boolean
   paidAt?: boolean
-  verifiedBy?: boolean
+  paymentMethod?: boolean
+  paymentProof?: boolean
   verifiedAt?: boolean
+  verifiedBy?: boolean
   canceledAt?: boolean
   canceledBy?: boolean
   rejectedReason?: boolean
@@ -931,15 +931,15 @@ export type TransactionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
 
 export type TransactionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  orderId?: boolean
-  paymentMethod?: boolean
-  paymentProof?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  orderId?: boolean
   paidAt?: boolean
-  verifiedBy?: boolean
+  paymentMethod?: boolean
+  paymentProof?: boolean
   verifiedAt?: boolean
+  verifiedBy?: boolean
   canceledAt?: boolean
   canceledBy?: boolean
   rejectedReason?: boolean
@@ -949,21 +949,21 @@ export type TransactionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
 
 export type TransactionSelectScalar = {
   id?: boolean
-  orderId?: boolean
-  paymentMethod?: boolean
-  paymentProof?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  orderId?: boolean
   paidAt?: boolean
-  verifiedBy?: boolean
+  paymentMethod?: boolean
+  paymentProof?: boolean
   verifiedAt?: boolean
+  verifiedBy?: boolean
   canceledAt?: boolean
   canceledBy?: boolean
   rejectedReason?: boolean
 }
 
-export type TransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderId" | "paymentMethod" | "paymentProof" | "status" | "createdAt" | "updatedAt" | "paidAt" | "verifiedBy" | "verifiedAt" | "canceledAt" | "canceledBy" | "rejectedReason", ExtArgs["result"]["transaction"]>
+export type TransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "status" | "createdAt" | "updatedAt" | "orderId" | "paidAt" | "paymentMethod" | "paymentProof" | "verifiedAt" | "verifiedBy" | "canceledAt" | "canceledBy" | "rejectedReason", ExtArgs["result"]["transaction"]>
 export type TransactionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
   admin?: boolean | Prisma.Transaction$adminArgs<ExtArgs>
@@ -985,15 +985,15 @@ export type $TransactionPayload<ExtArgs extends runtime.Types.Extensions.Interna
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
-    orderId: number
-    paymentMethod: $Enums.paymentMethod
-    paymentProof: string | null
     status: $Enums.transactionStatus
     createdAt: Date
     updatedAt: Date
+    orderId: number
     paidAt: Date | null
-    verifiedBy: number | null
+    paymentMethod: $Enums.paymentMethod
+    paymentProof: string | null
     verifiedAt: Date | null
+    verifiedBy: number | null
     canceledAt: Date | null
     canceledBy: $Enums.cancelActor | null
     rejectedReason: string | null
@@ -1423,15 +1423,15 @@ export interface Prisma__TransactionClient<T, Null = never, ExtArgs extends runt
  */
 export interface TransactionFieldRefs {
   readonly id: Prisma.FieldRef<"Transaction", 'Int'>
-  readonly orderId: Prisma.FieldRef<"Transaction", 'Int'>
-  readonly paymentMethod: Prisma.FieldRef<"Transaction", 'paymentMethod'>
-  readonly paymentProof: Prisma.FieldRef<"Transaction", 'String'>
   readonly status: Prisma.FieldRef<"Transaction", 'transactionStatus'>
   readonly createdAt: Prisma.FieldRef<"Transaction", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Transaction", 'DateTime'>
+  readonly orderId: Prisma.FieldRef<"Transaction", 'Int'>
   readonly paidAt: Prisma.FieldRef<"Transaction", 'DateTime'>
-  readonly verifiedBy: Prisma.FieldRef<"Transaction", 'Int'>
+  readonly paymentMethod: Prisma.FieldRef<"Transaction", 'paymentMethod'>
+  readonly paymentProof: Prisma.FieldRef<"Transaction", 'String'>
   readonly verifiedAt: Prisma.FieldRef<"Transaction", 'DateTime'>
+  readonly verifiedBy: Prisma.FieldRef<"Transaction", 'Int'>
   readonly canceledAt: Prisma.FieldRef<"Transaction", 'DateTime'>
   readonly canceledBy: Prisma.FieldRef<"Transaction", 'cancelActor'>
   readonly rejectedReason: Prisma.FieldRef<"Transaction", 'String'>

@@ -1,6 +1,12 @@
+import {
+  getOrganizerAttendeesPath,
+  getOrganizerProfilePath,
+  getOrganizerSettingsPath,
+  getOrganizerStatisticsPath,
+} from "@/config/site-navigation";
 import { useAuthStore } from "@/store/auth-store";
-import { Link, NavLink, useNavigate } from "react-router";
 import type { ReactNode } from "react";
+import { Link, NavLink, useNavigate } from "react-router";
 
 type OrganizerShellProps = {
   title: string;
@@ -41,8 +47,13 @@ export default function OrganizerShell({
       icon: "dashboard",
     },
     {
+      label: "Profile",
+      to: getOrganizerProfilePath(organizerId),
+      icon: "person",
+    },
+    {
       label: "Statistics",
-      to: organizerId ? `/organizer/${organizerId}/statistics` : "/organizer/dashboard",
+      to: getOrganizerStatisticsPath(organizerId),
       icon: "bar_chart",
     },
     {
@@ -52,12 +63,12 @@ export default function OrganizerShell({
     },
     {
       label: "Attendees",
-      to: organizerId ? `/organizer/${organizerId}/attendees` : "/organizer/dashboard",
+      to: getOrganizerAttendeesPath(organizerId),
       icon: "groups",
     },
     {
       label: "Settings",
-      to: organizerId ? `/organizer/${organizerId}/settings` : "/organizer/dashboard",
+      to: getOrganizerSettingsPath(organizerId),
       icon: "settings",
     },
   ];
@@ -69,7 +80,7 @@ export default function OrganizerShell({
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <div className="mx-auto flex min-h-screen max-w-[1600px]">
+      <div className="mx-auto flex min-h-screen max-w-[1600px] flex-col md:flex-row">
         <aside className="hidden w-72 shrink-0 border-r border-slate-200 bg-white/90 p-5 backdrop-blur md:flex md:flex-col dark:border-slate-800 dark:bg-slate-950/80">
           <Link className="flex items-center gap-3 px-3 py-2" to="/">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white">
@@ -101,10 +112,7 @@ export default function OrganizerShell({
           </nav>
 
           <div className="space-y-2 border-t border-slate-200 pt-4 dark:border-slate-800">
-            <Link
-              className={getNavLinkClass(false)}
-              to="/help"
-            >
+            <Link className={getNavLinkClass(false)} to="/help">
               <span className="material-symbols-outlined text-lg">help</span>
               <span>Help Center</span>
             </Link>
@@ -145,6 +153,33 @@ export default function OrganizerShell({
               </div>
             </div>
           </header>
+
+          <div className="border-b border-slate-200 bg-white/85 px-4 py-3 backdrop-blur md:hidden dark:border-slate-800 dark:bg-slate-950/85">
+            <div className="overflow-x-auto">
+              <div className="flex min-w-max gap-2">
+                {navItems.map((item) => (
+                  <NavLink
+                    className={({ isActive }) => getNavLinkClass(isActive)}
+                    key={item.label}
+                    to={item.to}
+                  >
+                    <span className="material-symbols-outlined text-lg">
+                      {item.icon}
+                    </span>
+                    <span>{item.label}</span>
+                  </NavLink>
+                ))}
+                <button
+                  className={`${getNavLinkClass(false)} shrink-0`}
+                  onClick={handleLogout}
+                  type="button"
+                >
+                  <span className="material-symbols-outlined text-lg">logout</span>
+                  <span>Log Out</span>
+                </button>
+              </div>
+            </div>
+          </div>
 
           <main className="flex-1 px-4 py-6 md:px-8 md:py-8">{children}</main>
         </div>

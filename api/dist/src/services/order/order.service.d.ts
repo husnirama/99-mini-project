@@ -1,6 +1,5 @@
 import type { CreateOrderPayload } from "../../types/order-type.js";
-export default function orderCreation(payload: CreateOrderPayload, customerId?: number): Promise<{
-    guestToken: string | null;
+export default function orderCreation(payload: CreateOrderPayload, customerId: number): Promise<{
     order: {
         id: number;
         createdAt: Date;

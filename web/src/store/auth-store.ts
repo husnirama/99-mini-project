@@ -16,6 +16,8 @@ type AuthSnapshot = {
   isAuthenticated: boolean;
 };
 
+const REGISTER_REFERRAL_POINTS = 10000;
+
 interface AuthState extends AuthSnapshot {
   isReady: boolean;
   login: (data: LoginCredentials) => Promise<User>;
@@ -66,13 +68,27 @@ export const useAuthStore = create<AuthState>()(
         role,
         referralCode,
       }: RegisterCredentials) => {
-        await authClient.post(API_ENDPOINTS.AUTH.REGISTER, {
+        const normalizedReferralCode = referralCode?.trim();
+        const response = await authClient.post(API_ENDPOINTS.AUTH.REGISTER, {
           name,
           email,
           password,
           role,
-          ...(referralCode ? { referralCode } : {}),
+          ...(normalizedReferralCode
+            ? { referralCode: normalizedReferralCode }
+            : {}),
         });
+
+        const createdUser = response.data.data as User | undefined;
+
+        if (normalizedReferralCode && createdUser?.id) {
+          await authClient.post(API_ENDPOINTS.POINTS.REGISTER, {
+            userId: createdUser.id,
+            points: REGISTER_REFERRAL_POINTS,
+            source: "REFERRAL",
+            referralCode: normalizedReferralCode,
+          });
+        }
       },
 
       logout: async () => {

@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { apiClient } from "@/api/clients";
 import { API_ENDPOINTS } from "@/api/endpoint";
 import EventCard from "@/components/EventCard";
+import { buildAuthRedirectPath } from "@/lib/auth-redirect";
+import { useAuthStore } from "@/store/auth-store";
 import type { EventDetail } from "@/types/eventDetailTypes";
 import type { EventItem } from "@/types/eventListTypes";
 import { formatDate, formatPrice, formatTime } from "@/utils/eventList.utils";
@@ -27,7 +29,7 @@ function pickRandomEvents(
   return pool.slice(0, limit);
 }
 
-function getTicketStatusConfig(status?: string) {
+function getTicketStatusConfig(status?: string, isAuthenticated: boolean = false) {
   if (status === "ACTIVE") {
     return {
       badgeClass:
@@ -37,7 +39,7 @@ function getTicketStatusConfig(status?: string) {
       buttonClass:
         "w-full py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary/90 transition-colors",
       badgeText: "Available",
-      buttonText: "Select",
+      buttonText: isAuthenticated ? "Select" : "Sign in to buy",
       buttonDisabled: false,
     };
   }
@@ -69,9 +71,26 @@ function getTicketStatusConfig(status?: string) {
   };
 }
 
+function formatReviewDate(value?: string | null) {
+  if (!value) {
+    return "-";
+  }
+
+  return new Date(value).toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function getReviewerInitial(name?: string | null) {
+  return name?.trim().charAt(0).toUpperCase() || "U";
+}
+
 export default function EventDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [recommendedEvents, setRecommendedEvents] = useState<EventItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -82,7 +101,15 @@ export default function EventDetail() {
       return;
     }
 
-    navigate(`/events/${event.id}/checkout?ticketId=${ticketId}`);
+    const checkoutPath = `/events/${event.id}/checkout?ticketId=${ticketId}`;
+
+    if (!isAuthenticated) {
+      toast.info("Sign in or create an account before buying tickets.");
+      navigate(buildAuthRedirectPath(checkoutPath));
+      return;
+    }
+
+    navigate(checkoutPath);
   }
 
   useEffect(() => {
@@ -158,6 +185,9 @@ export default function EventDetail() {
       typeof ticket.eventId === "number" ? ticket.eventId === event.id : true,
     );
   }, [event]);
+  const eventReviews = event?.reviews ?? [];
+  const totalReviews = event?.reviewStats?.totalReviews ?? eventReviews.length;
+  const averageRating = event?.reviewStats?.averageRating ?? null;
 
   function scrollRecommendations(direction: "left" | "right") {
     const list = recommendedListRef.current;
@@ -314,6 +344,90 @@ export default function EventDetail() {
             </section>
 
             <section>
+              <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold">Customer Reviews</h2>
+                  <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                    Read feedback from verified attendees who already joined this
+                    event.
+                  </p>
+                </div>
+                <div className="inline-flex w-fit items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                  <div className="flex items-center gap-1 text-amber-500">
+                    <span className="material-symbols-outlined text-xl">star</span>
+                    <span className="text-lg font-bold text-slate-900 dark:text-white">
+                      {averageRating ?? "-"}
+                    </span>
+                  </div>
+                  <span className="text-xs font-medium uppercase tracking-wider text-slate-400">
+                    {totalReviews} review{totalReviews === 1 ? "" : "s"}
+                  </span>
+                </div>
+              </div>
+
+              {eventReviews.length > 0 ? (
+                <div className="space-y-4">
+                  {eventReviews.map((review) => (
+                    <article
+                      className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                      key={review.id}
+                    >
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                        <div className="flex items-center gap-3 sm:w-56 sm:flex-shrink-0">
+                          {review.user.profilePicture ? (
+                            <img
+                              alt={review.user.name}
+                              className="h-12 w-12 rounded-full object-cover"
+                              src={review.user.profilePicture}
+                            />
+                          ) : (
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                              {getReviewerInitial(review.user.name)}
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-semibold text-slate-900 dark:text-white">
+                              {review.user.name}
+                            </p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              Verified attendee
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex-1">
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex text-amber-500">
+                              {Array.from({ length: 5 }, (_, index) => (
+                                <span
+                                  className="material-symbols-outlined text-sm"
+                                  key={index}
+                                >
+                                  {index < review.rating ? "star" : "star_outline"}
+                                </span>
+                              ))}
+                            </div>
+                            <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
+                              Updated {formatReviewDate(review.updatedAt)}
+                            </p>
+                          </div>
+
+                          <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                            {review.comment || "No comment was provided."}
+                          </p>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                  No public reviews yet for this event.
+                </div>
+              )}
+            </section>
+
+            <section>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold">Event For You</h2>
                 <div className="flex items-center gap-2">
@@ -374,7 +488,10 @@ export default function EventDetail() {
                 {eventTickets.length > 0 ? (
                   <div className="space-y-4 mb-8">
                     {eventTickets.map((ticket) => {
-                      const ticketStatus = getTicketStatusConfig(ticket.status);
+                      const ticketStatus = getTicketStatusConfig(
+                        ticket.status,
+                        isAuthenticated,
+                      );
                       const price = Number(ticket.price);
                       const hasValidPrice = Number.isFinite(price);
 

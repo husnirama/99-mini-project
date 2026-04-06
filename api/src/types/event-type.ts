@@ -12,6 +12,7 @@ export interface VenueInput {
 }
 
 export interface TicketTypeInput {
+  id?: number;
   name: string;
   availability: TicketAvailability;
   price: string;
@@ -26,6 +27,7 @@ export interface ContactInfoInput {
 }
 
 export interface PromotionInput {
+  id?: number;
   name: string;
   code: string;
   discountType: PromotionDiscountType;
@@ -43,6 +45,7 @@ export interface CreateEventInput {
   eventDescription?: string;
   eventDateStart: Date;
   eventDateEnd: Date;
+  status?: "DRAFT" | "PUBLISHED" | "CANCELLED";
   termsAccepted: boolean;
   venue: VenueInput;
   ticketTypes: TicketTypeInput[];

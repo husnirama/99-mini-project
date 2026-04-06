@@ -10,8 +10,11 @@ export const API_ENDPOINTS = {
     CREATE: "/event/draft",
     SHOW: "/event/event-list",
     FIND: (id: string | number) => `/event/${id}`,
+    MANAGE_FIND: (id: string | number) => `/event/manage/${id}`,
+    UPDATE: (id: string | number) => `/event/${id}`,
   },
   ORDERS: {
+    PREVIEW: "/order/preview",
     CREATE: "/order/creation",
   },
   TRANSACTIONS: {
@@ -26,14 +29,22 @@ export const API_ENDPOINTS = {
     CANCEL: (transactionId: string | number) =>
       `/transaction/${transactionId}/cancel`,
   },
+  POINTS: {
+    REGISTER: "/points/register",
+  },
   CUSTOMERS: {
-    PROFILE: "/user/customer/profile",
-    PASSWORD: "/user/customer/profile/password",
+    PROFILE: "/customer/profile",
+    PROFILE_IMAGE: "/customer/profile/image",
+    PASSWORD: "/customer/profile/password",
     COUPONS: "/user/customer/coupons",
+    POINTS: "/customer/points",
+    REVIEWS: "/customer/reviews",
+    TICKETS: "/customer/tickets",
   },
   ORGANIZER: {
     DASHBOARD: "/organizer/dashboard",
     PROFILE: "/organizer/profile",
+    PROFILE_IMAGE: "/organizer/profile/image",
     PASSWORD: "/organizer/profile/password",
   },
 };

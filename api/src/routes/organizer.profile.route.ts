@@ -7,7 +7,9 @@ import {
   handleGetOrganizerProfile,
   handleUpdateOrganizerPassword,
   handleUpdateOrganizerProfile,
+  handleUpdateOrganizerProfilePicture,
 } from "../controllers/organizer.profile.controller.js";
+import { upload } from "../middlewares/upload.middleware.js";
 
 const router = express.Router();
 router.get(
@@ -43,6 +45,13 @@ router.patch(
   requireAuth,
   requireRole("EVENT_ORGANIZER"),
   handleUpdateOrganizerProfile,
+);
+router.patch(
+  "/profile/image",
+  requireAuth,
+  requireRole("EVENT_ORGANIZER"),
+  upload.single("image"),
+  handleUpdateOrganizerProfilePicture,
 );
 router.patch(
   "/profile/password",

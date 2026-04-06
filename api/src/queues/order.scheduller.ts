@@ -29,7 +29,7 @@ export async function registerTransactionJob(
       transactionId,
     },
     {
-      delay: 3 * 24 * 60 * 60 * 1000,
+      delay: 1 * 1 * 2 * 60 * 1000,
       jobId: `expire-admin-review-${transactionId}`,
     },
   );

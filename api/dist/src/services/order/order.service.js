@@ -5,9 +5,8 @@ import { getTicketInfo, resolveBuyerInfo, resolvePromotion, calculateOrderAmount
 import { createTransaction } from "../transaction.service.js";
 import { Prisma } from "../../generated/prisma/client.js";
 import { registerOrderJob } from "../../queues/order.scheduller.js";
-import { generateGuestToken, hashGuestToken } from "../../utils/guest-token.js";
 export default async function orderCreation(payload, customerId) {
-    const { buyerName, buyerEmail } = await resolveBuyerInfo(payload, customerId ?? null);
+    const { buyerName, buyerEmail } = await resolveBuyerInfo(customerId);
     const ticketInfo = await getTicketInfo(payload.ticketTypeId, payload.eventId);
     validateTicketAvailability(ticketInfo);
     const unitPrice = Number(ticketInfo?.price);
@@ -15,12 +14,6 @@ export default async function orderCreation(payload, customerId) {
     const { promotionId, discountAmount } = await resolvePromotion(payload.voucherCode, initialAmount);
     const { subTotalAmount, totalAmount } = calculateOrderAmounts(payload.quantity, unitPrice, discountAmount);
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
-    let guestToken = null;
-    let guestTokenHash = null;
-    if (!customerId) {
-        guestToken = generateGuestToken();
-        guestTokenHash = hashGuestToken(guestToken);
-    }
     const result = await prisma.$transaction(async (tx) => {
         const freshTicketType = await tx.ticketType.findFirst({
             where: {
@@ -92,7 +85,7 @@ export default async function orderCreation(payload, customerId) {
         }
         const order = await tx.order.create({
             data: {
-                customerId: customerId ?? null,
+                customerId,
                 eventId: payload.eventId,
                 ticketTypeId: payload.ticketTypeId,
                 quantity: payload.quantity,
@@ -104,10 +97,9 @@ export default async function orderCreation(payload, customerId) {
                 voucherCode: payload.voucherCode ?? null,
                 buyerName,
                 buyerEmail,
-                buyerPhone: payload.buyerPhone,
+                buyerPhone: payload.buyerPhone.trim(),
                 expiresAt,
                 status: "PENDING",
-                guestTokenHash,
             },
         });
         const transaction = await createTransaction(tx, {
@@ -123,11 +115,8 @@ export default async function orderCreation(payload, customerId) {
         cacheTags.organizerDashboard(ticketInfo.event.organizeBy),
         cacheTags.organizerScope(ticketInfo.event.organizeBy),
         cacheTags.transactionsOrganizer(ticketInfo.event.organizeBy),
-        ...(customerId ? [cacheTags.transactionsUser(customerId)] : []),
+        cacheTags.transactionsUser(customerId),
     ]);
-    return {
-        ...result,
-        guestToken,
-    };
+    return result;
 }
 //# sourceMappingURL=order.service.js.map

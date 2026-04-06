@@ -1,5 +1,5 @@
+import { srLatn } from "date-fns/locale";
 import { prisma } from "../../lib/prisma.js";
-import type { CreateOrderPayload } from "../../types/order-type.js";
 import { AppError } from "../../utils/app-error.js";
 
 export async function getUserInfo(customerId: number) {
@@ -33,10 +33,11 @@ export async function getTicketInfo(ticketTypeId: number, eventId: number) {
   });
 }
 
-export async function getPromotionInfo(voucherCode: string) {
+export async function getPromotionInfo(voucherCode: string, eventId: number) {
   return prisma.promotion.findFirst({
     where: {
       code: voucherCode,
+      eventId,
       deletedAt: null,
     },
     select: {
@@ -53,26 +54,16 @@ export async function getPromotionInfo(voucherCode: string) {
   });
 }
 
-export async function resolveBuyerInfo(
-  payload: CreateOrderPayload,
-  customerId: number | null,
-) {
-  let buyerName = payload.buyerName;
-  let buyerEmail = payload.buyerEmail;
-
-  if (!customerId) {
-    return { buyerName, buyerEmail };
-  }
-
+export async function resolveBuyerInfo(customerId: number) {
   const buyerInfo = await getUserInfo(customerId);
   if (!buyerInfo) {
     throw new AppError("User Not Found", 404);
   }
 
-  buyerName = buyerInfo.name;
-  buyerEmail = buyerInfo.email;
-
-  return { buyerName, buyerEmail };
+  return {
+    buyerName: buyerInfo.name,
+    buyerEmail: buyerInfo.email,
+  };
 }
 
 export function calculateOrderAmounts(
@@ -97,7 +88,12 @@ export function validateTicketAvailability(
     event: { deletedAt: Date | null };
   } | null,
 ) {
-  const now = new Date();
+  const now = new Date(
+    new Date().toLocaleTimeString("en-US", {
+      timeZone: "Asia/Jakarta",
+    }),
+  );
+
   if (!ticket || ticket.event.deletedAt) {
     throw new AppError("Ticket not found", 404);
   }
@@ -107,6 +103,7 @@ export function validateTicketAvailability(
   }
 
   if (ticket.salesStartAt && now < ticket.salesStartAt) {
+    console.log("Sales Start At:", ticket.salesStartAt, now);
     throw new AppError("Ticket sales has not started yet", 400);
   }
 
@@ -115,18 +112,80 @@ export function validateTicketAvailability(
   }
 }
 
+export async function getCustomerAvailablePoints(customerId: number) {
+  const pointsBalance = await prisma.points.aggregate({
+    where: {
+      userId: customerId,
+      deletedAt: null,
+    },
+    _sum: {
+      points: true,
+    },
+  });
+
+  return Math.max(0, pointsBalance._sum.points ?? 0);
+}
+
+export function normalizeRedeemedPoints(redeemedPoints?: number) {
+  if (!Number.isFinite(redeemedPoints)) {
+    return 0;
+  }
+
+  return Math.max(0, Math.floor(redeemedPoints ?? 0));
+}
+
+export function calculatePromotionDiscount(
+  promotion: {
+    discountType: "PERCENTAGE" | "FIXED";
+    discountValue: number | string | { toString(): string };
+    maxDiscount?: number | string | { toString(): string } | null;
+  },
+  subTotal: number,
+) {
+  let discountAmount = 0;
+
+  if (promotion.discountType === "PERCENTAGE") {
+    discountAmount = Math.floor(
+      (subTotal * Number(promotion.discountValue)) / 100,
+    );
+
+    if (promotion.maxDiscount !== null && promotion.maxDiscount !== undefined) {
+      discountAmount = Math.min(discountAmount, Number(promotion.maxDiscount));
+    }
+  }
+
+  if (promotion.discountType === "FIXED") {
+    discountAmount = Number(promotion.discountValue);
+  }
+
+  return Math.min(discountAmount, subTotal);
+}
+
+export function calculatePointsDiscount(
+  redeemedPoints: number,
+  availablePoints: number,
+  remainingAmount: number,
+) {
+  return Math.min(
+    normalizeRedeemedPoints(redeemedPoints),
+    Math.max(0, availablePoints),
+    Math.max(0, remainingAmount),
+  );
+}
+
 export async function resolvePromotion(
   voucherCode: string | undefined,
   subTotal: number,
+  eventId: number,
 ) {
   if (!voucherCode) {
     return {
       promotionId: null as number | null,
-      discountAmount: 0,
+      voucherDiscountAmount: 0,
     };
   }
 
-  const promotionInfo = await getPromotionInfo(voucherCode);
+  const promotionInfo = await getPromotionInfo(voucherCode, eventId);
 
   if (!promotionInfo) {
     throw new AppError("Voucher Code is invalid", 400);
@@ -158,21 +217,8 @@ export async function resolvePromotion(
     throw new AppError("Voucher quota has been execeeded", 400);
   }
 
-  let discountAmount = 0;
-  if (promotionInfo.discountType === "PERCENTAGE") {
-    discountAmount = Math.floor(
-      (subTotal * Number(promotionInfo.discountValue)) / 100,
-    );
-  }
-
-  if (promotionInfo.discountType === "FIXED") {
-    discountAmount = Number(promotionInfo.discountValue);
-  }
-
-  discountAmount = Math.min(discountAmount, subTotal);
-
   return {
     promotionId: promotionInfo.id,
-    discountAmount,
+    voucherDiscountAmount: calculatePromotionDiscount(promotionInfo, subTotal),
   };
 }

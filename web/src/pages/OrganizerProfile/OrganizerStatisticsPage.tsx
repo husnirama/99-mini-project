@@ -7,6 +7,7 @@ import useOrganizerDashboard from "@/hooks/useOrganizerDashboard";
 import { useAuthStore } from "@/store/auth-store";
 import { formatEventDate } from "@/utils/eventList.utils";
 import { formatCurrency } from "@/utils/orderTransaction.utils";
+import { getPositiveIntegerSearchParam } from "@/utils/search-params.utils";
 import { Link, useSearchParams } from "react-router";
 
 function formatSoldTickets(
@@ -25,9 +26,12 @@ export default function OrganizerStatisticsPage() {
   const { dashboard, isLoading } = useOrganizerDashboard();
   const [searchParams] = useSearchParams();
   const organizerId = useAuthStore((state) => state.user?.id);
-  const eventIdFromQuery = Number(searchParams.get("eventId"));
+  const eventIdFromQuery = getPositiveIntegerSearchParam(
+    searchParams,
+    "eventId",
+  );
   const selectedEvent =
-    Number.isFinite(eventIdFromQuery) && dashboard?.eventSummary
+    eventIdFromQuery !== null && dashboard?.eventSummary
       ? dashboard.eventSummary.find((event) => event.id === eventIdFromQuery) ?? null
       : null;
 

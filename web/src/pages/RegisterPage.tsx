@@ -1,4 +1,5 @@
 import type { UserRole } from "@/api/types";
+import { buildAuthRedirectPath } from "@/lib/auth-redirect";
 import { registerSchema } from "@/validatons/auth.validation";
 import { useAuthStore } from "@/store/auth-store";
 import { useFormik } from "formik";
@@ -16,6 +17,10 @@ export default function RegisterPage() {
       ? "EVENT_ORGANIZER"
       : "CUSTOMER";
   const defaultEmail = searchParams.get("email") ?? "";
+  const requestedRedirect = searchParams.get("redirect");
+  const loginPath = requestedRedirect
+    ? buildAuthRedirectPath(requestedRedirect, "login")
+    : "/auth/login";
 
   const formik = useFormik({
     initialValues: {
@@ -36,7 +41,7 @@ export default function RegisterPage() {
     },
   });
 
-  if (success) return <Navigate replace to="/auth/login" />;
+  if (success) return <Navigate replace to={loginPath} />;
 
   return (
     <div className="flex min-h-screen w-full">
@@ -262,7 +267,7 @@ export default function RegisterPage() {
               <div className="my-1 h-px w-full bg-slate-100 dark:bg-slate-800"></div>
               <p className="text-sm text-slate-600 dark:text-slate-400">
                 Already have an account?{" "}
-                <Link className="font-bold text-blue-700 hover:underline" to="/auth/login">
+                <Link className="font-bold text-blue-700 hover:underline" to={loginPath}>
                   Log in
                 </Link>
               </p>
