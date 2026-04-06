@@ -9,9 +9,6 @@ import { AppError } from "../utils/app-error.js";
 import { loginSchema, registerSchema } from "../validations/auth.validation.js";
 import SendEmail from "../utils/email.js";
 
-<<<<<<< HEAD
-const ACCESS_TOKEN_EXPIRES_IN = "1d";
-=======
 const ACCESS_TOKEN_EXPIRES_IN = "1h";
 const REFERRAL_REWARD_POINTS = 10_000;
 const REFERRAL_COUPON_PROMOTION_ID = 1;
@@ -19,7 +16,6 @@ const REFERRAL_COUPON_PROMOTION_ID = 1;
 type ReferralOwnerRow = {
   id: number;
 };
->>>>>>> d814dc9e2277622fef8c5d70512b4f2fa988d592
 
 // register service
 export async function createUser(data: UserCreateInput) {
