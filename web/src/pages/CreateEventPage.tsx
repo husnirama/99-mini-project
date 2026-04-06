@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { X } from "lucide-react";
 import MapPicker from "@/components/MapPicker";
 import { useJsApiLoader } from "@react-google-maps/api";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { useAuthStore } from "@/store/auth-store";
 import type {
   UploadedFile,
@@ -48,7 +48,116 @@ function createEmptyPromotionVoucher(): PromotionVoucher {
   };
 }
 
+type EditableEvent = {
+  id: number;
+  title: string;
+  category?: string | null;
+  eventDescription?: string | null;
+  eventDateStart: string;
+  eventDateEnd: string;
+  status?: string;
+  termsAccepted: boolean;
+  venue?: Array<{
+    id: number;
+    name: string;
+    addressLine: string;
+    city: string;
+    region?: string | null;
+    country: string;
+    latitude?: number | string | null;
+    longitude?: number | string | null;
+  }>;
+  ticket?: Array<{
+    id: number;
+    name: string;
+    price: number | string;
+    quota?: number;
+    contactPerson: string;
+    emailContactPerson: string;
+    phoneContactPerson: string;
+  }>;
+  promotion?: Array<{
+    id: number;
+    name: string;
+    code: string;
+    discountType: "PERCENTAGE" | "FIXED";
+    discountValue: number | string;
+    maxDiscount?: number | string | null;
+    minPurchase?: number | string | null;
+    quota: number;
+    startDate?: string | null;
+    endDate?: string | null;
+  }>;
+  eventImage?: Array<{
+    id: number;
+    imageURL: string;
+  }>;
+};
+
+function formatDateInput(value?: string | null) {
+  if (!value) {
+    return "";
+  }
+
+  const currentDate = new Date(value);
+  if (Number.isNaN(currentDate.getTime())) {
+    return "";
+  }
+
+  const localDate = new Date(
+    currentDate.getTime() - currentDate.getTimezoneOffset() * 60000,
+  );
+
+  return localDate.toISOString().slice(0, 10);
+}
+
+function formatTimeInput(value?: string | null) {
+  if (!value) {
+    return "";
+  }
+
+  const currentDate = new Date(value);
+  if (Number.isNaN(currentDate.getTime())) {
+    return "";
+  }
+
+  const localDate = new Date(
+    currentDate.getTime() - currentDate.getTimezoneOffset() * 60000,
+  );
+
+  return localDate.toISOString().slice(11, 16);
+}
+
+function splitPhoneContact(value?: string | null) {
+  const phonePrefixes = ["ID +62", "SG +65", "MY +60", "US +1"];
+
+  if (!value) {
+    return {
+      countryCode: "ID +62",
+      phoneNumber: "",
+    };
+  }
+
+  const matchedPrefix = phonePrefixes.find(
+    (prefix) => value === prefix || value.startsWith(`${prefix} `),
+  );
+
+  if (!matchedPrefix) {
+    return {
+      countryCode: "ID +62",
+      phoneNumber: value.replace(/\D/g, ""),
+    };
+  }
+
+  return {
+    countryCode: matchedPrefix,
+    phoneNumber: value.slice(matchedPrefix.length).trim().replace(/\D/g, ""),
+  };
+}
+
 export default function CreateEventPage() {
+  const { eventId } = useParams();
+  const isEditMode = Boolean(eventId);
   const [eventData, setEventData] = useState({
     title: "",
     category: "",
@@ -100,6 +209,9 @@ export default function CreateEventPage() {
     phoneNumber: "",
   });
   const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
+  const [isLoadingEvent, setIsLoadingEvent] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { isLoaded: isMapsLoaded } = useJsApiLoader({
     id: "google-maps-script",
@@ -115,6 +227,12 @@ export default function CreateEventPage() {
   const organizerStatisticsPath = getOrganizerStatisticsPath(organizerId);
   const organizerAttendeesPath = getOrganizerAttendeesPath(organizerId);
   const organizerSettingsPath = getOrganizerSettingsPath(organizerId);
+  const pageTitle = isEditMode ? "Update Event" : "Create New Event";
+  const pageDescription = isEditMode
+    ? "Update your event details, tickets, promotions, and publishing status."
+    : "Set up your event details, tickets, and schedule to start selling.";
+  const headerSubmitLabel = isEditMode ? "Save Changes" : "Save Draft";
+  const submitButtonLabel = isEditMode ? "Update Event" : "Create Event";
   const handleLogout = async () => {
     await logout();
     navigate("/", { replace: true });
@@ -187,6 +305,150 @@ export default function CreateEventPage() {
     document.addEventListener("mousedown", handleOutsideClick);
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
+
+  useEffect(() => {
+    if (!isEditMode || !eventId) {
+      return;
+    }
+
+    let isMounted = true;
+
+    async function fetchOwnedEvent() {
+      setIsLoadingEvent(true);
+      setLoadError(null);
+
+      try {
+        const response = await apiClient.get(API_ENDPOINTS.EVENTS.MANAGE_FIND(eventId));
+        const nextEvent = response.data.data as EditableEvent;
+
+        if (!isMounted) {
+          return;
+        }
+
+        const currentVenue = nextEvent.venue?.[0];
+        const coverImage = nextEvent.eventImage?.[0];
+        const primaryTicket = nextEvent.ticket?.[0];
+        const phoneContact = splitPhoneContact(primaryTicket?.phoneContactPerson);
+        const latitude =
+          currentVenue?.latitude !== null && currentVenue?.latitude !== undefined
+            ? Number(currentVenue.latitude)
+            : null;
+        const longitude =
+          currentVenue?.longitude !== null && currentVenue?.longitude !== undefined
+            ? Number(currentVenue.longitude)
+            : null;
+
+        setEventData({
+          title: nextEvent.title ?? "",
+          category: nextEvent.category ?? "",
+          addressLine: currentVenue?.addressLine ?? "",
+          city: currentVenue?.city ?? "",
+          state: currentVenue?.region ?? "",
+          country: currentVenue?.country ?? "",
+          latitude:
+            currentVenue?.latitude !== null && currentVenue?.latitude !== undefined
+              ? String(currentVenue.latitude)
+              : "",
+          longitude:
+            currentVenue?.longitude !== null && currentVenue?.longitude !== undefined
+              ? String(currentVenue.longitude)
+              : "",
+          eventDescription: nextEvent.eventDescription ?? "",
+        });
+        setEventSchedule({
+          startDate: formatDateInput(nextEvent.eventDateStart),
+          startTime: formatTimeInput(nextEvent.eventDateStart),
+          endDate: formatDateInput(nextEvent.eventDateEnd),
+          endTime: formatTimeInput(nextEvent.eventDateEnd),
+        });
+        setLocationQuery(currentVenue?.name ?? currentVenue?.addressLine ?? "");
+        setCoords(
+          latitude !== null &&
+            longitude !== null &&
+            Number.isFinite(latitude) &&
+            Number.isFinite(longitude)
+            ? { lat: latitude, lng: longitude }
+            : null,
+        );
+        setSingleFile(
+          coverImage
+            ? {
+                id: `event-image-${coverImage.id}`,
+                name: `event-image-${coverImage.id}`,
+                rawFile: null,
+                preview: coverImage.imageURL,
+              }
+            : null,
+        );
+        setTicketTiers(
+          nextEvent.ticket?.length
+            ? nextEvent.ticket.map((ticket) => ({
+                id: uuidV4(),
+                persistedId: ticket.id,
+                name: ticket.name,
+                availability: Number(ticket.price) <= 0 ? "Free" : "Paid",
+                price: String(ticket.price ?? ""),
+                capacity:
+                  ticket.quota !== null && ticket.quota !== undefined
+                    ? String(ticket.quota)
+                    : "",
+              }))
+            : [createEmptyTicketTier()],
+        );
+        setPromotionVouchers(
+          nextEvent.promotion?.length
+            ? nextEvent.promotion.map((promotion) => ({
+                id: uuidV4(),
+                persistedId: promotion.id,
+                name: promotion.name,
+                code: promotion.code,
+                discountType: promotion.discountType,
+                discountValue: String(promotion.discountValue ?? ""),
+                maxDiscount:
+                  promotion.maxDiscount !== null &&
+                  promotion.maxDiscount !== undefined
+                    ? String(promotion.maxDiscount)
+                    : "",
+                minPurchase:
+                  promotion.minPurchase !== null &&
+                  promotion.minPurchase !== undefined
+                    ? String(promotion.minPurchase)
+                    : "",
+                quota: String(promotion.quota ?? ""),
+                startDate: formatDateInput(promotion.startDate),
+                endDate: formatDateInput(promotion.endDate),
+              }))
+            : [],
+        );
+        setContactInfo({
+          contactName: primaryTicket?.contactPerson ?? "",
+          contactEmail: primaryTicket?.emailContactPerson ?? "",
+          countryCode: phoneContact.countryCode,
+          phoneNumber: phoneContact.phoneNumber,
+        });
+        setHasAcceptedTerms(Boolean(nextEvent.termsAccepted));
+      } catch (error: any) {
+        if (!isMounted) {
+          return;
+        }
+
+        const message =
+          error?.response?.data?.message || "We couldn't load this event.";
+        setLoadError(message);
+        toast.error(message);
+      } finally {
+        if (isMounted) {
+          setIsLoadingEvent(false);
+        }
+      }
+    }
+
+    fetchOwnedEvent();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [eventId, isEditMode]);
 
   function handleSelectSuggestion(suggestion: LocationSuggestion) {
     setLocationQuery(suggestion.description);
@@ -393,6 +655,7 @@ export default function CreateEventPage() {
       reader.readAsDataURL(selectedFile);
       reader.onload = (event) => {
         const preview = event.target?.result as string;
+        setError(null);
         setSingleFile({
           id: uuidV4(),
           name: selectedFile.name,
@@ -403,8 +666,10 @@ export default function CreateEventPage() {
     }
   }
 
-  async function handleSingleFileSubmit(event: React.SubmitEvent) {
-    event.preventDefault();
+  async function submitEvent(statusOverride?: "PUBLISHED") {
+    if (isSubmitting) {
+      return;
+    }
 
     if (!eventData.title.trim()) {
       toast.error("Event name is required");
@@ -484,6 +749,7 @@ export default function CreateEventPage() {
         ].some((value) => value.trim().length > 0),
       )
       .map((voucher) => ({
+        id: voucher.persistedId,
         name: voucher.name.trim(),
         code: voucher.code.trim(),
         discountType: voucher.discountType,
@@ -518,6 +784,7 @@ export default function CreateEventPage() {
     }
 
     try {
+      setIsSubmitting(true);
       const formData = new FormData();
       formData.append("title", eventData.title.trim());
       formData.append("category", eventData.category);
@@ -525,6 +792,9 @@ export default function CreateEventPage() {
       formData.append("eventDateStart", startDateTime.toISOString());
       formData.append("eventDateEnd", endDateTime.toISOString());
       formData.append("termsAccepted", String(hasAcceptedTerms));
+      if (statusOverride) {
+        formData.append("status", statusOverride);
+      }
       formData.append(
         "venue",
         JSON.stringify({
@@ -541,6 +811,7 @@ export default function CreateEventPage() {
         "ticketTypes",
         JSON.stringify(
           ticketTiers.map((ticketTier) => ({
+            id: ticketTier.persistedId,
             name: ticketTier.name.trim(),
             availability: ticketTier.availability,
             price: ticketTier.price,
@@ -558,17 +829,48 @@ export default function CreateEventPage() {
         }),
       );
       formData.append("promotions", JSON.stringify(normalizedPromotions));
-      formData.append("arrayImages", singleFile.rawFile);
 
-      await apiClient.post(API_ENDPOINTS.EVENTS.CREATE, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      toast.success("Event Created successfully");
-    } catch (error) {
+      if (singleFile.rawFile) {
+        formData.append("arrayImages", singleFile.rawFile);
+      }
+
+      if (isEditMode && eventId) {
+        await apiClient.patch(API_ENDPOINTS.EVENTS.UPDATE(eventId), formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      } else {
+        await apiClient.post(API_ENDPOINTS.EVENTS.CREATE, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      }
+
+      toast.success(
+        statusOverride === "PUBLISHED"
+          ? "Event published successfully"
+          : isEditMode
+            ? "Event updated successfully"
+            : "Event created successfully",
+      );
+    } catch (error: any) {
       console.error(error);
-      toast.error("Upload Failed");
+      toast.error(
+        error?.response?.data?.message ||
+          (isEditMode ? "We couldn't update this event." : "Upload Failed"),
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   }
+
+  async function handleSingleFileSubmit(event: React.SubmitEvent) {
+    event.preventDefault();
+    await submitEvent();
+  }
+
+  async function handlePublishEvent() {
+    await submitEvent("PUBLISHED");
+  }
+
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md">
@@ -614,11 +916,12 @@ export default function CreateEventPage() {
             </div>
             <div className="flex items-center gap-4">
               <button
-                className="hidden sm:inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="hidden sm:inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-200 dark:hover:bg-slate-800"
+                disabled={isLoadingEvent || isSubmitting}
                 form="create-event-form"
                 type="submit"
               >
-                Save Draft
+                {isSubmitting ? "Saving..." : headerSubmitLabel}
               </button>
               <div className="relative">
                 <button
@@ -660,6 +963,23 @@ export default function CreateEventPage() {
         </div>
       </header>
       <main className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        {isEditMode && isLoadingEvent ? (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
+            Loading event data...
+          </div>
+        ) : isEditMode && loadError ? (
+          <div className="space-y-4 rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
+            <p>{loadError}</p>
+            <button
+              className="inline-flex h-11 items-center justify-center rounded-lg border border-slate-200 px-5 text-sm font-semibold text-slate-700 transition-colors hover:border-primary hover:text-primary dark:border-slate-700 dark:text-slate-200"
+              onClick={() => navigate("/organizer/dashboard")}
+              type="button"
+            >
+              Back to Dashboard
+            </button>
+          </div>
+        ) : (
+          <>
         {/* <!-- Breadcrumb & Header --> */}
         <nav className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-6">
           <Link
@@ -681,15 +1001,15 @@ export default function CreateEventPage() {
             chevron_right
           </span>
           <span className="text-slate-900 dark:text-slate-100 font-medium">
-            Create New Event
+            {pageTitle}
           </span>
         </nav>
         <div className="mb-10">
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 mb-2">
-            Create New Event
+            {pageTitle}
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
-            Set up your event details, tickets, and schedule to start selling.
+            {pageDescription}
           </p>
         </div>
         <form
@@ -874,7 +1194,7 @@ export default function CreateEventPage() {
                 {error && <p>{error}</p>}
                 {!singleFile && (
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Cover image will be uploaded when you click Create Event.
+                    Cover image will be uploaded when you click {submitButtonLabel}.
                   </p>
                 )}
               </div>
@@ -1445,21 +1765,32 @@ export default function CreateEventPage() {
               </div>
               <div className="flex items-center gap-4 w-full sm:w-auto">
                 <button
-                  className="w-full sm:w-auto px-6 py-3 text-sm font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                  className="w-full sm:w-auto rounded-lg bg-slate-100 px-6 py-3 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                   onClick={() => navigate("/organizer/dashboard")}
                   type="button"
                 >
                   Cancel
-              </button>
-              <button
-                className="w-full sm:w-auto px-10 py-3 text-sm font-bold text-white bg-primary rounded-lg hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center justify-center gap-2"
-                type="submit"
-              >
-                Create Event
-                <span className="material-symbols-outlined text-lg">
-                  rocket_launch
-                </span>
-              </button>
+                </button>
+                {isEditMode ? (
+                  <button
+                    className="w-full sm:w-auto rounded-lg border border-primary px-6 py-3 text-sm font-bold text-primary transition-colors hover:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={isSubmitting}
+                    onClick={handlePublishEvent}
+                    type="button"
+                  >
+                    {isSubmitting ? "Saving..." : "PUBLISH"}
+                  </button>
+                ) : null}
+                <button
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-10 py-3 text-sm font-bold text-white transition-all hover:shadow-lg hover:shadow-primary/30 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                  disabled={isSubmitting}
+                  type="submit"
+                >
+                  {isSubmitting ? "Saving..." : submitButtonLabel}
+                  <span className="material-symbols-outlined text-lg">
+                    rocket_launch
+                  </span>
+                </button>
             </div>
           </div>
         </form>
@@ -1503,6 +1834,8 @@ export default function CreateEventPage() {
           {/* <!-- Abstract background shape --> */}
           <div className="absolute -right-20 -bottom-20 h-64 w-64 bg-white/10 rounded-full blur-3xl"></div>
         </div>
+          </>
+        )}
       </main>
       <footer className="mt-20 border-t border-slate-200 dark:border-slate-800 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
         <p>Copyright 2024 EventHub Platform. All rights reserved.</p>

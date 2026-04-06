@@ -1,9 +1,16 @@
 import { cacheTags, invalidateCacheTags } from "../../lib/cache.js";
 import { prisma } from "../../lib/prisma.js";
 import { AppError } from "../../utils/app-error.js";
-import type { CreateOrderPayload } from "../../types/order-type.js";
+import type {
+  CreateOrderPayload,
+  PreviewOrderPayload,
+} from "../../types/order-type.js";
 import {
+  calculatePointsDiscount,
+  calculatePromotionDiscount,
   getTicketInfo,
+  getCustomerAvailablePoints,
+  normalizeRedeemedPoints,
   resolveBuyerInfo,
   resolvePromotion,
   calculateOrderAmounts,
@@ -12,30 +19,82 @@ import {
 
 import { createTransaction } from "../transaction.service.js";
 import { Prisma } from "../../generated/prisma/client.js";
-import { registerOrderJob } from "../../queues/order.scheduller.js";
+import {
+  registerOrderJob,
+  registerTransactionJob,
+} from "../../queues/order.scheduller.js";
+
+async function buildOrderPricing(
+  payload: PreviewOrderPayload,
+  customerId: number,
+) {
+  const ticketInfo = await getTicketInfo(payload.ticketTypeId, payload.eventId);
+  validateTicketAvailability(ticketInfo);
+
+  const unitPrice = Number(ticketInfo?.price);
+  const subTotalAmount = payload.quantity * unitPrice;
+  const availablePoints = await getCustomerAvailablePoints(customerId);
+  const { promotionId, voucherDiscountAmount } = await resolvePromotion(
+    payload.voucherCode,
+    subTotalAmount,
+    payload.eventId,
+  );
+  const appliedRedeemedPoints = calculatePointsDiscount(
+    payload.redeemedPoints ?? 0,
+    availablePoints,
+    subTotalAmount - voucherDiscountAmount,
+  );
+  const discountAmount = voucherDiscountAmount + appliedRedeemedPoints;
+  const { totalAmount } = calculateOrderAmounts(
+    payload.quantity,
+    unitPrice,
+    discountAmount,
+  );
+
+  return {
+    ticketInfo,
+    unitPrice,
+    subTotalAmount,
+    totalAmount,
+    discountAmount,
+    promotionId,
+    voucherDiscountAmount,
+    pointsDiscountAmount: appliedRedeemedPoints,
+    appliedRedeemedPoints,
+    availablePoints,
+  };
+}
+
+export async function previewOrderPricing(
+  payload: PreviewOrderPayload,
+  customerId: number,
+) {
+  const pricing = await buildOrderPricing(payload, customerId);
+
+  return {
+    unitPrice: pricing.unitPrice,
+    quantity: payload.quantity,
+    subTotalAmount: pricing.subTotalAmount,
+    voucherDiscountAmount: pricing.voucherDiscountAmount,
+    pointsDiscountAmount: pricing.pointsDiscountAmount,
+    totalDiscountAmount: pricing.discountAmount,
+    totalAmount: pricing.totalAmount,
+    availablePoints: pricing.availablePoints,
+    appliedRedeemedPoints: pricing.appliedRedeemedPoints,
+    voucherCode: payload.voucherCode ?? null,
+  };
+}
 
 export default async function orderCreation(
   payload: CreateOrderPayload,
   customerId: number,
 ) {
   const { buyerName, buyerEmail } = await resolveBuyerInfo(customerId);
-  const ticketInfo = await getTicketInfo(payload.ticketTypeId, payload.eventId);
-  validateTicketAvailability(ticketInfo);
-
-  const unitPrice = Number(ticketInfo?.price);
-  const initialAmount = payload.quantity * Number(unitPrice);
-
-  const { promotionId, discountAmount } = await resolvePromotion(
-    payload.voucherCode,
-    initialAmount,
+  const pricing = await buildOrderPricing(payload, customerId);
+  const normalizedRedeemedPoints = normalizeRedeemedPoints(
+    payload.redeemedPoints,
   );
-
-  const { subTotalAmount, totalAmount } = calculateOrderAmounts(
-    payload.quantity,
-    unitPrice,
-    discountAmount,
-  );
-  const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+  const expiresAt = new Date(Date.now() + 1 * 60 * 1000);
 
   const result = await prisma.$transaction(
     async (tx: Prisma.TransactionClient) => {
@@ -70,12 +129,8 @@ export default async function orderCreation(
         throw new AppError("Ticket Stock is not enough", 400);
       }
 
-      await tx.ticketType.update({
-        where: { id: freshTicketType!.id },
-        data: {
-          reserved: reserved + payload.quantity,
-        },
-      });
+      let promotionId = pricing.promotionId;
+      let voucherDiscountAmount = pricing.voucherDiscountAmount;
 
       if (promotionId) {
         const freshPromotion = await tx.promotion.findUnique({
@@ -87,6 +142,9 @@ export default async function orderCreation(
             startDate: true,
             endDate: true,
             deletedAt: true,
+            discountType: true,
+            discountValue: true,
+            maxDiscount: true,
           },
         });
 
@@ -113,13 +171,51 @@ export default async function orderCreation(
           throw new AppError("Voucher quota has been exhausted", 400);
         }
 
+        voucherDiscountAmount = calculatePromotionDiscount(
+          freshPromotion,
+          pricing.subTotalAmount,
+        );
+
         await tx.promotion.update({
           where: { id: freshPromotion.id },
           data: {
             usedCount: currentUsedCount + 1,
           },
         });
+      } else {
+        promotionId = null;
+        voucherDiscountAmount = 0;
       }
+
+      const freshPointsBalance = await tx.points.aggregate({
+        where: {
+          userId: customerId,
+          deletedAt: null,
+        },
+        _sum: {
+          points: true,
+        },
+      });
+      const availablePoints = Math.max(0, freshPointsBalance._sum.points ?? 0);
+      const pointsDiscountAmount = calculatePointsDiscount(
+        normalizedRedeemedPoints,
+        availablePoints,
+        pricing.subTotalAmount - voucherDiscountAmount,
+      );
+      const discountAmount = voucherDiscountAmount + pointsDiscountAmount;
+      const { subTotalAmount, totalAmount } = calculateOrderAmounts(
+        payload.quantity,
+        pricing.unitPrice,
+        discountAmount,
+      );
+      const isZeroAmountOrder = totalAmount <= 0;
+
+      await tx.ticketType.update({
+        where: { id: freshTicketType!.id },
+        data: {
+          reserved: reserved + payload.quantity,
+        },
+      });
 
       const order = await tx.order.create({
         data: {
@@ -127,7 +223,7 @@ export default async function orderCreation(
           eventId: payload.eventId,
           ticketTypeId: payload.ticketTypeId,
           quantity: payload.quantity,
-          unitPrice,
+          unitPrice: pricing.unitPrice,
           subTotalAmount,
           discountAmount,
           totalAmount,
@@ -141,23 +237,50 @@ export default async function orderCreation(
         },
       });
 
+      if (pointsDiscountAmount > 0) {
+        await tx.points.create({
+          data: {
+            userId: customerId,
+            points: -pointsDiscountAmount,
+            discount: order.id,
+            source: "PURCHASE",
+            expiresAt,
+          },
+        });
+      }
+
       const transaction = await createTransaction(tx, {
         orderId: order.id,
         paymentMethod: payload.paymentMethod,
+        status: isZeroAmountOrder
+          ? "WAITING_FOR_ADMIN_CONFIRMATION"
+          : "WAITING_FOR_PAYMENT",
       });
 
-      return { order, transaction };
+      return { order, transaction, isZeroAmountOrder };
     },
   );
-  await registerOrderJob(result.order.id, result.transaction.id, expiresAt);
+
+  if (result.isZeroAmountOrder) {
+    await registerTransactionJob(result.order.id, result.transaction.id);
+  } else {
+    await registerOrderJob(result.order.id, result.transaction.id, expiresAt);
+  }
+
   await invalidateCacheTags([
     cacheTags.eventsList,
     cacheTags.event(payload.eventId),
-    cacheTags.organizerDashboard(ticketInfo!.event.organizeBy),
-    cacheTags.organizerScope(ticketInfo!.event.organizeBy),
-    cacheTags.transactionsOrganizer(ticketInfo!.event.organizeBy),
+    cacheTags.organizerDashboard(pricing.ticketInfo!.event.organizeBy),
+    cacheTags.organizerScope(pricing.ticketInfo!.event.organizeBy),
+    cacheTags.transactionsOrganizer(pricing.ticketInfo!.event.organizeBy),
     cacheTags.transactionsUser(customerId),
+    cacheTags.customerPoints(customerId),
+    cacheTags.customerProfile(customerId),
+    cacheTags.customerScope(customerId),
   ]);
 
-  return result;
+  return {
+    order: result.order,
+    transaction: result.transaction,
+  };
 }

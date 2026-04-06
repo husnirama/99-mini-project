@@ -71,6 +71,22 @@ function getTicketStatusConfig(status?: string, isAuthenticated: boolean = false
   };
 }
 
+function formatReviewDate(value?: string | null) {
+  if (!value) {
+    return "-";
+  }
+
+  return new Date(value).toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function getReviewerInitial(name?: string | null) {
+  return name?.trim().charAt(0).toUpperCase() || "U";
+}
+
 export default function EventDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -169,6 +185,9 @@ export default function EventDetail() {
       typeof ticket.eventId === "number" ? ticket.eventId === event.id : true,
     );
   }, [event]);
+  const eventReviews = event?.reviews ?? [];
+  const totalReviews = event?.reviewStats?.totalReviews ?? eventReviews.length;
+  const averageRating = event?.reviewStats?.averageRating ?? null;
 
   function scrollRecommendations(direction: "left" | "right") {
     const list = recommendedListRef.current;
@@ -321,6 +340,90 @@ export default function EventDetail() {
                 <p className="text-sm text-slate-500">
                   No tags available for this event.
                 </p>
+              )}
+            </section>
+
+            <section>
+              <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold">Customer Reviews</h2>
+                  <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                    Read feedback from verified attendees who already joined this
+                    event.
+                  </p>
+                </div>
+                <div className="inline-flex w-fit items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                  <div className="flex items-center gap-1 text-amber-500">
+                    <span className="material-symbols-outlined text-xl">star</span>
+                    <span className="text-lg font-bold text-slate-900 dark:text-white">
+                      {averageRating ?? "-"}
+                    </span>
+                  </div>
+                  <span className="text-xs font-medium uppercase tracking-wider text-slate-400">
+                    {totalReviews} review{totalReviews === 1 ? "" : "s"}
+                  </span>
+                </div>
+              </div>
+
+              {eventReviews.length > 0 ? (
+                <div className="space-y-4">
+                  {eventReviews.map((review) => (
+                    <article
+                      className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                      key={review.id}
+                    >
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                        <div className="flex items-center gap-3 sm:w-56 sm:flex-shrink-0">
+                          {review.user.profilePicture ? (
+                            <img
+                              alt={review.user.name}
+                              className="h-12 w-12 rounded-full object-cover"
+                              src={review.user.profilePicture}
+                            />
+                          ) : (
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                              {getReviewerInitial(review.user.name)}
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-semibold text-slate-900 dark:text-white">
+                              {review.user.name}
+                            </p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              Verified attendee
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex-1">
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex text-amber-500">
+                              {Array.from({ length: 5 }, (_, index) => (
+                                <span
+                                  className="material-symbols-outlined text-sm"
+                                  key={index}
+                                >
+                                  {index < review.rating ? "star" : "star_outline"}
+                                </span>
+                              ))}
+                            </div>
+                            <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
+                              Updated {formatReviewDate(review.updatedAt)}
+                            </p>
+                          </div>
+
+                          <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                            {review.comment || "No comment was provided."}
+                          </p>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                  No public reviews yet for this event.
+                </div>
               )}
             </section>
 

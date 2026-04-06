@@ -1,312 +1,426 @@
+import { apiClient } from "@/api/clients";
+import { API_ENDPOINTS } from "@/api/endpoint";
 import SideNavigation from "@/components/customer/SideNavigation";
 import TopNavigation from "@/components/customer/TopNavigation";
+import { formatDate } from "@/utils/eventList.utils";
+import { useEffect, useState } from "react";
+import { Link } from "react-router";
+import { toast } from "sonner";
 
-export default function CustomerTickets() {
+type ReviewEventSnapshot = {
+  id: number;
+  title: string;
+  eventDateStart: string;
+  eventDateEnd: string;
+  image: string | null;
+  locationLabel: string;
+};
+
+type CustomerWrittenReview = {
+  id: number;
+  eventId: number;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+  updatedAt: string;
+  event: ReviewEventSnapshot;
+};
+
+type CustomerReviewsResponse = {
+  stats: {
+    attendedEvents: number;
+    reviewsWritten: number;
+    averageRating: number | null;
+  };
+  pendingReviews: ReviewEventSnapshot[];
+  writtenReviews: CustomerWrittenReview[];
+};
+
+type ReviewDraft = {
+  rating: number;
+  comment: string;
+};
+
+function getDefaultDraft(): ReviewDraft {
+  return {
+    rating: 5,
+    comment: "",
+  };
+}
+
+function formatReviewDate(value?: string | null) {
+  if (!value) {
+    return "-";
+  }
+
+  return new Date(value).toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+export default function CustomerReviews() {
+  const [reviews, setReviews] = useState<CustomerReviewsResponse | null>(null);
+  const [drafts, setDrafts] = useState<Record<number, ReviewDraft>>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [submittingEventId, setSubmittingEventId] = useState<number | null>(
+    null,
+  );
+
+  async function fetchReviews() {
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.CUSTOMERS.REVIEWS);
+      const nextReviews = response.data.data as CustomerReviewsResponse;
+
+      setReviews(nextReviews);
+      setDrafts((current) => {
+        const nextDrafts = { ...current };
+
+        nextReviews.pendingReviews.forEach((event) => {
+          if (!nextDrafts[event.id]) {
+            nextDrafts[event.id] = getDefaultDraft();
+          }
+        });
+
+        return nextDrafts;
+      });
+    } catch (error) {
+      console.error("Failed to fetch customer reviews", error);
+      setReviews(null);
+      setErrorMessage("We couldn't load your reviews right now.");
+      toast.error("We couldn't load your reviews.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchReviews();
+  }, []);
+
+  function handleDraftChange(eventId: number, patch: Partial<ReviewDraft>) {
+    setDrafts((current) => ({
+      ...current,
+      [eventId]: {
+        ...(current[eventId] ?? getDefaultDraft()),
+        ...patch,
+      },
+    }));
+  }
+
+  async function handleSubmitReview(eventId: number) {
+    const draft = drafts[eventId] ?? getDefaultDraft();
+    setSubmittingEventId(eventId);
+
+    try {
+      await apiClient.post(API_ENDPOINTS.CUSTOMERS.REVIEWS, {
+        eventId,
+        rating: draft.rating,
+        comment: draft.comment,
+      });
+      toast.success("Review submitted successfully.");
+      setDrafts((current) => {
+        const nextDrafts = { ...current };
+        delete nextDrafts[eventId];
+        return nextDrafts;
+      });
+      await fetchReviews();
+    } catch (error) {
+      console.error("Failed to submit review", error);
+      toast.error("We couldn't submit your review.");
+    } finally {
+      setSubmittingEventId(null);
+    }
+  }
+
   return (
     <>
-      {/* top navigation */}
       <TopNavigation />
-      <div className="max-w-9xl flex gap-8 p-6 lg:p-10">
-        {/* side navigation */}
+      <div className="max-w-9xl mx-auto flex flex-col gap-6 p-4 sm:p-6 md:flex-row lg:p-5">
         <SideNavigation />
-        {/* main content */}
-        <main className="flex-1 min-w-0">
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 mb-8 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-6">
-              <div className="relative">
-                <img
-                  alt="Large User Profile"
-                  className="w-24 h-24 rounded-full border-4 border-white dark:border-slate-800 shadow-md"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdOy3S697-0rTw3sGeoHk6IB6_0zE21gDWOEqJyrziw5s8g2kQX28qb6TlT2Md--j9Z88s6hLb9Ms0lXmZb08CtUfBOIYb1cW_413SY48ssfwXUVDkNm4vpLHqC2oprhg1ZpIKMJS4_nBTL5vtHYdRyXklt68jf1Qb3UhT09aDX5pj4Yy-UXROD4_a-TZC8OjtIqT1ZpFT4pS6N6H1Qg5FH89u8fhEKZFCpeaYucd-fhrflWIPkD3THvRcv9OzWte4XBEOcTeBmpi3"
-                />
-                <button className="absolute bottom-0 right-0 bg-primary text-white p-1.5 rounded-full border-2 border-white dark:border-slate-900 hover:scale-110 transition-transform">
-                  <span className="material-icons-outlined text-sm">edit</span>
-                </button>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold">Alex Rivera</h1>
-                <p className="text-slate-500 dark:text-slate-400">
-                  alex.rivera@example.com
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-xs text-slate-400">
-                    Member since 2023
+        <main className="min-w-0 flex-1">
+          {isLoading ? (
+            <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              Loading your reviews...
+            </div>
+          ) : errorMessage ? (
+            <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              {errorMessage}
+            </div>
+          ) : (
+            <div className="space-y-8">
+              <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">
+                      Customer Reviews
+                    </p>
+                    <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                      Share your event experience
+                    </h1>
+                    <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                      Review completed events from your real booking history and
+                      revisit what you already submitted.
+                    </p>
+                  </div>
+                  <Link
+                    className="inline-flex h-11 items-center justify-center rounded-lg border border-slate-200 px-5 text-sm font-semibold text-slate-700 transition-colors hover:border-primary hover:text-primary dark:border-slate-700 dark:text-slate-200"
+                    to="/customer/dashboard"
+                  >
+                    Back to Tickets
+                  </Link>
+                </div>
+              </section>
+
+              <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                  <p className="mb-1 text-xs font-bold uppercase tracking-widest text-slate-400">
+                    Attended Events
+                  </p>
+                  <p className="text-2xl font-bold">
+                    {reviews?.stats.attendedEvents ?? 0}
+                  </p>
+                </article>
+                <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                  <p className="mb-1 text-xs font-bold uppercase tracking-widest text-slate-400">
+                    Reviews Written
+                  </p>
+                  <p className="text-2xl font-bold">
+                    {reviews?.stats.reviewsWritten ?? 0}
+                  </p>
+                </article>
+                <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                  <p className="mb-1 text-xs font-bold uppercase tracking-widest text-slate-400">
+                    Average Rating
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-2xl font-bold text-amber-500">
+                      {reviews?.stats.averageRating ?? "-"}
+                    </p>
+                    <span className="material-symbols-outlined text-xl text-amber-500">
+                      star
+                    </span>
+                  </div>
+                </article>
+              </section>
+
+              <section className="space-y-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <h2 className="text-lg font-bold">Awaiting Your Review</h2>
+                  <span className="text-xs font-medium text-slate-500">
+                    {reviews?.pendingReviews.length ?? 0} event
+                    {(reviews?.pendingReviews.length ?? 0) === 1 ? "" : "s"}
                   </span>
                 </div>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <button className="px-5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                View Public Profile
-              </button>
-              <button className="px-5 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-blue-700 transition-colors shadow-lg shadow-primary/20">
-                Edit Settings
-              </button>
-            </div>
-          </div>
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-              <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
-                  Total Events
-                </p>
-                <p className="text-2xl font-bold">24</p>
-              </div>
-              <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
-                  Reviews Written
-                </p>
-                <p className="text-2xl font-bold">12</p>
-              </div>
-              <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
-                  Average Rating
-                </p>
-                <div className="flex items-center gap-2">
-                  <p className="text-2xl font-bold text-amber-500">4.8</p>
-                  <span className="material-symbols-outlined text-amber-500 star-filled text-xl">
-                    star
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold">Recent Past Events</h2>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500 font-medium">
-                  Filter by:
-                </span>
-                <select className="text-xs bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg py-1 px-3 focus:ring-primary">
-                  <option>All Past Events</option>
-                  <option>Awaiting Review</option>
-                  <option>Reviewed</option>
-                </select>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
-                <div className="p-5">
-                  <div className="flex flex-col md:flex-row gap-5">
-                    <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
-                      <img
-                        alt="Past Event"
-                        className="w-full h-full object-cover"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQgT_-pC3mM8iMLHlTedATpErAZ5BRvkxVTSsIcunXxtCrYOjiYTL-kzbmt8D9rLuJXmqlo53dnXnAxxHGYywgFlhQSUwqMko4thc1LZqcrvv2JACvwSjKC4WRkk8KAOo0oOWjTbYEZemoc5q5F1cDMNtUIc3xHL3HmDFO4kKJhoErAxGU6MZr6q8HYTEZfwFCwm1X6nuhBZ_snaDzelwY0k9ylJomf3TTuk7oUMPErTr93IcEeYBDCAMk7qqP6eMEa8HgNmAuNHHU"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex flex-col md:flex-row md:items-start justify-between gap-2">
-                        <div>
-                          <h3 className="font-bold text-base">
-                            Global Food Carnival 2024
-                          </h3>
-                          <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
-                            <span className="material-icons-outlined text-sm">
-                              calendar_today
-                            </span>{" "}
-                            Jan 20, 2024
-                            <span className="mx-2">•</span>
-                            <span className="material-icons-outlined text-sm">
-                              location_on
-                            </span>{" "}
-                            Sentul International Circuit
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-1 text-xs font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-1 rounded-full border border-green-100 dark:border-green-800/50">
-                          <span className="material-symbols-outlined text-sm star-filled">
-                            check_circle
-                          </span>
-                          REVIEWED
-                        </div>
-                      </div>
-                      <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="flex text-amber-500">
-                            <span className="material-symbols-outlined text-sm star-filled">
-                              star
-                            </span>
-                            <span className="material-symbols-outlined text-sm star-filled">
-                              star
-                            </span>
-                            <span className="material-symbols-outlined text-sm star-filled">
-                              star
-                            </span>
-                            <span className="material-symbols-outlined text-sm star-filled">
-                              star
-                            </span>
-                            <span className="material-symbols-outlined text-sm star-filled">
-                              star
-                            </span>
+
+                {reviews?.pendingReviews.length ? (
+                  reviews.pendingReviews.map((event) => {
+                    const draft = drafts[event.id] ?? getDefaultDraft();
+
+                    return (
+                      <article
+                        className="overflow-hidden rounded-xl border border-primary/30 bg-white shadow-md ring-1 ring-primary/5 dark:border-primary/20 dark:bg-slate-900"
+                        key={event.id}
+                      >
+                        <div className="p-5">
+                          <div className="flex flex-col gap-5 md:flex-row">
+                            <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg">
+                              <img
+                                alt={event.title}
+                                className="h-full w-full object-cover"
+                                src={
+                                  event.image ||
+                                  "https://via.placeholder.com/240x240?text=Event"
+                                }
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                                <div>
+                                  <h3 className="font-bold text-base">
+                                    {event.title}
+                                  </h3>
+                                  <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                                    <span className="material-icons-outlined text-sm">
+                                      calendar_today
+                                    </span>
+                                    {formatDate(event.eventDateStart)}
+                                    <span className="material-icons-outlined text-sm">
+                                      location_on
+                                    </span>
+                                    {event.locationLabel || "Venue TBA"}
+                                  </p>
+                                </div>
+                                <Link
+                                  className="text-xs font-bold text-primary hover:underline"
+                                  to={`/events/${event.id}`}
+                                >
+                                  View Event
+                                </Link>
+                              </div>
+
+                              <div className="mt-6 border-t border-slate-100 pt-5 dark:border-slate-800">
+                                <div className="mb-4">
+                                  <label className="mb-2 block text-sm font-bold text-slate-700 dark:text-slate-300">
+                                    How was your experience?
+                                  </label>
+                                  <div className="mb-4 flex gap-1">
+                                    {Array.from({ length: 5 }, (_, index) => {
+                                      const ratingValue = index + 1;
+                                      const isActive =
+                                        ratingValue <= draft.rating;
+
+                                      return (
+                                        <button
+                                          className={
+                                            isActive
+                                              ? "text-amber-400 transition-colors"
+                                              : "text-slate-200 transition-colors hover:text-amber-400 dark:text-slate-700"
+                                          }
+                                          key={ratingValue}
+                                          onClick={() =>
+                                            handleDraftChange(event.id, {
+                                              rating: ratingValue,
+                                            })
+                                          }
+                                          type="button"
+                                        >
+                                          <span className="material-symbols-outlined text-3xl">
+                                            star
+                                          </span>
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                  <textarea
+                                    className="min-h-[100px] w-full rounded-xl border-slate-200 bg-slate-50 p-4 text-sm transition-all focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-800"
+                                    onChange={(eventTarget) =>
+                                      handleDraftChange(event.id, {
+                                        comment: eventTarget.target.value,
+                                      })
+                                    }
+                                    placeholder="Share details of your experience to help others..."
+                                    value={draft.comment}
+                                  />
+                                </div>
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                  <p className="flex items-center gap-1 text-xs text-slate-400">
+                                    <span className="material-icons-outlined text-sm">
+                                      verified
+                                    </span>
+                                    Your review will be public
+                                  </p>
+                                  <button
+                                    className="w-full rounded-lg bg-primary px-6 py-2 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                                    disabled={submittingEventId === event.id}
+                                    onClick={() => handleSubmitReview(event.id)}
+                                    type="button"
+                                  >
+                                    {submittingEventId === event.id
+                                      ? "Submitting..."
+                                      : "Submit Review"}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                            Jan 22, 2024
-                          </span>
                         </div>
-                        <p className="text-sm text-slate-600 dark:text-slate-300 italic">
-                          "The variety of food was incredible! Well organized
-                          and the mobile app for ordering worked flawlessly.
-                          Can't wait for next year."
-                        </p>
-                      </div>
-                    </div>
+                      </article>
+                    );
+                  })
+                ) : (
+                  <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    No completed events are waiting for a review right now.
                   </div>
-                </div>
-              </div>
-              <div className="bg-white dark:bg-slate-900 rounded-xl border border-primary/30 dark:border-primary/20 overflow-hidden shadow-md ring-1 ring-primary/5">
-                <div className="p-5">
-                  <div className="flex flex-col md:flex-row gap-5">
-                    <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
-                      <img
-                        alt="Past Event"
-                        className="w-full h-full object-cover"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCD_Cf3xilgC0eAUyVZhzmnE0tVHXNX_Alw-pTXwc20EKB9S_Vi4yBM5CSlnCLYbRjon-QR6xGp35iVHVxSYG6pbPoJLFbGE72odFrSI5tJSs6uZGw30uv2OXDA1JaZ5Q2m99Fe1AXAJ2K1BlPlQYzF6ZRQPkMgZvY7S70i0tzqtqBYGwP_Iggnk0FRKL4I01kgXseLFKN1ehONpcKoXADOVlIqkgYRjCvoVIWWOwqxjYvpaGcLwQDMAJTqfrbXRdG12uAdxa6rcYQu"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex flex-col md:flex-row md:items-start justify-between gap-2">
-                        <div>
-                          <h3 className="font-bold text-base">
-                            UI/UX Designer Meetup 2024
-                          </h3>
-                          <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
-                            <span className="material-icons-outlined text-sm">
-                              calendar_today
-                            </span>{" "}
-                            March 12, 2024
-                            <span className="mx-2">•</span>
-                            <span className="material-icons-outlined text-sm">
-                              location_on
-                            </span>{" "}
-                            Co-working Space ID
-                          </p>
-                        </div>
-                        <button className="text-primary text-xs font-bold flex items-center gap-1 hover:underline">
-                          <span className="material-icons-outlined text-sm">
-                            flag
-                          </span>{" "}
-                          Report Issue
-                        </button>
-                      </div>
-                      <div className="mt-6 border-t border-slate-100 dark:border-slate-800 pt-5">
-                        <div className="mb-4">
-                          <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                            How was your experience?
-                          </label>
-                          <div className="flex gap-1 mb-4">
-                            <button className="text-amber-400 hover:text-amber-500 transition-colors">
-                              <span className="material-symbols-outlined text-3xl star-filled">
-                                star
-                              </span>
-                            </button>
-                            <button className="text-amber-400 hover:text-amber-500 transition-colors">
-                              <span className="material-symbols-outlined text-3xl star-filled">
-                                star
-                              </span>
-                            </button>
-                            <button className="text-amber-400 hover:text-amber-500 transition-colors">
-                              <span className="material-symbols-outlined text-3xl star-filled">
-                                star
-                              </span>
-                            </button>
-                            <button className="text-amber-400 hover:text-amber-500 transition-colors">
-                              <span className="material-symbols-outlined text-3xl star-filled">
-                                star
-                              </span>
-                            </button>
-                            <button className="text-slate-200 dark:text-slate-700 hover:text-amber-400 transition-colors">
-                              <span className="material-symbols-outlined text-3xl">
-                                star
-                              </span>
-                            </button>
+                )}
+              </section>
+
+              <section className="space-y-4">
+                <h2 className="text-lg font-bold">Review History</h2>
+
+                {reviews?.writtenReviews.length ? (
+                  reviews.writtenReviews.map((review) => (
+                    <article
+                      className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                      key={review.id}
+                    >
+                      <div className="p-5">
+                        <div className="flex flex-col gap-5 md:flex-row">
+                          <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg">
+                            <img
+                              alt={review.event.title}
+                              className="h-full w-full object-cover"
+                              src={
+                                review.event.image ||
+                                "https://via.placeholder.com/240x240?text=Event"
+                              }
+                            />
                           </div>
-                          <textarea
-                            className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl text-sm p-4 focus:ring-primary focus:border-primary transition-all min-h-[100px]"
-                            placeholder="Share details of your experience to help others..."
-                          ></textarea>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs text-slate-400 flex items-center gap-1">
-                            <span className="material-icons-outlined text-sm">
-                              verified
-                            </span>
-                            Your review will be public
-                          </p>
-                          <div className="flex gap-3">
-                            <button className="px-5 py-2 rounded-lg text-sm font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                              Cancel
-                            </button>
-                            <button className="px-6 py-2 bg-primary text-white rounded-lg text-sm font-bold hover:bg-blue-700 shadow-lg shadow-primary/20 transition-all">
-                              Submit Review
-                            </button>
+                          <div className="flex-1">
+                            <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                              <div>
+                                <h3 className="font-bold text-base">
+                                  {review.event.title}
+                                </h3>
+                                <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                                  <span className="material-icons-outlined text-sm">
+                                    calendar_today
+                                  </span>
+                                  {formatDate(review.event.eventDateStart)}
+                                  <span className="material-icons-outlined text-sm">
+                                    location_on
+                                  </span>
+                                  {review.event.locationLabel || "Venue TBA"}
+                                </p>
+                              </div>
+                              <Link
+                                className="text-xs font-bold text-primary hover:underline"
+                                to={`/events/${review.event.id}`}
+                              >
+                                View Event
+                              </Link>
+                            </div>
+
+                            <div className="mt-4 rounded-lg border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+                              <div className="mb-2 flex items-center gap-3">
+                                <div className="flex text-amber-500">
+                                  {Array.from({ length: 5 }, (_, index) => (
+                                    <span
+                                      className="material-symbols-outlined text-sm"
+                                      key={index}
+                                    >
+                                      {index < review.rating
+                                        ? "star"
+                                        : "star_outline"}
+                                    </span>
+                                  ))}
+                                </div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                  Updated {formatReviewDate(review.updatedAt)}
+                                </span>
+                              </div>
+                              <p className="text-sm italic text-slate-600 dark:text-slate-300">
+                                {review.comment || "No comment was provided."}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </article>
+                  ))
+                ) : (
+                  <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    You haven't submitted any reviews yet.
                   </div>
-                </div>
-              </div>
-              <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
-                <div className="p-5 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                      <img
-                        alt="Past Event"
-                        className="w-full h-full object-cover"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeYybI2RqEW8sTO2hgRqGTUIEsan2Kj-H0dg092eUNHGm0_SN5LU3E7RLQhfGVzC02ql7Nn-lKU7nCTNm7CYoaOEUD0ZkdzcW24mEyqs5OVnN1gZhf1McHVy30x03E5c_eSnKPxtVdy9iuncGQPJwS3zkka92sLgYUCRfNeaT0-4zgJxr2wxpxniu8HwU5-DBEMpHZDULpYdeGf4-Ed806cuYfgN-DNtPsxtOmGaPeokXFHZKsvXBiJxNv44c05R-VyxSLzeFlbbQJ"
-                      />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-sm">
-                        Jazz Under the Stars
-                      </h4>
-                      <p className="text-xs text-slate-500">
-                        Feb 14, 2024 • City Park Amphitheater
-                      </p>
-                    </div>
-                  </div>
-                  <button className="bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all text-sm font-bold px-6 py-2.5 rounded-lg border border-primary/20">
-                    Write a Review
-                  </button>
-                </div>
-              </div>
+                )}
+              </section>
             </div>
-            <div className="pt-4 flex justify-center">
-              <button className="text-sm font-bold text-slate-500 hover:text-primary transition-colors flex items-center gap-2">
-                Show More Events
-                <span className="material-icons-outlined">expand_more</span>
-              </button>
-            </div>
-          </div>
-          <div className="mt-12 p-8 border-t border-slate-200 dark:border-slate-800 text-center">
-            <p className="text-slate-500 text-sm">
-              Need help with your reviews or bookings?{" "}
-              <a className="text-primary font-bold hover:underline" href="#">
-                Contact Support
-              </a>
-            </p>
-            <div className="mt-6 flex justify-center gap-8">
-              <div className="text-center">
-                <p className="text-2xl font-bold">24</p>
-                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">
-                  Total Events
-                </p>
-              </div>
-              <div className="w-[1px] bg-slate-200 dark:bg-slate-800 h-10"></div>
-              <div className="text-center">
-                <p className="text-2xl font-bold">12</p>
-                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">
-                  Reviews Left
-                </p>
-              </div>
-              <div className="w-[1px] bg-slate-200 dark:bg-slate-800 h-10"></div>
-              <div className="text-center">
-                <p className="text-2xl font-bold">1.2M</p>
-                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">
-                  IDR Saved
-                </p>
-              </div>
-            </div>
-          </div>
+          )}
         </main>
       </div>
     </>

@@ -31,8 +31,8 @@ export type TicketTypeAvgAggregateOutputType = {
   eventId: number | null
   price: runtime.Decimal | null
   quota: number | null
-  sold: number | null
   reserved: number | null
+  sold: number | null
 }
 
 export type TicketTypeSumAggregateOutputType = {
@@ -40,8 +40,8 @@ export type TicketTypeSumAggregateOutputType = {
   eventId: number | null
   price: runtime.Decimal | null
   quota: number | null
-  sold: number | null
   reserved: number | null
+  sold: number | null
 }
 
 export type TicketTypeMinAggregateOutputType = {
@@ -50,8 +50,6 @@ export type TicketTypeMinAggregateOutputType = {
   name: string | null
   price: runtime.Decimal | null
   quota: number | null
-  sold: number | null
-  reserved: number | null
   description: string | null
   salesStartAt: Date | null
   salesEndAt: Date | null
@@ -59,6 +57,8 @@ export type TicketTypeMinAggregateOutputType = {
   contactPerson: string | null
   emailContactPerson: string | null
   phoneContactPerson: string | null
+  reserved: number | null
+  sold: number | null
 }
 
 export type TicketTypeMaxAggregateOutputType = {
@@ -67,8 +67,6 @@ export type TicketTypeMaxAggregateOutputType = {
   name: string | null
   price: runtime.Decimal | null
   quota: number | null
-  sold: number | null
-  reserved: number | null
   description: string | null
   salesStartAt: Date | null
   salesEndAt: Date | null
@@ -76,6 +74,8 @@ export type TicketTypeMaxAggregateOutputType = {
   contactPerson: string | null
   emailContactPerson: string | null
   phoneContactPerson: string | null
+  reserved: number | null
+  sold: number | null
 }
 
 export type TicketTypeCountAggregateOutputType = {
@@ -84,8 +84,6 @@ export type TicketTypeCountAggregateOutputType = {
   name: number
   price: number
   quota: number
-  sold: number
-  reserved: number
   description: number
   salesStartAt: number
   salesEndAt: number
@@ -93,6 +91,8 @@ export type TicketTypeCountAggregateOutputType = {
   contactPerson: number
   emailContactPerson: number
   phoneContactPerson: number
+  reserved: number
+  sold: number
   _all: number
 }
 
@@ -102,8 +102,8 @@ export type TicketTypeAvgAggregateInputType = {
   eventId?: true
   price?: true
   quota?: true
-  sold?: true
   reserved?: true
+  sold?: true
 }
 
 export type TicketTypeSumAggregateInputType = {
@@ -111,8 +111,8 @@ export type TicketTypeSumAggregateInputType = {
   eventId?: true
   price?: true
   quota?: true
-  sold?: true
   reserved?: true
+  sold?: true
 }
 
 export type TicketTypeMinAggregateInputType = {
@@ -121,8 +121,6 @@ export type TicketTypeMinAggregateInputType = {
   name?: true
   price?: true
   quota?: true
-  sold?: true
-  reserved?: true
   description?: true
   salesStartAt?: true
   salesEndAt?: true
@@ -130,6 +128,8 @@ export type TicketTypeMinAggregateInputType = {
   contactPerson?: true
   emailContactPerson?: true
   phoneContactPerson?: true
+  reserved?: true
+  sold?: true
 }
 
 export type TicketTypeMaxAggregateInputType = {
@@ -138,8 +138,6 @@ export type TicketTypeMaxAggregateInputType = {
   name?: true
   price?: true
   quota?: true
-  sold?: true
-  reserved?: true
   description?: true
   salesStartAt?: true
   salesEndAt?: true
@@ -147,6 +145,8 @@ export type TicketTypeMaxAggregateInputType = {
   contactPerson?: true
   emailContactPerson?: true
   phoneContactPerson?: true
+  reserved?: true
+  sold?: true
 }
 
 export type TicketTypeCountAggregateInputType = {
@@ -155,8 +155,6 @@ export type TicketTypeCountAggregateInputType = {
   name?: true
   price?: true
   quota?: true
-  sold?: true
-  reserved?: true
   description?: true
   salesStartAt?: true
   salesEndAt?: true
@@ -164,6 +162,8 @@ export type TicketTypeCountAggregateInputType = {
   contactPerson?: true
   emailContactPerson?: true
   phoneContactPerson?: true
+  reserved?: true
+  sold?: true
   _all?: true
 }
 
@@ -259,8 +259,6 @@ export type TicketTypeGroupByOutputType = {
   name: string
   price: runtime.Decimal
   quota: number
-  sold: number
-  reserved: number
   description: string | null
   salesStartAt: Date
   salesEndAt: Date
@@ -268,6 +266,8 @@ export type TicketTypeGroupByOutputType = {
   contactPerson: string
   emailContactPerson: string
   phoneContactPerson: string
+  reserved: number
+  sold: number
   _count: TicketTypeCountAggregateOutputType | null
   _avg: TicketTypeAvgAggregateOutputType | null
   _sum: TicketTypeSumAggregateOutputType | null
@@ -299,8 +299,6 @@ export type TicketTypeWhereInput = {
   name?: Prisma.StringFilter<"TicketType"> | string
   price?: Prisma.DecimalFilter<"TicketType"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   quota?: Prisma.IntFilter<"TicketType"> | number
-  sold?: Prisma.IntFilter<"TicketType"> | number
-  reserved?: Prisma.IntFilter<"TicketType"> | number
   description?: Prisma.StringNullableFilter<"TicketType"> | string | null
   salesStartAt?: Prisma.DateTimeFilter<"TicketType"> | Date | string
   salesEndAt?: Prisma.DateTimeFilter<"TicketType"> | Date | string
@@ -308,8 +306,10 @@ export type TicketTypeWhereInput = {
   contactPerson?: Prisma.StringFilter<"TicketType"> | string
   emailContactPerson?: Prisma.StringFilter<"TicketType"> | string
   phoneContactPerson?: Prisma.StringFilter<"TicketType"> | string
-  event?: Prisma.XOR<Prisma.EventScalarRelationFilter, Prisma.EventWhereInput>
+  reserved?: Prisma.IntFilter<"TicketType"> | number
+  sold?: Prisma.IntFilter<"TicketType"> | number
   order?: Prisma.OrderListRelationFilter
+  event?: Prisma.XOR<Prisma.EventScalarRelationFilter, Prisma.EventWhereInput>
 }
 
 export type TicketTypeOrderByWithRelationInput = {
@@ -318,8 +318,6 @@ export type TicketTypeOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   price?: Prisma.SortOrder
   quota?: Prisma.SortOrder
-  sold?: Prisma.SortOrder
-  reserved?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   salesStartAt?: Prisma.SortOrder
   salesEndAt?: Prisma.SortOrder
@@ -327,8 +325,10 @@ export type TicketTypeOrderByWithRelationInput = {
   contactPerson?: Prisma.SortOrder
   emailContactPerson?: Prisma.SortOrder
   phoneContactPerson?: Prisma.SortOrder
-  event?: Prisma.EventOrderByWithRelationInput
+  reserved?: Prisma.SortOrder
+  sold?: Prisma.SortOrder
   order?: Prisma.OrderOrderByRelationAggregateInput
+  event?: Prisma.EventOrderByWithRelationInput
 }
 
 export type TicketTypeWhereUniqueInput = Prisma.AtLeast<{
@@ -340,8 +340,6 @@ export type TicketTypeWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"TicketType"> | string
   price?: Prisma.DecimalFilter<"TicketType"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   quota?: Prisma.IntFilter<"TicketType"> | number
-  sold?: Prisma.IntFilter<"TicketType"> | number
-  reserved?: Prisma.IntFilter<"TicketType"> | number
   description?: Prisma.StringNullableFilter<"TicketType"> | string | null
   salesStartAt?: Prisma.DateTimeFilter<"TicketType"> | Date | string
   salesEndAt?: Prisma.DateTimeFilter<"TicketType"> | Date | string
@@ -349,8 +347,10 @@ export type TicketTypeWhereUniqueInput = Prisma.AtLeast<{
   contactPerson?: Prisma.StringFilter<"TicketType"> | string
   emailContactPerson?: Prisma.StringFilter<"TicketType"> | string
   phoneContactPerson?: Prisma.StringFilter<"TicketType"> | string
-  event?: Prisma.XOR<Prisma.EventScalarRelationFilter, Prisma.EventWhereInput>
+  reserved?: Prisma.IntFilter<"TicketType"> | number
+  sold?: Prisma.IntFilter<"TicketType"> | number
   order?: Prisma.OrderListRelationFilter
+  event?: Prisma.XOR<Prisma.EventScalarRelationFilter, Prisma.EventWhereInput>
 }, "id">
 
 export type TicketTypeOrderByWithAggregationInput = {
@@ -359,8 +359,6 @@ export type TicketTypeOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   price?: Prisma.SortOrder
   quota?: Prisma.SortOrder
-  sold?: Prisma.SortOrder
-  reserved?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   salesStartAt?: Prisma.SortOrder
   salesEndAt?: Prisma.SortOrder
@@ -368,6 +366,8 @@ export type TicketTypeOrderByWithAggregationInput = {
   contactPerson?: Prisma.SortOrder
   emailContactPerson?: Prisma.SortOrder
   phoneContactPerson?: Prisma.SortOrder
+  reserved?: Prisma.SortOrder
+  sold?: Prisma.SortOrder
   _count?: Prisma.TicketTypeCountOrderByAggregateInput
   _avg?: Prisma.TicketTypeAvgOrderByAggregateInput
   _max?: Prisma.TicketTypeMaxOrderByAggregateInput
@@ -384,8 +384,6 @@ export type TicketTypeScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"TicketType"> | string
   price?: Prisma.DecimalWithAggregatesFilter<"TicketType"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   quota?: Prisma.IntWithAggregatesFilter<"TicketType"> | number
-  sold?: Prisma.IntWithAggregatesFilter<"TicketType"> | number
-  reserved?: Prisma.IntWithAggregatesFilter<"TicketType"> | number
   description?: Prisma.StringNullableWithAggregatesFilter<"TicketType"> | string | null
   salesStartAt?: Prisma.DateTimeWithAggregatesFilter<"TicketType"> | Date | string
   salesEndAt?: Prisma.DateTimeWithAggregatesFilter<"TicketType"> | Date | string
@@ -393,14 +391,14 @@ export type TicketTypeScalarWhereWithAggregatesInput = {
   contactPerson?: Prisma.StringWithAggregatesFilter<"TicketType"> | string
   emailContactPerson?: Prisma.StringWithAggregatesFilter<"TicketType"> | string
   phoneContactPerson?: Prisma.StringWithAggregatesFilter<"TicketType"> | string
+  reserved?: Prisma.IntWithAggregatesFilter<"TicketType"> | number
+  sold?: Prisma.IntWithAggregatesFilter<"TicketType"> | number
 }
 
 export type TicketTypeCreateInput = {
   name: string
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   quota: number
-  sold?: number
-  reserved?: number
   description?: string | null
   salesStartAt: Date | string
   salesEndAt: Date | string
@@ -408,8 +406,10 @@ export type TicketTypeCreateInput = {
   contactPerson: string
   emailContactPerson: string
   phoneContactPerson: string
-  event: Prisma.EventCreateNestedOneWithoutTicketInput
+  reserved?: number
+  sold?: number
   order?: Prisma.OrderCreateNestedManyWithoutTicketInput
+  event: Prisma.EventCreateNestedOneWithoutTicketInput
 }
 
 export type TicketTypeUncheckedCreateInput = {
@@ -418,8 +418,6 @@ export type TicketTypeUncheckedCreateInput = {
   name: string
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   quota: number
-  sold?: number
-  reserved?: number
   description?: string | null
   salesStartAt: Date | string
   salesEndAt: Date | string
@@ -427,6 +425,8 @@ export type TicketTypeUncheckedCreateInput = {
   contactPerson: string
   emailContactPerson: string
   phoneContactPerson: string
+  reserved?: number
+  sold?: number
   order?: Prisma.OrderUncheckedCreateNestedManyWithoutTicketInput
 }
 
@@ -434,8 +434,6 @@ export type TicketTypeUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quota?: Prisma.IntFieldUpdateOperationsInput | number
-  sold?: Prisma.IntFieldUpdateOperationsInput | number
-  reserved?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salesStartAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salesEndAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -443,8 +441,10 @@ export type TicketTypeUpdateInput = {
   contactPerson?: Prisma.StringFieldUpdateOperationsInput | string
   emailContactPerson?: Prisma.StringFieldUpdateOperationsInput | string
   phoneContactPerson?: Prisma.StringFieldUpdateOperationsInput | string
-  event?: Prisma.EventUpdateOneRequiredWithoutTicketNestedInput
+  reserved?: Prisma.IntFieldUpdateOperationsInput | number
+  sold?: Prisma.IntFieldUpdateOperationsInput | number
   order?: Prisma.OrderUpdateManyWithoutTicketNestedInput
+  event?: Prisma.EventUpdateOneRequiredWithoutTicketNestedInput
 }
 
 export type TicketTypeUncheckedUpdateInput = {
@@ -453,8 +453,6 @@ export type TicketTypeUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quota?: Prisma.IntFieldUpdateOperationsInput | number
-  sold?: Prisma.IntFieldUpdateOperationsInput | number
-  reserved?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salesStartAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salesEndAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -462,6 +460,8 @@ export type TicketTypeUncheckedUpdateInput = {
   contactPerson?: Prisma.StringFieldUpdateOperationsInput | string
   emailContactPerson?: Prisma.StringFieldUpdateOperationsInput | string
   phoneContactPerson?: Prisma.StringFieldUpdateOperationsInput | string
+  reserved?: Prisma.IntFieldUpdateOperationsInput | number
+  sold?: Prisma.IntFieldUpdateOperationsInput | number
   order?: Prisma.OrderUncheckedUpdateManyWithoutTicketNestedInput
 }
 
@@ -471,8 +471,6 @@ export type TicketTypeCreateManyInput = {
   name: string
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   quota: number
-  sold?: number
-  reserved?: number
   description?: string | null
   salesStartAt: Date | string
   salesEndAt: Date | string
@@ -480,14 +478,14 @@ export type TicketTypeCreateManyInput = {
   contactPerson: string
   emailContactPerson: string
   phoneContactPerson: string
+  reserved?: number
+  sold?: number
 }
 
 export type TicketTypeUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quota?: Prisma.IntFieldUpdateOperationsInput | number
-  sold?: Prisma.IntFieldUpdateOperationsInput | number
-  reserved?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salesStartAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salesEndAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -495,6 +493,8 @@ export type TicketTypeUpdateManyMutationInput = {
   contactPerson?: Prisma.StringFieldUpdateOperationsInput | string
   emailContactPerson?: Prisma.StringFieldUpdateOperationsInput | string
   phoneContactPerson?: Prisma.StringFieldUpdateOperationsInput | string
+  reserved?: Prisma.IntFieldUpdateOperationsInput | number
+  sold?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type TicketTypeUncheckedUpdateManyInput = {
@@ -503,8 +503,6 @@ export type TicketTypeUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quota?: Prisma.IntFieldUpdateOperationsInput | number
-  sold?: Prisma.IntFieldUpdateOperationsInput | number
-  reserved?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salesStartAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salesEndAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -512,6 +510,8 @@ export type TicketTypeUncheckedUpdateManyInput = {
   contactPerson?: Prisma.StringFieldUpdateOperationsInput | string
   emailContactPerson?: Prisma.StringFieldUpdateOperationsInput | string
   phoneContactPerson?: Prisma.StringFieldUpdateOperationsInput | string
+  reserved?: Prisma.IntFieldUpdateOperationsInput | number
+  sold?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type TicketTypeListRelationFilter = {
@@ -530,8 +530,6 @@ export type TicketTypeCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   price?: Prisma.SortOrder
   quota?: Prisma.SortOrder
-  sold?: Prisma.SortOrder
-  reserved?: Prisma.SortOrder
   description?: Prisma.SortOrder
   salesStartAt?: Prisma.SortOrder
   salesEndAt?: Prisma.SortOrder
@@ -539,6 +537,8 @@ export type TicketTypeCountOrderByAggregateInput = {
   contactPerson?: Prisma.SortOrder
   emailContactPerson?: Prisma.SortOrder
   phoneContactPerson?: Prisma.SortOrder
+  reserved?: Prisma.SortOrder
+  sold?: Prisma.SortOrder
 }
 
 export type TicketTypeAvgOrderByAggregateInput = {
@@ -546,8 +546,8 @@ export type TicketTypeAvgOrderByAggregateInput = {
   eventId?: Prisma.SortOrder
   price?: Prisma.SortOrder
   quota?: Prisma.SortOrder
-  sold?: Prisma.SortOrder
   reserved?: Prisma.SortOrder
+  sold?: Prisma.SortOrder
 }
 
 export type TicketTypeMaxOrderByAggregateInput = {
@@ -556,8 +556,6 @@ export type TicketTypeMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   price?: Prisma.SortOrder
   quota?: Prisma.SortOrder
-  sold?: Prisma.SortOrder
-  reserved?: Prisma.SortOrder
   description?: Prisma.SortOrder
   salesStartAt?: Prisma.SortOrder
   salesEndAt?: Prisma.SortOrder
@@ -565,6 +563,8 @@ export type TicketTypeMaxOrderByAggregateInput = {
   contactPerson?: Prisma.SortOrder
   emailContactPerson?: Prisma.SortOrder
   phoneContactPerson?: Prisma.SortOrder
+  reserved?: Prisma.SortOrder
+  sold?: Prisma.SortOrder
 }
 
 export type TicketTypeMinOrderByAggregateInput = {
@@ -573,8 +573,6 @@ export type TicketTypeMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   price?: Prisma.SortOrder
   quota?: Prisma.SortOrder
-  sold?: Prisma.SortOrder
-  reserved?: Prisma.SortOrder
   description?: Prisma.SortOrder
   salesStartAt?: Prisma.SortOrder
   salesEndAt?: Prisma.SortOrder
@@ -582,6 +580,8 @@ export type TicketTypeMinOrderByAggregateInput = {
   contactPerson?: Prisma.SortOrder
   emailContactPerson?: Prisma.SortOrder
   phoneContactPerson?: Prisma.SortOrder
+  reserved?: Prisma.SortOrder
+  sold?: Prisma.SortOrder
 }
 
 export type TicketTypeSumOrderByAggregateInput = {
@@ -589,8 +589,8 @@ export type TicketTypeSumOrderByAggregateInput = {
   eventId?: Prisma.SortOrder
   price?: Prisma.SortOrder
   quota?: Prisma.SortOrder
-  sold?: Prisma.SortOrder
   reserved?: Prisma.SortOrder
+  sold?: Prisma.SortOrder
 }
 
 export type TicketTypeScalarRelationFilter = {
@@ -670,8 +670,6 @@ export type TicketTypeCreateWithoutEventInput = {
   name: string
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   quota: number
-  sold?: number
-  reserved?: number
   description?: string | null
   salesStartAt: Date | string
   salesEndAt: Date | string
@@ -679,6 +677,8 @@ export type TicketTypeCreateWithoutEventInput = {
   contactPerson: string
   emailContactPerson: string
   phoneContactPerson: string
+  reserved?: number
+  sold?: number
   order?: Prisma.OrderCreateNestedManyWithoutTicketInput
 }
 
@@ -687,8 +687,6 @@ export type TicketTypeUncheckedCreateWithoutEventInput = {
   name: string
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   quota: number
-  sold?: number
-  reserved?: number
   description?: string | null
   salesStartAt: Date | string
   salesEndAt: Date | string
@@ -696,6 +694,8 @@ export type TicketTypeUncheckedCreateWithoutEventInput = {
   contactPerson: string
   emailContactPerson: string
   phoneContactPerson: string
+  reserved?: number
+  sold?: number
   order?: Prisma.OrderUncheckedCreateNestedManyWithoutTicketInput
 }
 
@@ -734,8 +734,6 @@ export type TicketTypeScalarWhereInput = {
   name?: Prisma.StringFilter<"TicketType"> | string
   price?: Prisma.DecimalFilter<"TicketType"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   quota?: Prisma.IntFilter<"TicketType"> | number
-  sold?: Prisma.IntFilter<"TicketType"> | number
-  reserved?: Prisma.IntFilter<"TicketType"> | number
   description?: Prisma.StringNullableFilter<"TicketType"> | string | null
   salesStartAt?: Prisma.DateTimeFilter<"TicketType"> | Date | string
   salesEndAt?: Prisma.DateTimeFilter<"TicketType"> | Date | string
@@ -743,14 +741,14 @@ export type TicketTypeScalarWhereInput = {
   contactPerson?: Prisma.StringFilter<"TicketType"> | string
   emailContactPerson?: Prisma.StringFilter<"TicketType"> | string
   phoneContactPerson?: Prisma.StringFilter<"TicketType"> | string
+  reserved?: Prisma.IntFilter<"TicketType"> | number
+  sold?: Prisma.IntFilter<"TicketType"> | number
 }
 
 export type TicketTypeCreateWithoutOrderInput = {
   name: string
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   quota: number
-  sold?: number
-  reserved?: number
   description?: string | null
   salesStartAt: Date | string
   salesEndAt: Date | string
@@ -758,6 +756,8 @@ export type TicketTypeCreateWithoutOrderInput = {
   contactPerson: string
   emailContactPerson: string
   phoneContactPerson: string
+  reserved?: number
+  sold?: number
   event: Prisma.EventCreateNestedOneWithoutTicketInput
 }
 
@@ -767,8 +767,6 @@ export type TicketTypeUncheckedCreateWithoutOrderInput = {
   name: string
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   quota: number
-  sold?: number
-  reserved?: number
   description?: string | null
   salesStartAt: Date | string
   salesEndAt: Date | string
@@ -776,6 +774,8 @@ export type TicketTypeUncheckedCreateWithoutOrderInput = {
   contactPerson: string
   emailContactPerson: string
   phoneContactPerson: string
+  reserved?: number
+  sold?: number
 }
 
 export type TicketTypeCreateOrConnectWithoutOrderInput = {
@@ -798,8 +798,6 @@ export type TicketTypeUpdateWithoutOrderInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quota?: Prisma.IntFieldUpdateOperationsInput | number
-  sold?: Prisma.IntFieldUpdateOperationsInput | number
-  reserved?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salesStartAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salesEndAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -807,6 +805,8 @@ export type TicketTypeUpdateWithoutOrderInput = {
   contactPerson?: Prisma.StringFieldUpdateOperationsInput | string
   emailContactPerson?: Prisma.StringFieldUpdateOperationsInput | string
   phoneContactPerson?: Prisma.StringFieldUpdateOperationsInput | string
+  reserved?: Prisma.IntFieldUpdateOperationsInput | number
+  sold?: Prisma.IntFieldUpdateOperationsInput | number
   event?: Prisma.EventUpdateOneRequiredWithoutTicketNestedInput
 }
 
@@ -816,8 +816,6 @@ export type TicketTypeUncheckedUpdateWithoutOrderInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quota?: Prisma.IntFieldUpdateOperationsInput | number
-  sold?: Prisma.IntFieldUpdateOperationsInput | number
-  reserved?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salesStartAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salesEndAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -825,6 +823,8 @@ export type TicketTypeUncheckedUpdateWithoutOrderInput = {
   contactPerson?: Prisma.StringFieldUpdateOperationsInput | string
   emailContactPerson?: Prisma.StringFieldUpdateOperationsInput | string
   phoneContactPerson?: Prisma.StringFieldUpdateOperationsInput | string
+  reserved?: Prisma.IntFieldUpdateOperationsInput | number
+  sold?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type TicketTypeCreateManyEventInput = {
@@ -832,8 +832,6 @@ export type TicketTypeCreateManyEventInput = {
   name: string
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   quota: number
-  sold?: number
-  reserved?: number
   description?: string | null
   salesStartAt: Date | string
   salesEndAt: Date | string
@@ -841,14 +839,14 @@ export type TicketTypeCreateManyEventInput = {
   contactPerson: string
   emailContactPerson: string
   phoneContactPerson: string
+  reserved?: number
+  sold?: number
 }
 
 export type TicketTypeUpdateWithoutEventInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quota?: Prisma.IntFieldUpdateOperationsInput | number
-  sold?: Prisma.IntFieldUpdateOperationsInput | number
-  reserved?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salesStartAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salesEndAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -856,6 +854,8 @@ export type TicketTypeUpdateWithoutEventInput = {
   contactPerson?: Prisma.StringFieldUpdateOperationsInput | string
   emailContactPerson?: Prisma.StringFieldUpdateOperationsInput | string
   phoneContactPerson?: Prisma.StringFieldUpdateOperationsInput | string
+  reserved?: Prisma.IntFieldUpdateOperationsInput | number
+  sold?: Prisma.IntFieldUpdateOperationsInput | number
   order?: Prisma.OrderUpdateManyWithoutTicketNestedInput
 }
 
@@ -864,8 +864,6 @@ export type TicketTypeUncheckedUpdateWithoutEventInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quota?: Prisma.IntFieldUpdateOperationsInput | number
-  sold?: Prisma.IntFieldUpdateOperationsInput | number
-  reserved?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salesStartAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salesEndAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -873,6 +871,8 @@ export type TicketTypeUncheckedUpdateWithoutEventInput = {
   contactPerson?: Prisma.StringFieldUpdateOperationsInput | string
   emailContactPerson?: Prisma.StringFieldUpdateOperationsInput | string
   phoneContactPerson?: Prisma.StringFieldUpdateOperationsInput | string
+  reserved?: Prisma.IntFieldUpdateOperationsInput | number
+  sold?: Prisma.IntFieldUpdateOperationsInput | number
   order?: Prisma.OrderUncheckedUpdateManyWithoutTicketNestedInput
 }
 
@@ -881,8 +881,6 @@ export type TicketTypeUncheckedUpdateManyWithoutEventInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quota?: Prisma.IntFieldUpdateOperationsInput | number
-  sold?: Prisma.IntFieldUpdateOperationsInput | number
-  reserved?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salesStartAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salesEndAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -890,6 +888,8 @@ export type TicketTypeUncheckedUpdateManyWithoutEventInput = {
   contactPerson?: Prisma.StringFieldUpdateOperationsInput | string
   emailContactPerson?: Prisma.StringFieldUpdateOperationsInput | string
   phoneContactPerson?: Prisma.StringFieldUpdateOperationsInput | string
+  reserved?: Prisma.IntFieldUpdateOperationsInput | number
+  sold?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 
@@ -929,8 +929,6 @@ export type TicketTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   name?: boolean
   price?: boolean
   quota?: boolean
-  sold?: boolean
-  reserved?: boolean
   description?: boolean
   salesStartAt?: boolean
   salesEndAt?: boolean
@@ -938,8 +936,10 @@ export type TicketTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   contactPerson?: boolean
   emailContactPerson?: boolean
   phoneContactPerson?: boolean
-  event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
+  reserved?: boolean
+  sold?: boolean
   order?: boolean | Prisma.TicketType$orderArgs<ExtArgs>
+  event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.TicketTypeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["ticketType"]>
 
@@ -949,8 +949,6 @@ export type TicketTypeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   name?: boolean
   price?: boolean
   quota?: boolean
-  sold?: boolean
-  reserved?: boolean
   description?: boolean
   salesStartAt?: boolean
   salesEndAt?: boolean
@@ -958,6 +956,8 @@ export type TicketTypeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   contactPerson?: boolean
   emailContactPerson?: boolean
   phoneContactPerson?: boolean
+  reserved?: boolean
+  sold?: boolean
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["ticketType"]>
 
@@ -967,8 +967,6 @@ export type TicketTypeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   name?: boolean
   price?: boolean
   quota?: boolean
-  sold?: boolean
-  reserved?: boolean
   description?: boolean
   salesStartAt?: boolean
   salesEndAt?: boolean
@@ -976,6 +974,8 @@ export type TicketTypeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   contactPerson?: boolean
   emailContactPerson?: boolean
   phoneContactPerson?: boolean
+  reserved?: boolean
+  sold?: boolean
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["ticketType"]>
 
@@ -985,8 +985,6 @@ export type TicketTypeSelectScalar = {
   name?: boolean
   price?: boolean
   quota?: boolean
-  sold?: boolean
-  reserved?: boolean
   description?: boolean
   salesStartAt?: boolean
   salesEndAt?: boolean
@@ -994,12 +992,14 @@ export type TicketTypeSelectScalar = {
   contactPerson?: boolean
   emailContactPerson?: boolean
   phoneContactPerson?: boolean
+  reserved?: boolean
+  sold?: boolean
 }
 
-export type TicketTypeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "eventId" | "name" | "price" | "quota" | "sold" | "reserved" | "description" | "salesStartAt" | "salesEndAt" | "status" | "contactPerson" | "emailContactPerson" | "phoneContactPerson", ExtArgs["result"]["ticketType"]>
+export type TicketTypeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "eventId" | "name" | "price" | "quota" | "description" | "salesStartAt" | "salesEndAt" | "status" | "contactPerson" | "emailContactPerson" | "phoneContactPerson" | "reserved" | "sold", ExtArgs["result"]["ticketType"]>
 export type TicketTypeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
   order?: boolean | Prisma.TicketType$orderArgs<ExtArgs>
+  event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.TicketTypeCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TicketTypeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1012,8 +1012,8 @@ export type TicketTypeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.E
 export type $TicketTypePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "TicketType"
   objects: {
-    event: Prisma.$EventPayload<ExtArgs>
     order: Prisma.$OrderPayload<ExtArgs>[]
+    event: Prisma.$EventPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1021,8 +1021,6 @@ export type $TicketTypePayload<ExtArgs extends runtime.Types.Extensions.Internal
     name: string
     price: runtime.Decimal
     quota: number
-    sold: number
-    reserved: number
     description: string | null
     salesStartAt: Date
     salesEndAt: Date
@@ -1030,6 +1028,8 @@ export type $TicketTypePayload<ExtArgs extends runtime.Types.Extensions.Internal
     contactPerson: string
     emailContactPerson: string
     phoneContactPerson: string
+    reserved: number
+    sold: number
   }, ExtArgs["result"]["ticketType"]>
   composites: {}
 }
@@ -1424,8 +1424,8 @@ readonly fields: TicketTypeFieldRefs;
  */
 export interface Prisma__TicketTypeClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  event<T extends Prisma.EventDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EventDefaultArgs<ExtArgs>>): Prisma.Prisma__EventClient<runtime.Types.Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   order<T extends Prisma.TicketType$orderArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TicketType$orderArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  event<T extends Prisma.EventDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EventDefaultArgs<ExtArgs>>): Prisma.Prisma__EventClient<runtime.Types.Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1460,8 +1460,6 @@ export interface TicketTypeFieldRefs {
   readonly name: Prisma.FieldRef<"TicketType", 'String'>
   readonly price: Prisma.FieldRef<"TicketType", 'Decimal'>
   readonly quota: Prisma.FieldRef<"TicketType", 'Int'>
-  readonly sold: Prisma.FieldRef<"TicketType", 'Int'>
-  readonly reserved: Prisma.FieldRef<"TicketType", 'Int'>
   readonly description: Prisma.FieldRef<"TicketType", 'String'>
   readonly salesStartAt: Prisma.FieldRef<"TicketType", 'DateTime'>
   readonly salesEndAt: Prisma.FieldRef<"TicketType", 'DateTime'>
@@ -1469,6 +1467,8 @@ export interface TicketTypeFieldRefs {
   readonly contactPerson: Prisma.FieldRef<"TicketType", 'String'>
   readonly emailContactPerson: Prisma.FieldRef<"TicketType", 'String'>
   readonly phoneContactPerson: Prisma.FieldRef<"TicketType", 'String'>
+  readonly reserved: Prisma.FieldRef<"TicketType", 'Int'>
+  readonly sold: Prisma.FieldRef<"TicketType", 'Int'>
 }
     
 

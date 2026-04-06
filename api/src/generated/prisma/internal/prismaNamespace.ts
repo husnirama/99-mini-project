@@ -393,7 +393,9 @@ export const ModelName = {
   Promotion: 'Promotion',
   Order: 'Order',
   Transaction: 'Transaction',
-  Points: 'Points'
+  Points: 'Points',
+  UserPromotion: 'UserPromotion',
+  Reviews: 'Reviews'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -409,7 +411,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "event" | "eventImage" | "venue" | "ticketType" | "promotion" | "order" | "transaction" | "points"
+    modelProps: "user" | "session" | "event" | "eventImage" | "venue" | "ticketType" | "promotion" | "order" | "transaction" | "points" | "userPromotion" | "reviews"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1153,6 +1155,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    UserPromotion: {
+      payload: Prisma.$UserPromotionPayload<ExtArgs>
+      fields: Prisma.UserPromotionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserPromotionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserPromotionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload>
+        }
+        findFirst: {
+          args: Prisma.UserPromotionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserPromotionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload>
+        }
+        findMany: {
+          args: Prisma.UserPromotionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload>[]
+        }
+        create: {
+          args: Prisma.UserPromotionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload>
+        }
+        createMany: {
+          args: Prisma.UserPromotionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserPromotionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload>[]
+        }
+        delete: {
+          args: Prisma.UserPromotionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload>
+        }
+        update: {
+          args: Prisma.UserPromotionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload>
+        }
+        deleteMany: {
+          args: Prisma.UserPromotionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserPromotionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserPromotionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload>[]
+        }
+        upsert: {
+          args: Prisma.UserPromotionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPromotionPayload>
+        }
+        aggregate: {
+          args: Prisma.UserPromotionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserPromotion>
+        }
+        groupBy: {
+          args: Prisma.UserPromotionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserPromotionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserPromotionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserPromotionCountAggregateOutputType> | number
+        }
+      }
+    }
+    Reviews: {
+      payload: Prisma.$ReviewsPayload<ExtArgs>
+      fields: Prisma.ReviewsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReviewsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReviewsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload>
+        }
+        findFirst: {
+          args: Prisma.ReviewsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReviewsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload>
+        }
+        findMany: {
+          args: Prisma.ReviewsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload>[]
+        }
+        create: {
+          args: Prisma.ReviewsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload>
+        }
+        createMany: {
+          args: Prisma.ReviewsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReviewsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload>[]
+        }
+        delete: {
+          args: Prisma.ReviewsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload>
+        }
+        update: {
+          args: Prisma.ReviewsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReviewsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReviewsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReviewsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReviewsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewsPayload>
+        }
+        aggregate: {
+          args: Prisma.ReviewsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReviews>
+        }
+        groupBy: {
+          args: Prisma.ReviewsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReviewsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReviewsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReviewsCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1198,12 +1348,13 @@ export const UserScalarFieldEnum = {
   password: 'password',
   email: 'email',
   address: 'address',
+  profilePicture: 'profilePicture',
   role: 'role',
   referralCode: 'referralCode',
   referredBy: 'referredBy',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
+  deletedAt: 'deletedAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -1225,17 +1376,17 @@ export const EventScalarFieldEnum = {
   id: 'id',
   organizeBy: 'organizeBy',
   title: 'title',
-  category: 'category',
-  image: 'image',
   eventDateStart: 'eventDateStart',
   eventDateEnd: 'eventDateEnd',
   status: 'status',
   eventDescription: 'eventDescription',
   eventTnC: 'eventTnC',
-  termsAccepted: 'termsAccepted',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
+  deletedAt: 'deletedAt',
+  image: 'image',
+  category: 'category',
+  termsAccepted: 'termsAccepted'
 } as const
 
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
@@ -1274,15 +1425,15 @@ export const TicketTypeScalarFieldEnum = {
   name: 'name',
   price: 'price',
   quota: 'quota',
-  sold: 'sold',
-  reserved: 'reserved',
   description: 'description',
   salesStartAt: 'salesStartAt',
   salesEndAt: 'salesEndAt',
   status: 'status',
   contactPerson: 'contactPerson',
   emailContactPerson: 'emailContactPerson',
-  phoneContactPerson: 'phoneContactPerson'
+  phoneContactPerson: 'phoneContactPerson',
+  reserved: 'reserved',
+  sold: 'sold'
 } as const
 
 export type TicketTypeScalarFieldEnum = (typeof TicketTypeScalarFieldEnum)[keyof typeof TicketTypeScalarFieldEnum]
@@ -1298,12 +1449,12 @@ export const PromotionScalarFieldEnum = {
   maxDiscount: 'maxDiscount',
   minPurchase: 'minPurchase',
   quota: 'quota',
-  usedCount: 'usedCount',
   startDate: 'startDate',
   endDate: 'endDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
+  deletedAt: 'deletedAt',
+  usedCount: 'usedCount'
 } as const
 
 export type PromotionScalarFieldEnum = (typeof PromotionScalarFieldEnum)[keyof typeof PromotionScalarFieldEnum]
@@ -1324,11 +1475,11 @@ export const OrderScalarFieldEnum = {
   buyerName: 'buyerName',
   buyerEmail: 'buyerEmail',
   buyerPhone: 'buyerPhone',
-  guestTokenHash: 'guestTokenHash',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  expiresAt: 'expiresAt'
+  expiresAt: 'expiresAt',
+  guestTokenHash: 'guestTokenHash'
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
@@ -1336,15 +1487,15 @@ export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof Or
 
 export const TransactionScalarFieldEnum = {
   id: 'id',
-  orderId: 'orderId',
-  paymentMethod: 'paymentMethod',
-  paymentProof: 'paymentProof',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  orderId: 'orderId',
   paidAt: 'paidAt',
-  verifiedBy: 'verifiedBy',
+  paymentMethod: 'paymentMethod',
+  paymentProof: 'paymentProof',
   verifiedAt: 'verifiedAt',
+  verifiedBy: 'verifiedBy',
   canceledAt: 'canceledAt',
   canceledBy: 'canceledBy',
   rejectedReason: 'rejectedReason'
@@ -1366,6 +1517,33 @@ export const PointsScalarFieldEnum = {
 } as const
 
 export type PointsScalarFieldEnum = (typeof PointsScalarFieldEnum)[keyof typeof PointsScalarFieldEnum]
+
+
+export const UserPromotionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  promotionId: 'promotionId',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  status: 'status'
+} as const
+
+export type UserPromotionScalarFieldEnum = (typeof UserPromotionScalarFieldEnum)[keyof typeof UserPromotionScalarFieldEnum]
+
+
+export const ReviewsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  eventId: 'eventId',
+  rating: 'rating',
+  comment: 'comment',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type ReviewsScalarFieldEnum = (typeof ReviewsScalarFieldEnum)[keyof typeof ReviewsScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1532,20 +1710,6 @@ export type ListEnumorderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$
 
 
 /**
- * Reference to a field of type 'paymentMethod'
- */
-export type EnumpaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'paymentMethod'>
-    
-
-
-/**
- * Reference to a field of type 'paymentMethod[]'
- */
-export type ListEnumpaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'paymentMethod[]'>
-    
-
-
-/**
  * Reference to a field of type 'transactionStatus'
  */
 export type EnumtransactionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'transactionStatus'>
@@ -1556,6 +1720,20 @@ export type EnumtransactionStatusFieldRefInput<$PrismaModel> = FieldRefInputType
  * Reference to a field of type 'transactionStatus[]'
  */
 export type ListEnumtransactionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'transactionStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'paymentMethod'
+ */
+export type EnumpaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'paymentMethod'>
+    
+
+
+/**
+ * Reference to a field of type 'paymentMethod[]'
+ */
+export type ListEnumpaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'paymentMethod[]'>
     
 
 
@@ -1705,6 +1883,8 @@ export type GlobalOmitConfig = {
   order?: Prisma.OrderOmit
   transaction?: Prisma.TransactionOmit
   points?: Prisma.PointsOmit
+  userPromotion?: Prisma.UserPromotionOmit
+  reviews?: Prisma.ReviewsOmit
 }
 
 /* Types for Logging */

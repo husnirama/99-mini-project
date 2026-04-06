@@ -24,7 +24,6 @@ function stableSerialize(value: unknown): string {
       .map((key) => `${key}:${stableSerialize(objectValue[key])}`)
       .join(",")}}`;
   }
-
   return String(value);
 }
 
@@ -52,7 +51,11 @@ function buildRequestCacheKey(req: Request, namespace: string) {
   ].join(":");
 }
 
-async function registerTags(cacheKey: string, tags: string[], ttlSeconds: number) {
+async function registerTags(
+  cacheKey: string,
+  tags: string[],
+  ttlSeconds: number,
+) {
   if (!tags.length) {
     return;
   }
@@ -80,7 +83,11 @@ export function createGetCacheMiddleware(options: CacheOptions) {
       const cachedValue = await redis.get(cacheKey);
 
       if (cachedValue) {
-        res.status(200).json(JSON.parse(cachedValue));
+        const parsedValue = JSON.parse(cachedValue);
+        res.status(200).json({
+          ...parsedValue,
+          source: "cache",
+        });
         return;
       }
     } catch (error) {
@@ -100,9 +107,16 @@ export function createGetCacheMiddleware(options: CacheOptions) {
             return;
           }
 
-          const uniqueTags = Array.from(new Set(options.tags(req))).filter(Boolean);
+          const uniqueTags = Array.from(new Set(options.tags(req))).filter(
+            Boolean,
+          );
 
-          await redis.set(cacheKey, JSON.stringify(body), "EX", options.ttlSeconds);
+          await redis.set(
+            cacheKey,
+            JSON.stringify(body),
+            "EX",
+            options.ttlSeconds,
+          );
           await registerTags(cacheKey, uniqueTags, options.ttlSeconds);
         } catch (error) {
           console.error("Cache write failed:", error);
@@ -125,7 +139,9 @@ export async function invalidateCacheTags(tags: string[]) {
 
   try {
     const tagKeys = uniqueTags.map((tag) => getTagKey(tag));
-    const taggedKeys = await Promise.all(tagKeys.map((tagKey) => redis.smembers(tagKey)));
+    const taggedKeys = await Promise.all(
+      tagKeys.map((tagKey) => redis.smembers(tagKey)),
+    );
     const cacheKeys = Array.from(new Set(taggedKeys.flat())).filter(Boolean);
     const pipeline = redis.multi();
 
@@ -154,4 +170,9 @@ export const cacheTags = {
   transactionsUser: (userId: number) => `transactions:user:${userId}`,
   transactionsOrganizer: (userId: number) => `transactions:organizer:${userId}`,
   transaction: (transactionId: number) => `transaction:${transactionId}`,
+  customerScope: (userId: number) => `customer:user:${userId}`,
+  customerProfile: (userId: number) => `customer:profile:user:${userId}`,
+  customerPoints: (userId: number) => `customer:points:user:${userId}`,
+  customerTickets: (userId: number) => `customer:tickets:user:${userId}`,
+  customerReviews: (userId: number) => `customer:reviews:user:${userId}`,
 };

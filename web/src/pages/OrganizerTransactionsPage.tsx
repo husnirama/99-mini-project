@@ -484,11 +484,11 @@ export default function OrganizerTransactionsPage() {
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                     {canReviewTransaction(selectedRecord.transaction.status) ? (
                       <>
                         <Button
-                          className="h-11 rounded-lg px-5 text-sm font-semibold shadow-lg shadow-primary/20"
+                          className="h-11 w-full rounded-lg px-5 text-sm font-semibold shadow-lg shadow-primary/20 sm:w-auto"
                           disabled={Boolean(pendingAction)}
                           onClick={() =>
                             handleAction(
@@ -505,7 +505,7 @@ export default function OrganizerTransactionsPage() {
                             : "Approve"}
                         </Button>
                         <Button
-                          className="h-11 rounded-lg px-5 text-sm font-semibold"
+                          className="h-11 w-full rounded-lg bg-rose-600 px-5 text-sm font-semibold text-white hover:bg-rose-700 sm:w-auto"
                           disabled={Boolean(pendingAction)}
                           onClick={() =>
                             handleAction(
@@ -514,7 +514,6 @@ export default function OrganizerTransactionsPage() {
                             )
                           }
                           type="button"
-                          variant="destructive"
                         >
                           {pendingAction?.transactionId ===
                             selectedRecord.transaction.id &&
@@ -527,7 +526,7 @@ export default function OrganizerTransactionsPage() {
 
                     {canCancelTransaction(selectedRecord.transaction.status) ? (
                       <Button
-                        className="h-11 rounded-lg px-5 text-sm font-semibold"
+                        className="h-11 w-full rounded-lg px-5 text-sm font-semibold sm:w-auto"
                         disabled={Boolean(pendingAction)}
                         onClick={() =>
                           handleAction(selectedRecord.transaction.id, "cancel")

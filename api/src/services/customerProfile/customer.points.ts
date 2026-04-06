@@ -41,5 +41,45 @@ export default async function customerRegisterpoints(
   return [referredPoints, newUserPoints];
 }
 
-// GetPromotion Coupon
-// export default async function getPromotionCoupon()
+export async function getCustomerPoints(userId: number) {
+  const points = await prisma.points.aggregate({
+    where: {
+      userId,
+      deletedAt: null,
+    },
+    _sum: {
+      points: true,
+    },
+    _max: {
+      expiresAt: true,
+    },
+  });
+  return points;
+}
+
+export async function getHistoryPoints(userId: number) {
+  const pointsHistory = await prisma.points.findMany({
+    where: {
+      userId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+  return pointsHistory;
+}
+
+export async function getReferralCode(userId: number) {
+  const referralCode = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      referralCode: true,
+    },
+  });
+  if (!referralCode) {
+    throw new AppError("User not found", 404);
+  }
+  return referralCode?.referralCode;
+}

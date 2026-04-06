@@ -1,359 +1,384 @@
+import { apiClient } from "@/api/clients";
+import { API_ENDPOINTS } from "@/api/endpoint";
+import TransactionStatusBadge from "@/components/TransactionStatusBadge";
 import SideNavigation from "@/components/customer/SideNavigation";
 import TopNavigation from "@/components/customer/TopNavigation";
+import type {
+  TransactionLifecycleRecord,
+  TransactionStatus,
+} from "@/types/orderTransactionTypes";
+import { formatDate } from "@/utils/eventList.utils";
+import {
+  canCancelTransaction,
+  canUploadPaymentProof,
+  formatCurrency,
+  formatTransactionStatusLabel,
+} from "@/utils/orderTransaction.utils";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router";
+import { toast } from "sonner";
+
+type DashboardStatusFilter = "ALL" | TransactionStatus;
+
+type CustomerTicketsSummary = {
+  totalTickets: {
+    _count: {
+      id: number;
+    };
+  };
+  upcomingEvents: {
+    _count: {
+      id: number;
+    };
+  };
+};
+
+const STATUS_OPTIONS: DashboardStatusFilter[] = [
+  "ALL",
+  "WAITING_FOR_PAYMENT",
+  "WAITING_FOR_ADMIN_CONFIRMATION",
+  "DONE",
+  "REJECTED",
+  "EXPIRED",
+  "CANCELED",
+];
+
+function stampRecord(
+  record: TransactionLifecycleRecord,
+): TransactionLifecycleRecord {
+  return {
+    ...record,
+    lastSyncedAt: new Date().toISOString(),
+  };
+}
+
+function formatDashboardStatus(status: DashboardStatusFilter) {
+  if (status === "ALL") {
+    return "All Status";
+  }
+
+  return formatTransactionStatusLabel(status);
+}
+
+function getRecordTimestamp(record: TransactionLifecycleRecord) {
+  return new Date(
+    record.transaction.createdAt || record.order.createdAt || record.lastSyncedAt,
+  ).getTime();
+}
 
 export default function CustomerTickets() {
+  const [summary, setSummary] = useState<CustomerTicketsSummary | null>(null);
+  const [records, setRecords] = useState<TransactionLifecycleRecord[]>([]);
+  const [activeFilter, setActiveFilter] =
+    useState<DashboardStatusFilter>("ALL");
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [pendingTransactionId, setPendingTransactionId] = useState<number | null>(
+    null,
+  );
+
+  async function fetchDashboard() {
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const [summaryResponse, transactionsResponse] = await Promise.all([
+        apiClient.get(API_ENDPOINTS.CUSTOMERS.TICKETS),
+        apiClient.get(API_ENDPOINTS.TRANSACTIONS.LIST),
+      ]);
+
+      setSummary(summaryResponse.data.data as CustomerTicketsSummary);
+      setRecords(
+        (transactionsResponse.data.data as TransactionLifecycleRecord[]).map(
+          stampRecord,
+        ),
+      );
+    } catch (error: any) {
+      console.error("Failed to fetch customer dashboard", error);
+      setSummary(null);
+      setRecords([]);
+      setErrorMessage(
+        error?.response?.data?.message || "We couldn't load your tickets right now.",
+      );
+      toast.error("We couldn't load your ticket dashboard.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  async function handleCancelTransaction(transactionId: number) {
+    setPendingTransactionId(transactionId);
+
+    try {
+      await apiClient.patch(API_ENDPOINTS.TRANSACTIONS.CANCEL(transactionId), {});
+      toast.success("Transaction canceled.");
+      await fetchDashboard();
+    } catch (error: any) {
+      console.error("Failed to cancel transaction", error);
+      toast.error(
+        error?.response?.data?.message || "We couldn't cancel this transaction.",
+      );
+    } finally {
+      setPendingTransactionId(null);
+    }
+  }
+
+  const sortedRecords = useMemo(
+    () =>
+      [...records].sort(
+        (left, right) => getRecordTimestamp(right) - getRecordTimestamp(left),
+      ),
+    [records],
+  );
+  const filteredRecords = useMemo(
+    () =>
+      activeFilter === "ALL"
+        ? sortedRecords
+        : sortedRecords.filter(
+            (record) => record.transaction.status === activeFilter,
+          ),
+    [activeFilter, sortedRecords],
+  );
+  const totalTicketUnits = useMemo(
+    () =>
+      records.reduce((sum, record) => sum + (record.order.quantity ?? 0), 0),
+    [records],
+  );
+  const nextUpcomingRecord = useMemo(
+    () =>
+      [...records]
+        .filter(
+          (record) =>
+            new Date(record.event.eventDateStart).getTime() > Date.now() &&
+            record.transaction.status !== "CANCELED" &&
+            record.transaction.status !== "EXPIRED" &&
+            record.transaction.status !== "REJECTED",
+        )
+        .sort(
+          (left, right) =>
+            new Date(left.event.eventDateStart).getTime() -
+            new Date(right.event.eventDateStart).getTime(),
+        )[0] ?? null,
+    [records],
+  );
+
   return (
     <>
-      {/* top navigation */}
       <TopNavigation />
-      <div className="max-w-9xl flex gap-8 p-6 lg:p-5 mx-auto">
-        {/* side navigation */}
+      <div className="max-w-9xl mx-auto flex flex-col gap-6 p-4 sm:p-6 md:flex-row lg:p-5">
         <SideNavigation />
-        {/* main content */}
-        <main className="min-h-screen flex flex-col">
-          {/* <!-- Content Canvas --> */}
-          <div className="p-6 md:p-10 space-y-8">
-            {/* <!-- Page Header --> */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div>
-                <h2 className="text-3xl font-extrabold tracking-tight text-on-surface">
-                  My Tickets
-                </h2>
-                <p className="text-on-surface-variant mt-1">
-                  Manage your event bookings and view transaction history.
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <button className="px-4 py-2 bg-secondary-container text-on-secondary-container text-sm font-semibold rounded-lg hover:opacity-90 transition-all flex items-center gap-2">
+        <main className="min-h-screen min-w-0 flex-1">
+          {isLoading ? (
+            <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              Loading your ticket dashboard...
+            </div>
+          ) : errorMessage ? (
+            <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              {errorMessage}
+            </div>
+          ) : (
+              <div className="space-y-8 p-4 sm:p-6 md:p-8">
+              <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <h2 className="text-3xl font-extrabold tracking-tight text-on-surface">
+                    My Tickets
+                  </h2>
+                  <p className="mt-1 text-on-surface-variant">
+                    Manage your event bookings and view transaction history.
+                  </p>
+                </div>
+                <Link
+                  className="inline-flex items-center gap-2 rounded-lg bg-secondary-container px-4 py-2 text-sm font-semibold text-on-secondary-container transition-opacity hover:opacity-90"
+                  to="/transactions/history"
+                >
                   <span className="material-symbols-outlined text-sm">
-                    download
+                    receipt_long
                   </span>
-                  Export PDF
-                </button>
+                  Open Full History
+                </Link>
               </div>
-            </div>
-            {/* <!-- Summary Bento Grid --> */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* <!-- Card 1 --> */}
-              <div className="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-primary relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <span
-                    className="material-symbols-outlined text-6xl"
-                    data-icon="confirmation_number"
+
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div className="relative overflow-hidden rounded-xl border-l-4 border-primary bg-surface-container-lowest p-6 shadow-sm">
+                  <div className="absolute right-0 top-0 p-4 opacity-10">
+                    <span className="material-symbols-outlined text-6xl">
+                      confirmation_number
+                    </span>
+                  </div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
+                    Total Tickets
+                  </p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold text-on-surface">
+                      {totalTicketUnits}
+                    </span>
+                    <span className="text-xs font-medium text-on-surface-variant">
+                      {summary?.totalTickets._count.id ?? 0} order
+                      {(summary?.totalTickets._count.id ?? 0) === 1 ? "" : "s"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="relative overflow-hidden rounded-xl border-l-4 border-tertiary bg-surface-container-lowest p-6 shadow-sm">
+                  <div className="absolute right-0 top-0 p-4 opacity-10">
+                    <span className="material-symbols-outlined text-6xl">
+                      calendar_today
+                    </span>
+                  </div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
+                    Upcoming Events
+                  </p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold text-on-surface">
+                      {summary?.upcomingEvents._count.id ?? 0}
+                    </span>
+                    <span className="text-xs font-medium text-primary">
+                      {nextUpcomingRecord
+                        ? `Next: ${formatDate(nextUpcomingRecord.event.eventDateStart)}`
+                        : "No upcoming bookings"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="overflow-hidden rounded-xl bg-surface-container-lowest shadow-sm">
+                  <div className="flex flex-col gap-3 border-b border-outline-variant/10 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                  <h3 className="text-lg font-bold">Transaction History</h3>
+                  <select
+                    className="rounded-lg bg-surface-container-low px-3 py-1.5 text-xs font-medium focus:ring-primary/20"
+                    onChange={(event) =>
+                      setActiveFilter(event.target.value as DashboardStatusFilter)
+                    }
+                    value={activeFilter}
                   >
-                    confirmation_number
-                  </span>
-                </div>
-                <p className="text-label-md uppercase tracking-widest text-on-surface-variant font-semibold text-xs mb-2">
-                  Total Tickets
-                </p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold text-on-surface">24</span>
-                  <span className="text-xs font-medium text-success text-green-600 flex items-center">
-                    +3 this month
-                  </span>
-                </div>
-              </div>
-              {/* <!-- Card 2 --> */}
-              <div className="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-tertiary relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <span
-                    className="material-symbols-outlined text-6xl"
-                    data-icon="calendar_today"
-                  >
-                    calendar_today
-                  </span>
-                </div>
-                <p className="text-label-md uppercase tracking-widest text-on-surface-variant font-semibold text-xs mb-2">
-                  Upcoming Events
-                </p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold text-on-surface">3</span>
-                  <span className="text-xs font-medium text-primary">
-                    Next: Dec 15
-                  </span>
-                </div>
-              </div>
-              {/* <!-- Card 3 --> */}
-              <div className="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-secondary relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <span
-                    className="material-symbols-outlined text-6xl"
-                    data-icon="stars"
-                  >
-                    stars
-                  </span>
-                </div>
-                <p className="text-label-md uppercase tracking-widest text-on-surface-variant font-semibold text-xs mb-2">
-                  Total Points
-                </p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold text-on-surface">
-                    12,450
-                  </span>
-                  <span className="text-xs font-medium text-on-surface-variant">
-                    IDR 124k value
-                  </span>
-                </div>
-              </div>
-            </div>
-            {/* <!-- Transaction Table Container --> */}
-            <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-outline-variant/10 flex items-center justify-between">
-                <h3 className="font-bold text-lg">Transaction History</h3>
-                <div className="flex items-center gap-2">
-                  <select className="bg-surface-container-low border-none rounded-lg text-xs font-medium py-1.5 focus:ring-primary/20">
-                    <option>All Status</option>
-                    <option>Completed</option>
-                    <option>Pending</option>
+                    {STATUS_OPTIONS.map((status) => (
+                      <option key={status} value={status}>
+                        {formatDashboardStatus(status)}
+                      </option>
+                    ))}
                   </select>
                 </div>
-              </div>
-              <div className="overflow-x-auto custom-scrollbar">
-                <table className="w-full text-sm text-left">
-                  <thead>
-                    <tr className="bg-surface-container-low/50 text-on-surface-variant uppercase text-[10px] tracking-widest font-bold">
-                      <th className="px-6 py-4">Order ID</th>
-                      <th className="px-6 py-4">Event Name</th>
-                      <th className="px-6 py-4">Date</th>
-                      <th className="px-6 py-4">Qty</th>
-                      <th className="px-6 py-4">Total Paid</th>
-                      <th className="px-6 py-4">Status</th>
-                      <th className="px-6 py-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-outline-variant/10">
-                    {/* <!-- Row 1: Completed --> */}
-                    <tr className="hover:bg-surface-container-low/30 transition-colors">
-                      <td className="px-6 py-4 font-mono font-medium text-primary">
-                        #TXN-9021
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-lg overflow-hidden flex-shrink-0 bg-slate-200">
-                            <img
-                              alt="Summer Fest"
-                              data-alt="vibrant neon concert stage with crowd silhouettes in purple and orange lighting, high energy music festival atmosphere"
-                              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYFF2cfcOV8OXfoRkANxrBi7Ckquce9_U7hgeVbKY_E4ojnlgkwxFqyFFw8CONqiDWNgi98QSsfNkHRk0VknjFpc_LcNeJU8Gjk1iS1n2MzPADWOoMtKRbGH8Csq3cA4PaCXszGrUE3X-zoPirqH_oPdaF9iXSNnGyvFzSyZixgZ6GWRxg6ObngeZG1Ibbh_ixU-Uf0k0NBzrNCTOyqTuzKJnOyMFIcZbT_fV_jh7JUKPPlxaDdtYDGR0auR2OvEJ1i0vv-tK_gfek"
-                            />
-                          </div>
-                          <span className="font-bold">
-                            Neon Summer Festival 2024
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-on-surface-variant">
-                        Nov 12, 2023
-                      </td>
-                      <td className="px-6 py-4">2</td>
-                      <td className="px-6 py-4 font-semibold text-on-surface">
-                        IDR 1,250,000
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-[11px] font-bold uppercase tracking-wider">
-                          Completed
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="text-primary hover:underline font-semibold flex items-center gap-1 mr-4">
-                          <span className="material-symbols-outlined text-base">
-                            star
-                          </span>
-                          Review
-                        </button>
-                        <button className="text-primary hover:underline font-semibold flex items-center gap-1 ml-auto">
-                          <span className="material-symbols-outlined text-base">
-                            confirmation_number
-                          </span>
-                          View Ticket
-                        </button>
-                      </td>
-                    </tr>
-                    {/* <!-- Row 2: Pending --> */}
-                    <tr className="hover:bg-surface-container-low/30 transition-colors">
-                      <td className="px-6 py-4 font-mono font-medium text-primary">
-                        #TXN-9045
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-lg overflow-hidden flex-shrink-0 bg-slate-200">
-                            <img
-                              alt="Tech Summit"
-                              data-alt="modern tech conference hall with blue led lighting, professional speakers on stage, futuristic corporate event design"
-                              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOCxnSRzVAweorO2Sg4VHaeP89zPXtWv4hOtUKLE7iQJgObYUlFJzbLiHnqrhNpDxN2-K5W9mKGbhiFrGQ-BLH6ZuQbJm9loF1XThOKeUB9ld0M-c0Jy-tGziDcjMvNZUcu5flyuNYrbpaqpxN5QhWKD7SslQHiYCa8A1q4k-MJshSN9381ge8rKoaaYqEGNGt6VXMLBEWq2wV3IfSEwZPJJxyiItUl3C69x-ze-Av7RXDoAZgH9nxoo9yYle8Q0lM2nfRcsveNNf0"
-                            />
-                          </div>
-                          <span className="font-bold">Global Tech Summit</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-on-surface-variant">
-                        Nov 28, 2023
-                      </td>
-                      <td className="px-6 py-4">1</td>
-                      <td className="px-6 py-4 font-semibold text-on-surface">
-                        IDR 3,500,000
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-[11px] font-bold uppercase tracking-wider">
-                          Pending Payment
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end gap-3">
-                          <button className="text-error hover:underline font-semibold flex items-center gap-1">
-                            Cancel
-                          </button>
-                          <button className="bg-primary text-white px-3 py-1 rounded-md text-xs font-bold shadow-sm hover:opacity-90 transition-all">
-                            Pay Now
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                    {/* <!-- Row 3: Waiting Confirmation --> */}
-                    <tr className="hover:bg-surface-container-low/30 transition-colors">
-                      <td className="px-6 py-4 font-mono font-medium text-primary">
-                        #TXN-9082
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-lg overflow-hidden flex-shrink-0 bg-slate-200">
-                            <img
-                              alt="Jazz Night"
-                              data-alt="dimly lit elegant jazz club with a saxophone player in spotlight, warm smoky atmosphere with vintage wooden textures"
-                              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAj8GtY6Zth1OsJ7WVQlLFwc0Y__pKqCnuQmIhACvO4crzRVjR_m_fiCZBoRhhYE6ymhNtEkEw5GRSOALUfacGsZMiSlV2wzTHVYkPvDRXnJqFawRtHcMP0mTnaQCGPneoiLdAdhm0ASbpJpBEXS5G96ba4YxqnqHBpUGacy8d6f8CjGdGPiDMgNDulVlt_9ch41WXyqTLKoSnb6zm_4LPGOnkl7gxXVgcuZT1BJdwtF-gfeByZauQvlgxM0oUpe75h1VE7L18X-FAE"
-                            />
-                          </div>
-                          <span className="font-bold">
-                            Midnight Jazz Quartet
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-on-surface-variant">
-                        Dec 02, 2023
-                      </td>
-                      <td className="px-6 py-4">4</td>
-                      <td className="px-6 py-4 font-semibold text-on-surface">
-                        IDR 800,000
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-[11px] font-bold uppercase tracking-wider">
-                          Waiting Confirmation
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="text-on-surface-variant hover:text-on-surface font-semibold flex items-center gap-1 ml-auto">
-                          <span className="material-symbols-outlined text-base">
-                            receipt_long
-                          </span>
-                          Details
-                        </button>
-                      </td>
-                    </tr>
-                    {/* <!-- Row 4: Canceled --> */}
-                    <tr className="hover:bg-surface-container-low/30 transition-colors">
-                      <td className="px-6 py-4 font-mono font-medium text-primary">
-                        #TXN-8822
-                      </td>
-                      <td className="px-6 py-4 text-slate-400">
-                        <div className="flex items-center gap-3 opacity-60">
-                          <div className="h-10 w-10 rounded-lg overflow-hidden flex-shrink-0 bg-slate-200 grayscale">
-                            <img
-                              alt="Workshop"
-                              data-alt="close-up of hands working on pottery wheel with clay, artisan workshop setting with natural earthy tones and soft morning light"
-                              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkZw9VW0FNk_J8C_62ADw9bwo5ELsCFSiGy3C4JV1wMqQrKcVqgNCyrmlwEnvpcDN27UyJLxbWEhHYzl5WD0mU33cRJmWW8W3Ko7UEgNh2r0LGkCajhm2vz0tBDIOA9iElvqghiOGyo86u_mbSIEFHHtZEoib03uj7VNSPj2zQehywevFQffuZpbOez9lauYlaePDilswa4Bgv6Z0D0PSAfpilj2LRtXKII-CTsuyNfT7ZZLVzPAlWINBJuQy_apr3_u9v3hfzCS40"
-                            />
-                          </div>
-                          <span className="font-bold line-through">
-                            Artisan Pottery Workshop
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-on-surface-variant/50">
-                        Oct 15, 2023
-                      </td>
-                      <td className="px-6 py-4 text-on-surface-variant/50">
-                        1
-                      </td>
-                      <td className="px-6 py-4 font-semibold text-on-surface-variant/50">
-                        IDR 450,000
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="px-3 py-1 rounded-full bg-red-100 text-red-700 text-[11px] font-bold uppercase tracking-wider">
-                          Canceled
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <span className="text-on-surface-variant/50 italic text-xs">
-                          No actions available
-                        </span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div className="px-6 py-4 border-t border-outline-variant/10 flex items-center justify-between">
-                <p className="text-xs text-on-surface-variant">
-                  Showing 4 of 24 transactions
-                </p>
-                <div className="flex gap-1">
-                  <button className="h-8 w-8 rounded flex items-center justify-center hover:bg-surface-container-low text-on-surface-variant">
-                    <span className="material-symbols-outlined text-sm">
-                      chevron_left
-                    </span>
-                  </button>
-                  <button className="h-8 w-8 rounded bg-primary text-white text-xs font-bold">
-                    1
-                  </button>
-                  <button className="h-8 w-8 rounded flex items-center justify-center hover:bg-surface-container-low text-on-surface-variant text-xs">
-                    2
-                  </button>
-                  <button className="h-8 w-8 rounded flex items-center justify-center hover:bg-surface-container-low text-on-surface-variant text-xs">
-                    3
-                  </button>
-                  <button className="h-8 w-8 rounded flex items-center justify-center hover:bg-surface-container-low text-on-surface-variant">
-                    <span className="material-symbols-outlined text-sm">
-                      chevron_right
-                    </span>
-                  </button>
+
+                <div className="overflow-x-auto custom-scrollbar">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="bg-surface-container-low/50 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+                        <th className="px-4 py-4 sm:px-6">Order ID</th>
+                        <th className="px-4 py-4 sm:px-6">Event Name</th>
+                        <th className="px-4 py-4 sm:px-6">Date</th>
+                        <th className="px-4 py-4 sm:px-6">Qty</th>
+                        <th className="px-4 py-4 sm:px-6">Total Paid</th>
+                        <th className="px-4 py-4 sm:px-6">Status</th>
+                        <th className="px-4 py-4 text-right sm:px-6">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-outline-variant/10">
+                      {filteredRecords.length ? (
+                        filteredRecords.map((record) => (
+                          <tr
+                            className="transition-colors hover:bg-surface-container-low/30"
+                            key={record.transaction.id}
+                          >
+                              <td className="px-4 py-4 font-mono font-medium text-primary sm:px-6">
+                              #{record.order.id}
+                            </td>
+                              <td className="px-4 py-4 sm:px-6">
+                              <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg bg-slate-200">
+                                  <img
+                                    alt={record.event.title}
+                                    className="h-full w-full object-cover"
+                                    src={
+                                      record.event.image ||
+                                      "https://via.placeholder.com/160x160?text=Event"
+                                    }
+                                  />
+                                </div>
+                                <span className="font-bold">{record.event.title}</span>
+                              </div>
+                            </td>
+                              <td className="px-4 py-4 text-on-surface-variant sm:px-6">
+                              {formatDate(record.event.eventDateStart)}
+                            </td>
+                              <td className="px-4 py-4 sm:px-6">{record.order.quantity}</td>
+                              <td className="px-4 py-4 font-semibold text-on-surface sm:px-6">
+                              {formatCurrency(record.order.totalAmount)}
+                            </td>
+                              <td className="px-4 py-4 sm:px-6">
+                              <TransactionStatusBadge
+                                className="whitespace-nowrap"
+                                status={record.transaction.status}
+                              />
+                            </td>
+                              <td className="px-4 py-4 sm:px-6">
+                              <div className="flex flex-wrap justify-end gap-3">
+                                <Link
+                                  className="font-semibold text-primary hover:underline"
+                                  to={`/transactions/${record.transaction.id}`}
+                                >
+                                  View detail
+                                </Link>
+                                {canUploadPaymentProof(record.transaction.status) ? (
+                                  <Link
+                                    className="font-semibold text-primary hover:underline"
+                                    to={`/transactions/${record.transaction.id}`}
+                                  >
+                                    Upload proof
+                                  </Link>
+                                ) : null}
+                                {canCancelTransaction(record.transaction.status) ? (
+                                  <button
+                                    className="font-semibold text-red-500 hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+                                    disabled={
+                                      pendingTransactionId === record.transaction.id
+                                    }
+                                    onClick={() =>
+                                      handleCancelTransaction(record.transaction.id)
+                                    }
+                                    type="button"
+                                  >
+                                    {pendingTransactionId === record.transaction.id
+                                      ? "Canceling..."
+                                      : "Cancel"}
+                                  </button>
+                                ) : null}
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            className="px-4 py-8 text-sm text-on-surface-variant sm:px-6"
+                            colSpan={7}
+                          >
+                            No transactions match the current status filter.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                  <div className="flex flex-col gap-3 border-t border-outline-variant/10 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                  <p className="text-xs text-on-surface-variant">
+                    Showing {filteredRecords.length} of {records.length} transactions
+                  </p>
+                  <Link
+                    className="text-xs font-semibold text-primary hover:underline"
+                    to="/transactions/history"
+                  >
+                    Open the full customer history page
+                  </Link>
                 </div>
               </div>
             </div>
-          </div>
-          {/* <!-- Empty Spacer for Mobile Bottom Nav Padding --> */}
-          <div className="h-20 md:hidden"></div>
+          )}
         </main>
-        <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-100 flex justify-around items-center py-3 px-2 z-50 shadow-2xl">
-          <a
-            className="flex flex-col items-center gap-1 text-slate-400"
-            href="#"
-          >
-            <span className="material-symbols-outlined">home</span>
-            <span className="text-[10px] font-medium">Home</span>
-          </a>
-          <a className="flex flex-col items-center gap-1 text-primary" href="#">
-            <span
-              className="material-symbols-outlined"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              confirmation_number
-            </span>
-            <span className="text-[10px] font-bold">Tickets</span>
-          </a>
-          <a
-            className="flex flex-col items-center gap-1 text-slate-400"
-            href="#"
-          >
-            <span className="material-symbols-outlined">redeem</span>
-            <span className="text-[10px] font-medium">Rewards</span>
-          </a>
-          <a
-            className="flex flex-col items-center gap-1 text-slate-400"
-            href="#"
-          >
-            <span className="material-symbols-outlined">person</span>
-            <span className="text-[10px] font-medium">Profile</span>
-          </a>
-        </nav>
       </div>
     </>
   );

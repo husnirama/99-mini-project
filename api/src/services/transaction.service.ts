@@ -44,7 +44,8 @@ export async function createTransaction(
     data: {
       orderId: payload.orderId,
       paymentMethod: payload.paymentMethod,
-      status: "WAITING_FOR_PAYMENT",
+      status: payload.status ?? "WAITING_FOR_PAYMENT",
+      paidAt: payload.paidAt ?? null,
     },
   });
 }
@@ -105,7 +106,12 @@ async function invalidateTransactionCache(
     cacheTags.eventsList,
     cacheTags.event(transaction.order.eventId),
     ...(transaction.order.customerId
-      ? [cacheTags.transactionsUser(transaction.order.customerId)]
+      ? [
+          cacheTags.transactionsUser(transaction.order.customerId),
+          cacheTags.customerPoints(transaction.order.customerId),
+          cacheTags.customerProfile(transaction.order.customerId),
+          cacheTags.customerScope(transaction.order.customerId),
+        ]
       : []),
   ]);
 }
@@ -259,6 +265,8 @@ function buildTransactionListWhere(
 async function restoreOrderResources(
   tx: Prisma.TransactionClient,
   data: {
+    orderId: number;
+    customerId: number | null;
     ticketTypeId: number;
     quantity: number;
     promotionId: number | null;
@@ -308,6 +316,20 @@ async function restoreOrderResources(
         },
       });
     }
+  }
+
+  if (data.customerId) {
+    await tx.points.updateMany({
+      where: {
+        userId: data.customerId,
+        source: "PURCHASE",
+        discount: data.orderId,
+        deletedAt: null,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
   }
 }
 
@@ -483,6 +505,8 @@ export async function rejectTransaction(
 
   const updatedTransaction = await prisma.$transaction(async (tx) => {
     await restoreOrderResources(tx, {
+      orderId: transaction.order.id,
+      customerId: transaction.order.customerId,
       ticketTypeId: transaction.order.ticketTypeId,
       quantity: transaction.order.quantity,
       promotionId: transaction.order.promotionId,
@@ -529,6 +553,8 @@ export async function cancelTransaction(
 
   const updatedTransaction = await prisma.$transaction(async (tx) => {
     await restoreOrderResources(tx, {
+      orderId: transaction.order.id,
+      customerId: transaction.order.customerId,
       ticketTypeId: transaction.order.ticketTypeId,
       quantity: transaction.order.quantity,
       promotionId: transaction.order.promotionId,
@@ -571,6 +597,8 @@ export async function expireTransaction(transactionId: number) {
 
   const updatedTransaction = await prisma.$transaction(async (tx) => {
     await restoreOrderResources(tx, {
+      orderId: transaction.order.id,
+      customerId: transaction.order.customerId,
       ticketTypeId: transaction.order.ticketTypeId,
       quantity: transaction.order.quantity,
       promotionId: transaction.order.promotionId,

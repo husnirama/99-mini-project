@@ -44,6 +44,18 @@ export const FOOTER_SHORTCUTS: SiteLink[] = [
   { label: "Help", to: "/help" },
 ];
 
+export function getCustomerProfilePath() {
+  return "/customer/profile";
+}
+
+export function getCustomerSettingsPath() {
+  return "/customer/settings";
+}
+
+export function getOrganizerProfilePath(userId?: number | null) {
+  return userId ? `/organizer/${userId}/profile` : "/organizer/dashboard";
+}
+
 export function getOrganizerStatisticsPath(userId?: number | null) {
   return userId ? `/organizer/${userId}/statistics` : "/organizer/dashboard";
 }

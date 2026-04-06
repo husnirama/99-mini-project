@@ -67,11 +67,11 @@ export type OrderMinAggregateOutputType = {
   buyerName: string | null
   buyerEmail: string | null
   buyerPhone: string | null
-  guestTokenHash: string | null
   status: $Enums.orderStatus | null
   createdAt: Date | null
   updatedAt: Date | null
   expiresAt: Date | null
+  guestTokenHash: string | null
 }
 
 export type OrderMaxAggregateOutputType = {
@@ -89,11 +89,11 @@ export type OrderMaxAggregateOutputType = {
   buyerName: string | null
   buyerEmail: string | null
   buyerPhone: string | null
-  guestTokenHash: string | null
   status: $Enums.orderStatus | null
   createdAt: Date | null
   updatedAt: Date | null
   expiresAt: Date | null
+  guestTokenHash: string | null
 }
 
 export type OrderCountAggregateOutputType = {
@@ -111,11 +111,11 @@ export type OrderCountAggregateOutputType = {
   buyerName: number
   buyerEmail: number
   buyerPhone: number
-  guestTokenHash: number
   status: number
   createdAt: number
   updatedAt: number
   expiresAt: number
+  guestTokenHash: number
   _all: number
 }
 
@@ -161,11 +161,11 @@ export type OrderMinAggregateInputType = {
   buyerName?: true
   buyerEmail?: true
   buyerPhone?: true
-  guestTokenHash?: true
   status?: true
   createdAt?: true
   updatedAt?: true
   expiresAt?: true
+  guestTokenHash?: true
 }
 
 export type OrderMaxAggregateInputType = {
@@ -183,11 +183,11 @@ export type OrderMaxAggregateInputType = {
   buyerName?: true
   buyerEmail?: true
   buyerPhone?: true
-  guestTokenHash?: true
   status?: true
   createdAt?: true
   updatedAt?: true
   expiresAt?: true
+  guestTokenHash?: true
 }
 
 export type OrderCountAggregateInputType = {
@@ -205,11 +205,11 @@ export type OrderCountAggregateInputType = {
   buyerName?: true
   buyerEmail?: true
   buyerPhone?: true
-  guestTokenHash?: true
   status?: true
   createdAt?: true
   updatedAt?: true
   expiresAt?: true
+  guestTokenHash?: true
   _all?: true
 }
 
@@ -314,11 +314,11 @@ export type OrderGroupByOutputType = {
   buyerName: string
   buyerEmail: string
   buyerPhone: string
-  guestTokenHash: string | null
   status: $Enums.orderStatus
   createdAt: Date
   updatedAt: Date
   expiresAt: Date
+  guestTokenHash: string | null
   _count: OrderCountAggregateOutputType | null
   _avg: OrderAvgAggregateOutputType | null
   _sum: OrderSumAggregateOutputType | null
@@ -359,15 +359,15 @@ export type OrderWhereInput = {
   buyerName?: Prisma.StringFilter<"Order"> | string
   buyerEmail?: Prisma.StringFilter<"Order"> | string
   buyerPhone?: Prisma.StringFilter<"Order"> | string
-  guestTokenHash?: Prisma.StringNullableFilter<"Order"> | string | null
   status?: Prisma.EnumorderStatusFilter<"Order"> | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"Order"> | Date | string
+  guestTokenHash?: Prisma.StringNullableFilter<"Order"> | string | null
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   event?: Prisma.XOR<Prisma.EventScalarRelationFilter, Prisma.EventWhereInput>
-  ticket?: Prisma.XOR<Prisma.TicketTypeScalarRelationFilter, Prisma.TicketTypeWhereInput>
   promotion?: Prisma.XOR<Prisma.PromotionNullableScalarRelationFilter, Prisma.PromotionWhereInput> | null
+  ticket?: Prisma.XOR<Prisma.TicketTypeScalarRelationFilter, Prisma.TicketTypeWhereInput>
   transaction?: Prisma.TransactionListRelationFilter
 }
 
@@ -386,15 +386,15 @@ export type OrderOrderByWithRelationInput = {
   buyerName?: Prisma.SortOrder
   buyerEmail?: Prisma.SortOrder
   buyerPhone?: Prisma.SortOrder
-  guestTokenHash?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  guestTokenHash?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   event?: Prisma.EventOrderByWithRelationInput
-  ticket?: Prisma.TicketTypeOrderByWithRelationInput
   promotion?: Prisma.PromotionOrderByWithRelationInput
+  ticket?: Prisma.TicketTypeOrderByWithRelationInput
   transaction?: Prisma.TransactionOrderByRelationAggregateInput
 }
 
@@ -416,15 +416,15 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   buyerName?: Prisma.StringFilter<"Order"> | string
   buyerEmail?: Prisma.StringFilter<"Order"> | string
   buyerPhone?: Prisma.StringFilter<"Order"> | string
-  guestTokenHash?: Prisma.StringNullableFilter<"Order"> | string | null
   status?: Prisma.EnumorderStatusFilter<"Order"> | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"Order"> | Date | string
+  guestTokenHash?: Prisma.StringNullableFilter<"Order"> | string | null
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   event?: Prisma.XOR<Prisma.EventScalarRelationFilter, Prisma.EventWhereInput>
-  ticket?: Prisma.XOR<Prisma.TicketTypeScalarRelationFilter, Prisma.TicketTypeWhereInput>
   promotion?: Prisma.XOR<Prisma.PromotionNullableScalarRelationFilter, Prisma.PromotionWhereInput> | null
+  ticket?: Prisma.XOR<Prisma.TicketTypeScalarRelationFilter, Prisma.TicketTypeWhereInput>
   transaction?: Prisma.TransactionListRelationFilter
 }, "id" | "id">
 
@@ -443,11 +443,11 @@ export type OrderOrderByWithAggregationInput = {
   buyerName?: Prisma.SortOrder
   buyerEmail?: Prisma.SortOrder
   buyerPhone?: Prisma.SortOrder
-  guestTokenHash?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  guestTokenHash?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.OrderCountOrderByAggregateInput
   _avg?: Prisma.OrderAvgOrderByAggregateInput
   _max?: Prisma.OrderMaxOrderByAggregateInput
@@ -473,11 +473,11 @@ export type OrderScalarWhereWithAggregatesInput = {
   buyerName?: Prisma.StringWithAggregatesFilter<"Order"> | string
   buyerEmail?: Prisma.StringWithAggregatesFilter<"Order"> | string
   buyerPhone?: Prisma.StringWithAggregatesFilter<"Order"> | string
-  guestTokenHash?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   status?: Prisma.EnumorderStatusWithAggregatesFilter<"Order"> | $Enums.orderStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
+  guestTokenHash?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
 }
 
 export type OrderCreateInput = {
@@ -490,15 +490,15 @@ export type OrderCreateInput = {
   buyerName: string
   buyerEmail: string
   buyerPhone: string
-  guestTokenHash?: string | null
   status?: $Enums.orderStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
+  guestTokenHash?: string | null
   user?: Prisma.UserCreateNestedOneWithoutOrdersInput
   event: Prisma.EventCreateNestedOneWithoutOrderInput
-  ticket: Prisma.TicketTypeCreateNestedOneWithoutOrderInput
   promotion?: Prisma.PromotionCreateNestedOneWithoutOrderInput
+  ticket: Prisma.TicketTypeCreateNestedOneWithoutOrderInput
   transaction?: Prisma.TransactionCreateNestedManyWithoutOrderInput
 }
 
@@ -517,11 +517,11 @@ export type OrderUncheckedCreateInput = {
   buyerName: string
   buyerEmail: string
   buyerPhone: string
-  guestTokenHash?: string | null
   status?: $Enums.orderStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
+  guestTokenHash?: string | null
   transaction?: Prisma.TransactionUncheckedCreateNestedManyWithoutOrderInput
 }
 
@@ -535,15 +535,15 @@ export type OrderUpdateInput = {
   buyerName?: Prisma.StringFieldUpdateOperationsInput | string
   buyerEmail?: Prisma.StringFieldUpdateOperationsInput | string
   buyerPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneWithoutOrdersNestedInput
   event?: Prisma.EventUpdateOneRequiredWithoutOrderNestedInput
-  ticket?: Prisma.TicketTypeUpdateOneRequiredWithoutOrderNestedInput
   promotion?: Prisma.PromotionUpdateOneWithoutOrderNestedInput
+  ticket?: Prisma.TicketTypeUpdateOneRequiredWithoutOrderNestedInput
   transaction?: Prisma.TransactionUpdateManyWithoutOrderNestedInput
 }
 
@@ -562,11 +562,11 @@ export type OrderUncheckedUpdateInput = {
   buyerName?: Prisma.StringFieldUpdateOperationsInput | string
   buyerEmail?: Prisma.StringFieldUpdateOperationsInput | string
   buyerPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   transaction?: Prisma.TransactionUncheckedUpdateManyWithoutOrderNestedInput
 }
 
@@ -585,11 +585,11 @@ export type OrderCreateManyInput = {
   buyerName: string
   buyerEmail: string
   buyerPhone: string
-  guestTokenHash?: string | null
   status?: $Enums.orderStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
+  guestTokenHash?: string | null
 }
 
 export type OrderUpdateManyMutationInput = {
@@ -602,11 +602,11 @@ export type OrderUpdateManyMutationInput = {
   buyerName?: Prisma.StringFieldUpdateOperationsInput | string
   buyerEmail?: Prisma.StringFieldUpdateOperationsInput | string
   buyerPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type OrderUncheckedUpdateManyInput = {
@@ -624,11 +624,11 @@ export type OrderUncheckedUpdateManyInput = {
   buyerName?: Prisma.StringFieldUpdateOperationsInput | string
   buyerEmail?: Prisma.StringFieldUpdateOperationsInput | string
   buyerPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type OrderListRelationFilter = {
@@ -656,11 +656,11 @@ export type OrderCountOrderByAggregateInput = {
   buyerName?: Prisma.SortOrder
   buyerEmail?: Prisma.SortOrder
   buyerPhone?: Prisma.SortOrder
-  guestTokenHash?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  guestTokenHash?: Prisma.SortOrder
 }
 
 export type OrderAvgOrderByAggregateInput = {
@@ -691,11 +691,11 @@ export type OrderMaxOrderByAggregateInput = {
   buyerName?: Prisma.SortOrder
   buyerEmail?: Prisma.SortOrder
   buyerPhone?: Prisma.SortOrder
-  guestTokenHash?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  guestTokenHash?: Prisma.SortOrder
 }
 
 export type OrderMinOrderByAggregateInput = {
@@ -713,11 +713,11 @@ export type OrderMinOrderByAggregateInput = {
   buyerName?: Prisma.SortOrder
   buyerEmail?: Prisma.SortOrder
   buyerPhone?: Prisma.SortOrder
-  guestTokenHash?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  guestTokenHash?: Prisma.SortOrder
 }
 
 export type OrderSumOrderByAggregateInput = {
@@ -934,14 +934,14 @@ export type OrderCreateWithoutUserInput = {
   buyerName: string
   buyerEmail: string
   buyerPhone: string
-  guestTokenHash?: string | null
   status?: $Enums.orderStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
+  guestTokenHash?: string | null
   event: Prisma.EventCreateNestedOneWithoutOrderInput
-  ticket: Prisma.TicketTypeCreateNestedOneWithoutOrderInput
   promotion?: Prisma.PromotionCreateNestedOneWithoutOrderInput
+  ticket: Prisma.TicketTypeCreateNestedOneWithoutOrderInput
   transaction?: Prisma.TransactionCreateNestedManyWithoutOrderInput
 }
 
@@ -959,11 +959,11 @@ export type OrderUncheckedCreateWithoutUserInput = {
   buyerName: string
   buyerEmail: string
   buyerPhone: string
-  guestTokenHash?: string | null
   status?: $Enums.orderStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
+  guestTokenHash?: string | null
   transaction?: Prisma.TransactionUncheckedCreateNestedManyWithoutOrderInput
 }
 
@@ -1011,11 +1011,11 @@ export type OrderScalarWhereInput = {
   buyerName?: Prisma.StringFilter<"Order"> | string
   buyerEmail?: Prisma.StringFilter<"Order"> | string
   buyerPhone?: Prisma.StringFilter<"Order"> | string
-  guestTokenHash?: Prisma.StringNullableFilter<"Order"> | string | null
   status?: Prisma.EnumorderStatusFilter<"Order"> | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"Order"> | Date | string
+  guestTokenHash?: Prisma.StringNullableFilter<"Order"> | string | null
 }
 
 export type OrderCreateWithoutEventInput = {
@@ -1028,14 +1028,14 @@ export type OrderCreateWithoutEventInput = {
   buyerName: string
   buyerEmail: string
   buyerPhone: string
-  guestTokenHash?: string | null
   status?: $Enums.orderStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
+  guestTokenHash?: string | null
   user?: Prisma.UserCreateNestedOneWithoutOrdersInput
-  ticket: Prisma.TicketTypeCreateNestedOneWithoutOrderInput
   promotion?: Prisma.PromotionCreateNestedOneWithoutOrderInput
+  ticket: Prisma.TicketTypeCreateNestedOneWithoutOrderInput
   transaction?: Prisma.TransactionCreateNestedManyWithoutOrderInput
 }
 
@@ -1053,11 +1053,11 @@ export type OrderUncheckedCreateWithoutEventInput = {
   buyerName: string
   buyerEmail: string
   buyerPhone: string
-  guestTokenHash?: string | null
   status?: $Enums.orderStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
+  guestTokenHash?: string | null
   transaction?: Prisma.TransactionUncheckedCreateNestedManyWithoutOrderInput
 }
 
@@ -1097,11 +1097,11 @@ export type OrderCreateWithoutTicketInput = {
   buyerName: string
   buyerEmail: string
   buyerPhone: string
-  guestTokenHash?: string | null
   status?: $Enums.orderStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
+  guestTokenHash?: string | null
   user?: Prisma.UserCreateNestedOneWithoutOrdersInput
   event: Prisma.EventCreateNestedOneWithoutOrderInput
   promotion?: Prisma.PromotionCreateNestedOneWithoutOrderInput
@@ -1122,11 +1122,11 @@ export type OrderUncheckedCreateWithoutTicketInput = {
   buyerName: string
   buyerEmail: string
   buyerPhone: string
-  guestTokenHash?: string | null
   status?: $Enums.orderStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
+  guestTokenHash?: string | null
   transaction?: Prisma.TransactionUncheckedCreateNestedManyWithoutOrderInput
 }
 
@@ -1166,11 +1166,11 @@ export type OrderCreateWithoutPromotionInput = {
   buyerName: string
   buyerEmail: string
   buyerPhone: string
-  guestTokenHash?: string | null
   status?: $Enums.orderStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
+  guestTokenHash?: string | null
   user?: Prisma.UserCreateNestedOneWithoutOrdersInput
   event: Prisma.EventCreateNestedOneWithoutOrderInput
   ticket: Prisma.TicketTypeCreateNestedOneWithoutOrderInput
@@ -1191,11 +1191,11 @@ export type OrderUncheckedCreateWithoutPromotionInput = {
   buyerName: string
   buyerEmail: string
   buyerPhone: string
-  guestTokenHash?: string | null
   status?: $Enums.orderStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
+  guestTokenHash?: string | null
   transaction?: Prisma.TransactionUncheckedCreateNestedManyWithoutOrderInput
 }
 
@@ -1235,15 +1235,15 @@ export type OrderCreateWithoutTransactionInput = {
   buyerName: string
   buyerEmail: string
   buyerPhone: string
-  guestTokenHash?: string | null
   status?: $Enums.orderStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
+  guestTokenHash?: string | null
   user?: Prisma.UserCreateNestedOneWithoutOrdersInput
   event: Prisma.EventCreateNestedOneWithoutOrderInput
-  ticket: Prisma.TicketTypeCreateNestedOneWithoutOrderInput
   promotion?: Prisma.PromotionCreateNestedOneWithoutOrderInput
+  ticket: Prisma.TicketTypeCreateNestedOneWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutTransactionInput = {
@@ -1261,11 +1261,11 @@ export type OrderUncheckedCreateWithoutTransactionInput = {
   buyerName: string
   buyerEmail: string
   buyerPhone: string
-  guestTokenHash?: string | null
   status?: $Enums.orderStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
+  guestTokenHash?: string | null
 }
 
 export type OrderCreateOrConnectWithoutTransactionInput = {
@@ -1294,15 +1294,15 @@ export type OrderUpdateWithoutTransactionInput = {
   buyerName?: Prisma.StringFieldUpdateOperationsInput | string
   buyerEmail?: Prisma.StringFieldUpdateOperationsInput | string
   buyerPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneWithoutOrdersNestedInput
   event?: Prisma.EventUpdateOneRequiredWithoutOrderNestedInput
-  ticket?: Prisma.TicketTypeUpdateOneRequiredWithoutOrderNestedInput
   promotion?: Prisma.PromotionUpdateOneWithoutOrderNestedInput
+  ticket?: Prisma.TicketTypeUpdateOneRequiredWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutTransactionInput = {
@@ -1320,11 +1320,11 @@ export type OrderUncheckedUpdateWithoutTransactionInput = {
   buyerName?: Prisma.StringFieldUpdateOperationsInput | string
   buyerEmail?: Prisma.StringFieldUpdateOperationsInput | string
   buyerPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type OrderCreateManyUserInput = {
@@ -1341,11 +1341,11 @@ export type OrderCreateManyUserInput = {
   buyerName: string
   buyerEmail: string
   buyerPhone: string
-  guestTokenHash?: string | null
   status?: $Enums.orderStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
+  guestTokenHash?: string | null
 }
 
 export type OrderUpdateWithoutUserInput = {
@@ -1358,14 +1358,14 @@ export type OrderUpdateWithoutUserInput = {
   buyerName?: Prisma.StringFieldUpdateOperationsInput | string
   buyerEmail?: Prisma.StringFieldUpdateOperationsInput | string
   buyerPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event?: Prisma.EventUpdateOneRequiredWithoutOrderNestedInput
-  ticket?: Prisma.TicketTypeUpdateOneRequiredWithoutOrderNestedInput
   promotion?: Prisma.PromotionUpdateOneWithoutOrderNestedInput
+  ticket?: Prisma.TicketTypeUpdateOneRequiredWithoutOrderNestedInput
   transaction?: Prisma.TransactionUpdateManyWithoutOrderNestedInput
 }
 
@@ -1383,11 +1383,11 @@ export type OrderUncheckedUpdateWithoutUserInput = {
   buyerName?: Prisma.StringFieldUpdateOperationsInput | string
   buyerEmail?: Prisma.StringFieldUpdateOperationsInput | string
   buyerPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   transaction?: Prisma.TransactionUncheckedUpdateManyWithoutOrderNestedInput
 }
 
@@ -1405,11 +1405,11 @@ export type OrderUncheckedUpdateManyWithoutUserInput = {
   buyerName?: Prisma.StringFieldUpdateOperationsInput | string
   buyerEmail?: Prisma.StringFieldUpdateOperationsInput | string
   buyerPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type OrderCreateManyEventInput = {
@@ -1426,11 +1426,11 @@ export type OrderCreateManyEventInput = {
   buyerName: string
   buyerEmail: string
   buyerPhone: string
-  guestTokenHash?: string | null
   status?: $Enums.orderStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
+  guestTokenHash?: string | null
 }
 
 export type OrderUpdateWithoutEventInput = {
@@ -1443,14 +1443,14 @@ export type OrderUpdateWithoutEventInput = {
   buyerName?: Prisma.StringFieldUpdateOperationsInput | string
   buyerEmail?: Prisma.StringFieldUpdateOperationsInput | string
   buyerPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneWithoutOrdersNestedInput
-  ticket?: Prisma.TicketTypeUpdateOneRequiredWithoutOrderNestedInput
   promotion?: Prisma.PromotionUpdateOneWithoutOrderNestedInput
+  ticket?: Prisma.TicketTypeUpdateOneRequiredWithoutOrderNestedInput
   transaction?: Prisma.TransactionUpdateManyWithoutOrderNestedInput
 }
 
@@ -1468,11 +1468,11 @@ export type OrderUncheckedUpdateWithoutEventInput = {
   buyerName?: Prisma.StringFieldUpdateOperationsInput | string
   buyerEmail?: Prisma.StringFieldUpdateOperationsInput | string
   buyerPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   transaction?: Prisma.TransactionUncheckedUpdateManyWithoutOrderNestedInput
 }
 
@@ -1490,11 +1490,11 @@ export type OrderUncheckedUpdateManyWithoutEventInput = {
   buyerName?: Prisma.StringFieldUpdateOperationsInput | string
   buyerEmail?: Prisma.StringFieldUpdateOperationsInput | string
   buyerPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type OrderCreateManyTicketInput = {
@@ -1511,11 +1511,11 @@ export type OrderCreateManyTicketInput = {
   buyerName: string
   buyerEmail: string
   buyerPhone: string
-  guestTokenHash?: string | null
   status?: $Enums.orderStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
+  guestTokenHash?: string | null
 }
 
 export type OrderUpdateWithoutTicketInput = {
@@ -1528,11 +1528,11 @@ export type OrderUpdateWithoutTicketInput = {
   buyerName?: Prisma.StringFieldUpdateOperationsInput | string
   buyerEmail?: Prisma.StringFieldUpdateOperationsInput | string
   buyerPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneWithoutOrdersNestedInput
   event?: Prisma.EventUpdateOneRequiredWithoutOrderNestedInput
   promotion?: Prisma.PromotionUpdateOneWithoutOrderNestedInput
@@ -1553,11 +1553,11 @@ export type OrderUncheckedUpdateWithoutTicketInput = {
   buyerName?: Prisma.StringFieldUpdateOperationsInput | string
   buyerEmail?: Prisma.StringFieldUpdateOperationsInput | string
   buyerPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   transaction?: Prisma.TransactionUncheckedUpdateManyWithoutOrderNestedInput
 }
 
@@ -1575,11 +1575,11 @@ export type OrderUncheckedUpdateManyWithoutTicketInput = {
   buyerName?: Prisma.StringFieldUpdateOperationsInput | string
   buyerEmail?: Prisma.StringFieldUpdateOperationsInput | string
   buyerPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type OrderCreateManyPromotionInput = {
@@ -1596,11 +1596,11 @@ export type OrderCreateManyPromotionInput = {
   buyerName: string
   buyerEmail: string
   buyerPhone: string
-  guestTokenHash?: string | null
   status?: $Enums.orderStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   expiresAt: Date | string
+  guestTokenHash?: string | null
 }
 
 export type OrderUpdateWithoutPromotionInput = {
@@ -1613,11 +1613,11 @@ export type OrderUpdateWithoutPromotionInput = {
   buyerName?: Prisma.StringFieldUpdateOperationsInput | string
   buyerEmail?: Prisma.StringFieldUpdateOperationsInput | string
   buyerPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneWithoutOrdersNestedInput
   event?: Prisma.EventUpdateOneRequiredWithoutOrderNestedInput
   ticket?: Prisma.TicketTypeUpdateOneRequiredWithoutOrderNestedInput
@@ -1638,11 +1638,11 @@ export type OrderUncheckedUpdateWithoutPromotionInput = {
   buyerName?: Prisma.StringFieldUpdateOperationsInput | string
   buyerEmail?: Prisma.StringFieldUpdateOperationsInput | string
   buyerPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   transaction?: Prisma.TransactionUncheckedUpdateManyWithoutOrderNestedInput
 }
 
@@ -1660,11 +1660,11 @@ export type OrderUncheckedUpdateManyWithoutPromotionInput = {
   buyerName?: Prisma.StringFieldUpdateOperationsInput | string
   buyerEmail?: Prisma.StringFieldUpdateOperationsInput | string
   buyerPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumorderStatusFieldUpdateOperationsInput | $Enums.orderStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -1713,15 +1713,15 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   buyerName?: boolean
   buyerEmail?: boolean
   buyerPhone?: boolean
-  guestTokenHash?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   expiresAt?: boolean
+  guestTokenHash?: boolean
   user?: boolean | Prisma.Order$userArgs<ExtArgs>
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
-  ticket?: boolean | Prisma.TicketTypeDefaultArgs<ExtArgs>
   promotion?: boolean | Prisma.Order$promotionArgs<ExtArgs>
+  ticket?: boolean | Prisma.TicketTypeDefaultArgs<ExtArgs>
   transaction?: boolean | Prisma.Order$transactionArgs<ExtArgs>
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
@@ -1741,15 +1741,15 @@ export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   buyerName?: boolean
   buyerEmail?: boolean
   buyerPhone?: boolean
-  guestTokenHash?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   expiresAt?: boolean
+  guestTokenHash?: boolean
   user?: boolean | Prisma.Order$userArgs<ExtArgs>
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
-  ticket?: boolean | Prisma.TicketTypeDefaultArgs<ExtArgs>
   promotion?: boolean | Prisma.Order$promotionArgs<ExtArgs>
+  ticket?: boolean | Prisma.TicketTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
 export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1767,15 +1767,15 @@ export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   buyerName?: boolean
   buyerEmail?: boolean
   buyerPhone?: boolean
-  guestTokenHash?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   expiresAt?: boolean
+  guestTokenHash?: boolean
   user?: boolean | Prisma.Order$userArgs<ExtArgs>
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
-  ticket?: boolean | Prisma.TicketTypeDefaultArgs<ExtArgs>
   promotion?: boolean | Prisma.Order$promotionArgs<ExtArgs>
+  ticket?: boolean | Prisma.TicketTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
 export type OrderSelectScalar = {
@@ -1793,33 +1793,33 @@ export type OrderSelectScalar = {
   buyerName?: boolean
   buyerEmail?: boolean
   buyerPhone?: boolean
-  guestTokenHash?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   expiresAt?: boolean
+  guestTokenHash?: boolean
 }
 
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "customerId" | "eventId" | "ticketTypeId" | "quantity" | "unitPrice" | "subTotalAmount" | "discountAmount" | "totalAmount" | "promotionId" | "voucherCode" | "buyerName" | "buyerEmail" | "buyerPhone" | "guestTokenHash" | "status" | "createdAt" | "updatedAt" | "expiresAt", ExtArgs["result"]["order"]>
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "customerId" | "eventId" | "ticketTypeId" | "quantity" | "unitPrice" | "subTotalAmount" | "discountAmount" | "totalAmount" | "promotionId" | "voucherCode" | "buyerName" | "buyerEmail" | "buyerPhone" | "status" | "createdAt" | "updatedAt" | "expiresAt" | "guestTokenHash", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.Order$userArgs<ExtArgs>
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
-  ticket?: boolean | Prisma.TicketTypeDefaultArgs<ExtArgs>
   promotion?: boolean | Prisma.Order$promotionArgs<ExtArgs>
+  ticket?: boolean | Prisma.TicketTypeDefaultArgs<ExtArgs>
   transaction?: boolean | Prisma.Order$transactionArgs<ExtArgs>
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.Order$userArgs<ExtArgs>
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
-  ticket?: boolean | Prisma.TicketTypeDefaultArgs<ExtArgs>
   promotion?: boolean | Prisma.Order$promotionArgs<ExtArgs>
+  ticket?: boolean | Prisma.TicketTypeDefaultArgs<ExtArgs>
 }
 export type OrderIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.Order$userArgs<ExtArgs>
   event?: boolean | Prisma.EventDefaultArgs<ExtArgs>
-  ticket?: boolean | Prisma.TicketTypeDefaultArgs<ExtArgs>
   promotion?: boolean | Prisma.Order$promotionArgs<ExtArgs>
+  ticket?: boolean | Prisma.TicketTypeDefaultArgs<ExtArgs>
 }
 
 export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1827,8 +1827,8 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   objects: {
     user: Prisma.$UserPayload<ExtArgs> | null
     event: Prisma.$EventPayload<ExtArgs>
-    ticket: Prisma.$TicketTypePayload<ExtArgs>
     promotion: Prisma.$PromotionPayload<ExtArgs> | null
+    ticket: Prisma.$TicketTypePayload<ExtArgs>
     transaction: Prisma.$TransactionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1846,11 +1846,11 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     buyerName: string
     buyerEmail: string
     buyerPhone: string
-    guestTokenHash: string | null
     status: $Enums.orderStatus
     createdAt: Date
     updatedAt: Date
     expiresAt: Date
+    guestTokenHash: string | null
   }, ExtArgs["result"]["order"]>
   composites: {}
 }
@@ -2247,8 +2247,8 @@ export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Ty
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.Order$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$userArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   event<T extends Prisma.EventDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EventDefaultArgs<ExtArgs>>): Prisma.Prisma__EventClient<runtime.Types.Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  ticket<T extends Prisma.TicketTypeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TicketTypeDefaultArgs<ExtArgs>>): Prisma.Prisma__TicketTypeClient<runtime.Types.Result.GetResult<Prisma.$TicketTypePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   promotion<T extends Prisma.Order$promotionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$promotionArgs<ExtArgs>>): Prisma.Prisma__PromotionClient<runtime.Types.Result.GetResult<Prisma.$PromotionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  ticket<T extends Prisma.TicketTypeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TicketTypeDefaultArgs<ExtArgs>>): Prisma.Prisma__TicketTypeClient<runtime.Types.Result.GetResult<Prisma.$TicketTypePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   transaction<T extends Prisma.Order$transactionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$transactionArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2293,11 +2293,11 @@ export interface OrderFieldRefs {
   readonly buyerName: Prisma.FieldRef<"Order", 'String'>
   readonly buyerEmail: Prisma.FieldRef<"Order", 'String'>
   readonly buyerPhone: Prisma.FieldRef<"Order", 'String'>
-  readonly guestTokenHash: Prisma.FieldRef<"Order", 'String'>
   readonly status: Prisma.FieldRef<"Order", 'orderStatus'>
   readonly createdAt: Prisma.FieldRef<"Order", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Order", 'DateTime'>
   readonly expiresAt: Prisma.FieldRef<"Order", 'DateTime'>
+  readonly guestTokenHash: Prisma.FieldRef<"Order", 'String'>
 }
     
 

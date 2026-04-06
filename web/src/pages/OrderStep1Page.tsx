@@ -7,6 +7,7 @@ import { useAuthStore } from "@/store/auth-store";
 import type { EventDetail } from "@/types/eventDetailTypes";
 import type {
   CreateOrderPayload,
+  OrderPricingPreview,
   PaymentMethod,
   TransactionCheckoutResponse,
 } from "@/types/orderTransactionTypes";
@@ -44,9 +45,14 @@ export default function OrderStep1Page() {
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [voucherCode, setVoucherCode] = useState("");
+  const [redeemedPointsInput, setRedeemedPointsInput] = useState("");
   const [paymentMethod, setPaymentMethod] =
     useState<PaymentMethod>("BANK_TRANSFER");
   const [buyerPhone, setBuyerPhone] = useState("");
+  const [pricingPreview, setPricingPreview] =
+    useState<OrderPricingPreview | null>(null);
+  const [isPricingLoading, setIsPricingLoading] = useState(false);
+  const [pricingError, setPricingError] = useState<string | null>(null);
   const buyerName = user?.name?.trim() ?? "";
   const buyerEmail = user?.email?.trim() ?? "";
 
@@ -130,12 +136,89 @@ export default function OrderStep1Page() {
     setQuantity((previous) => Math.max(1, Math.min(previous, maxQuantity)));
   }, [maxQuantity]);
 
+  const requestedRedeemedPoints = useMemo(() => {
+    const normalizedValue = redeemedPointsInput.replace(/\D/g, "");
+
+    if (!normalizedValue) {
+      return 0;
+    }
+
+    const parsedValue = Number(normalizedValue);
+    return Number.isFinite(parsedValue) ? parsedValue : 0;
+  }, [redeemedPointsInput]);
+
   const unitPrice = selectedTicket ? getTicketPrice(selectedTicket) : 0;
   const subtotal = unitPrice * quantity;
-  const estimatedDiscount = 0;
-  const total = Math.max(0, subtotal - estimatedDiscount);
+  const pricing = pricingPreview ?? {
+    unitPrice,
+    quantity,
+    subTotalAmount: subtotal,
+    voucherDiscountAmount: 0,
+    pointsDiscountAmount: 0,
+    totalDiscountAmount: 0,
+    totalAmount: subtotal,
+    availablePoints: 0,
+    appliedRedeemedPoints: 0,
+    voucherCode: voucherCode.trim() || null,
+  };
+  const total = pricing.totalAmount;
+  const isFreeOrder = total === 0;
   const eventImage = event ? getEventImageUrl(event) : "";
   const eventLocation = event ? getEventLocationLabel(event) : "Venue TBA";
+  const maxRedeemablePoints = Math.max(
+    0,
+    Math.min(
+      pricing.availablePoints,
+      pricing.subTotalAmount - pricing.voucherDiscountAmount,
+    ),
+  );
+
+  useEffect(() => {
+    if (!event || !selectedTicket) {
+      setPricingPreview(null);
+      setPricingError(null);
+      setIsPricingLoading(false);
+      return;
+    }
+
+    let isActive = true;
+    const timeout = window.setTimeout(async () => {
+      setIsPricingLoading(true);
+
+      try {
+        const response = await apiClient.post(API_ENDPOINTS.ORDERS.PREVIEW, {
+          eventId: event.id,
+          ticketTypeId: selectedTicket.id,
+          quantity,
+          voucherCode: voucherCode.trim() || undefined,
+          redeemedPoints: requestedRedeemedPoints || undefined,
+        });
+
+        if (!isActive) {
+          return;
+        }
+
+        setPricingPreview(response.data.data as OrderPricingPreview);
+        setPricingError(null);
+      } catch (error) {
+        if (!isActive) {
+          return;
+        }
+
+        console.error("Failed to preview order pricing", error);
+        setPricingError("We couldn't calculate your discount right now.");
+      } finally {
+        if (isActive) {
+          setIsPricingLoading(false);
+        }
+      }
+    }, 300);
+
+    return () => {
+      isActive = false;
+      window.clearTimeout(timeout);
+    };
+  }, [event, selectedTicket, quantity, voucherCode, requestedRedeemedPoints]);
 
   async function handleSubmit() {
     if (!event || !selectedTicket) {
@@ -144,15 +227,19 @@ export default function OrderStep1Page() {
     }
 
     if (!buyerName || !buyerEmail) {
-      toast.error("Your session is missing account details. Please log in again.");
+      toast.error(
+        "Your session is missing account details. Please log in again.",
+      );
       return;
     }
 
-    if (
-      !buyerPhone.trim() ||
-      !/^\+?[1-9]\d{7,14}$/.test(buyerPhone.trim())
-    ) {
+    if (!buyerPhone.trim() || !/^\+?[1-9]\d{7,14}$/.test(buyerPhone.trim())) {
       toast.error("Enter a valid phone number.");
+      return;
+    }
+
+    if (pricingError) {
+      toast.error(pricingError);
       return;
     }
 
@@ -161,6 +248,7 @@ export default function OrderStep1Page() {
       ticketTypeId: selectedTicket.id,
       quantity,
       voucherCode: voucherCode.trim() || undefined,
+      redeemedPoints: pricing.appliedRedeemedPoints || undefined,
       buyerName,
       buyerEmail,
       buyerPhone: buyerPhone.trim(),
@@ -176,7 +264,11 @@ export default function OrderStep1Page() {
       );
       const checkoutResponse = response.data
         .data as TransactionCheckoutResponse;
-      toast.success("Order created. Finish the payment before it expires.");
+      toast.success(
+        isFreeOrder
+          ? "Order created. No payment proof is needed for this ticket."
+          : "Order created. Finish the payment before it expires.",
+      );
       navigate(`/transactions/${checkoutResponse.transaction.id}`);
     } catch (error) {
       console.error("Failed to create order", error);
@@ -384,7 +476,7 @@ export default function OrderStep1Page() {
               })}
             </div>
 
-            <div className="mt-8 overflow-hidden rounded-xl border border-slate-100 dark:border-slate-800">
+            <div className="mt-8 overflow-x-auto rounded-xl border border-slate-100 dark:border-slate-800">
               <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 dark:bg-slate-800/50">
                   <tr>
@@ -451,14 +543,14 @@ export default function OrderStep1Page() {
               <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                 Buyer Information
               </h2>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  Your registered account details are used for the order, and we
-                  will use your phone number for payment updates if needed.
-                </p>
-              </div>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                Your registered account details are used for the order, and we
+                will use your phone number for payment updates if needed.
+              </p>
+            </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
                 <Label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                   Full Name
                 </Label>
@@ -513,7 +605,9 @@ export default function OrderStep1Page() {
                 Payment Method
               </h2>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                Order and transaction will be created together after checkout.
+                {isFreeOrder
+                  ? "Your ticket total is free, so payment proof will not be required after checkout."
+                  : "Order and transaction will be created together after checkout."}
               </p>
             </div>
 
@@ -558,7 +652,9 @@ export default function OrderStep1Page() {
                             {option.title}
                           </h3>
                           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                            {option.description}
+                            {isFreeOrder
+                              ? "No payment proof is required for zero-price checkout."
+                              : option.description}
                           </p>
                         </div>
                       </div>
@@ -602,9 +698,45 @@ export default function OrderStep1Page() {
                 value={voucherCode}
               />
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Any discount will be validated and applied when the order is
-                created.
+                Voucher discount is validated against the real backend pricing
+                rules before you continue.
               </p>
+            </div>
+          </section>
+
+          <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
+            <div className="mb-4 flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary">
+                stars
+              </span>
+              <h2 className="font-bold text-slate-900 dark:text-white">
+                Use Points
+              </h2>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Points to redeem
+              </Label>
+              <Input
+                className="h-11 border-slate-200 bg-slate-50 px-4 text-sm shadow-none dark:border-slate-700 dark:bg-slate-900"
+                inputMode="numeric"
+                onChange={(event) =>
+                  setRedeemedPointsInput(event.target.value.replace(/\D/g, ""))
+                }
+                placeholder="0"
+                value={redeemedPointsInput}
+              />
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Available now: {pricing.availablePoints} points. Up to{" "}
+                {maxRedeemablePoints} points can be used for this order.
+              </p>
+              {pricing.appliedRedeemedPoints > 0 ? (
+                <p className="text-xs font-medium text-emerald-600">
+                  {pricing.appliedRedeemedPoints} points will be applied as IDR{" "}
+                  {pricing.pointsDiscountAmount.toLocaleString("id-ID")}.
+                </p>
+              ) : null}
             </div>
           </section>
 
@@ -613,11 +745,17 @@ export default function OrderStep1Page() {
               Final Pricing Summary
             </h2>
 
+            {pricingError ? (
+              <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {pricingError}
+              </div>
+            ) : null}
+
             <div className="space-y-3 text-sm">
               <div className="flex items-center justify-between gap-4">
                 <span className="text-slate-500">Unit price</span>
                 <span className="font-medium text-slate-900 dark:text-white">
-                  {formatCurrency(unitPrice)}
+                  {formatCurrency(pricing.unitPrice)}
                 </span>
               </div>
 
@@ -631,23 +769,37 @@ export default function OrderStep1Page() {
               <div className="flex items-center justify-between gap-4">
                 <span className="text-slate-500">Subtotal</span>
                 <span className="font-medium text-slate-900 dark:text-white">
-                  {formatCurrency(subtotal)}
+                  {formatCurrency(pricing.subTotalAmount)}
                 </span>
               </div>
 
               <div className="flex items-center justify-between gap-4">
-                <span className="text-slate-500">Discount</span>
-                <span className="font-medium text-slate-900 dark:text-white">
-                  {voucherCode
-                    ? "Validated after checkout"
-                    : formatCurrency(estimatedDiscount)}
+                <span className="text-slate-500">Voucher discount</span>
+                <span className="font-medium text-emerald-600">
+                  -{formatCurrency(pricing.voucherDiscountAmount)}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-slate-500">Points redeemed</span>
+                <span className="font-medium text-emerald-600">
+                  -{formatCurrency(pricing.pointsDiscountAmount)}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-slate-500">Total discount</span>
+                <span className="font-medium text-emerald-600">
+                  -{formatCurrency(pricing.totalDiscountAmount)}
                 </span>
               </div>
 
               <div className="flex items-center justify-between gap-4">
                 <span className="text-slate-500">Payment method</span>
                 <span className="font-medium text-slate-900 dark:text-white">
-                  {formatPaymentMethod(paymentMethod)}
+                  {isFreeOrder
+                    ? "Not required for free ticket"
+                    : formatPaymentMethod(paymentMethod)}
                 </span>
               </div>
             </div>
@@ -665,11 +817,17 @@ export default function OrderStep1Page() {
 
             <Button
               className="h-12 w-full rounded-lg text-sm font-bold shadow-lg shadow-primary/20"
-              disabled={isSubmitting}
+              disabled={
+                isSubmitting || isPricingLoading || Boolean(pricingError)
+              }
               onClick={handleSubmit}
               type="button"
             >
-              {isSubmitting ? "Creating order..." : "Create Order & Continue"}
+              {isSubmitting
+                ? "Creating order..."
+                : isPricingLoading
+                  ? "Updating pricing..."
+                  : "Create Order & Continue"}
             </Button>
 
             <div className="mt-4 rounded-xl border border-primary/10 bg-primary/5 p-4 text-xs text-slate-600 dark:text-slate-300">
@@ -679,11 +837,14 @@ export default function OrderStep1Page() {
                 </span>
                 <div>
                   <p className="font-semibold text-slate-900 dark:text-white">
-                    Payment countdown starts immediately after checkout success.
+                    {isFreeOrder
+                      ? "This free ticket goes straight to organizer review."
+                      : "Payment countdown starts immediately after checkout success."}
                   </p>
                   <p className="mt-1">
-                    You will be redirected to the payment detail page to upload
-                    your proof and track the transaction status.
+                    {isFreeOrder
+                      ? "You will be redirected to the transaction detail page to track the organizer confirmation status."
+                      : "You will be redirected to the payment detail page to upload your proof and track the transaction status."}
                   </p>
                 </div>
               </div>

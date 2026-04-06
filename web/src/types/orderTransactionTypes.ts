@@ -28,10 +28,24 @@ export interface CreateOrderPayload {
   ticketTypeId: number;
   quantity: number;
   voucherCode?: string;
+  redeemedPoints?: number;
   buyerName: string;
   buyerEmail: string;
   buyerPhone: string;
   paymentMethod: PaymentMethod;
+}
+
+export interface OrderPricingPreview {
+  unitPrice: number;
+  quantity: number;
+  subTotalAmount: number;
+  voucherDiscountAmount: number;
+  pointsDiscountAmount: number;
+  totalDiscountAmount: number;
+  totalAmount: number;
+  availablePoints: number;
+  appliedRedeemedPoints: number;
+  voucherCode?: string | null;
 }
 
 export interface OrderRecord {

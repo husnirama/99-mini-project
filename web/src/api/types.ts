@@ -7,6 +7,7 @@ export interface User {
   role: UserRole;
   password?: string;
   address?: string | null;
+  profilePicture?: string | null;
   referralCode?: string;
   referredBy?: string | null;
   createdAt?: string;
@@ -38,6 +39,7 @@ export interface OrganizerProfile {
   name: string;
   email: string;
   address?: string | null;
+  profilePicture?: string | null;
   role: UserRole;
   referralCode?: string;
   referredBy?: string | null;
@@ -55,6 +57,7 @@ export interface CustomerProfile {
   name: string;
   email: string;
   address?: string | null;
+  profilePicture?: string | null;
   role: UserRole;
   referralCode?: string;
   referredBy?: string | null;

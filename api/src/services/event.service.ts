@@ -14,6 +14,82 @@ function normalizeNumeric(value: string, field: string) {
   return normalized;
 }
 
+function parseCoordinate(value?: string) {
+  if (!value) {
+    return null;
+  }
+
+  const parsedValue = Number(value);
+  return Number.isFinite(parsedValue) ? parsedValue : null;
+}
+
+function normalizeTicketPrice(price: string, availability: "Paid" | "Free") {
+  if (availability === "Free") {
+    return "0";
+  }
+
+  return normalizeNumeric(price, "Ticket price");
+}
+
+const publicEventInclude = {
+  venue: true,
+  ticket: {
+    where: {
+      status: {
+        not: "HIDDEN",
+      },
+    },
+    orderBy: {
+      id: "asc",
+    },
+  },
+  eventImage: {
+    where: {
+      deletedAt: null,
+    },
+    orderBy: {
+      id: "asc",
+    },
+  },
+} as const;
+
+const organizerManagedEventInclude = {
+  ...publicEventInclude,
+  promotion: {
+    where: {
+      deletedAt: null,
+    },
+    orderBy: {
+      id: "asc",
+    },
+  },
+} as const;
+
+const publicEventDetailInclude = {
+  ...publicEventInclude,
+  reviews: {
+    where: {
+      deletedAt: null,
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+    select: {
+      id: true,
+      rating: true,
+      comment: true,
+      createdAt: true,
+      updatedAt: true,
+      user: {
+        select: {
+          name: true,
+          profilePicture: true,
+        },
+      },
+    },
+  },
+} as const;
+
 export async function createDraftEvent(
   organizerId: number,
   payload: CreateEventInput,
@@ -34,33 +110,22 @@ export async function createDraftEvent(
     const imageUrls = uploadResults.map((result) => result.secure_url);
     uploadedPublicIds = uploadResults.map((result) => result.public_id);
 
-    const event = await prisma.$transaction(async (tx) => {
-      const createdEvent = await tx.event.create({
-        data: {
-          organizeBy: organizerId,
-          title: parsedCreateEvent.title,
-          category: parsedCreateEvent.category ?? null,
-          eventDescription: parsedCreateEvent.eventDescription ?? null,
-          eventDateStart: parsedCreateEvent.eventDateStart,
-          eventDateEnd: parsedCreateEvent.eventDateEnd,
-          termsAccepted: parsedCreateEvent.termsAccepted,
-        },
-      });
+      const event = await prisma.$transaction(async (tx) => {
+        const createdEvent = await tx.event.create({
+          data: {
+            organizeBy: organizerId,
+            title: parsedCreateEvent.title,
+            category: parsedCreateEvent.category ?? null,
+            eventDescription: parsedCreateEvent.eventDescription ?? null,
+            eventDateStart: parsedCreateEvent.eventDateStart,
+            eventDateEnd: parsedCreateEvent.eventDateEnd,
+            termsAccepted: parsedCreateEvent.termsAccepted,
+            image: imageUrls[0] ?? null,
+          },
+        });
 
-      const latitudeRaw = parsedCreateEvent.venue.latitude
-        ? Number(parsedCreateEvent.venue.latitude)
-        : null;
-      const longitudeRaw = parsedCreateEvent.venue.longitude
-        ? Number(parsedCreateEvent.venue.longitude)
-        : null;
-      const latitude =
-        latitudeRaw !== null && Number.isFinite(latitudeRaw)
-          ? latitudeRaw
-          : null;
-      const longitude =
-        longitudeRaw !== null && Number.isFinite(longitudeRaw)
-          ? longitudeRaw
-          : null;
+      const latitude = parseCoordinate(parsedCreateEvent.venue.latitude);
+      const longitude = parseCoordinate(parsedCreateEvent.venue.longitude);
 
       await tx.venue.create({
         data: {
@@ -79,7 +144,7 @@ export async function createDraftEvent(
         data: parsedCreateEvent.ticketTypes.map((ticket) => ({
           eventId: createdEvent.id,
           name: ticket.name,
-          price: normalizeNumeric(ticket.price, "Ticket price"),
+          price: normalizeTicketPrice(ticket.price, ticket.availability),
           quota: Number(normalizeNumeric(ticket.capacity, "Ticket capacity")),
           sold: 0,
           reserved: 0,
@@ -133,12 +198,7 @@ export async function createDraftEvent(
 
       return tx.event.findUnique({
         where: { id: createdEvent.id },
-        include: {
-          venue: true,
-          ticket: true,
-          eventImage: true,
-          promotion: true,
-        },
+        include: organizerManagedEventInclude,
       });
     });
 
@@ -171,17 +231,315 @@ export async function createDraftEvent(
   }
 }
 
+export async function getOrganizerOwnedEvent(
+  organizerId: number,
+  eventId: number,
+) {
+  const event = await prisma.event.findFirst({
+    where: {
+      id: eventId,
+      organizeBy: organizerId,
+      deletedAt: null,
+    },
+    include: organizerManagedEventInclude,
+  });
+
+  if (!event) {
+    throw new AppError("Event not found", 404);
+  }
+
+  return event;
+}
+
+export async function updateEventByOrganizer(
+  organizerId: number,
+  eventId: number,
+  payload: CreateEventInput,
+  files: Express.Multer.File[] = [],
+) {
+  let uploadedPublicIds: string[] = [];
+
+  try {
+    const parsedUpdateEvent = createEventSchema.parse(payload);
+    const existingEvent = await prisma.event.findFirst({
+      where: {
+        id: eventId,
+        organizeBy: organizerId,
+        deletedAt: null,
+      },
+      include: {
+        venue: true,
+        ticket: true,
+        promotion: true,
+        eventImage: {
+          where: {
+            deletedAt: null,
+          },
+        },
+      },
+    });
+
+    if (!existingEvent) {
+      throw new AppError("Event not found", 404);
+    }
+
+    let imageUrls: string[] = [];
+    if (files.length > 0) {
+      const uploadResults = await Promise.all(
+        files.map((file) => cloudinary.uploader.upload(file.path)),
+      );
+      imageUrls = uploadResults.map((result) => result.secure_url);
+      uploadedPublicIds = uploadResults.map((result) => result.public_id);
+    }
+
+    const latitude = parseCoordinate(parsedUpdateEvent.venue.latitude);
+    const longitude = parseCoordinate(parsedUpdateEvent.venue.longitude);
+    const submittedTicketIds = parsedUpdateEvent.ticketTypes
+      .map((ticket) => ticket.id)
+      .filter((ticketId): ticketId is number => Boolean(ticketId));
+    const submittedPromotionIds = parsedUpdateEvent.promotions
+      .map((promotion) => promotion.id)
+      .filter((promotionId): promotionId is number => Boolean(promotionId));
+
+    const updatedEvent = await prisma.$transaction(async (tx) => {
+      await tx.event.update({
+        where: {
+          id: eventId,
+        },
+        data: {
+          title: parsedUpdateEvent.title,
+          category: parsedUpdateEvent.category ?? null,
+          eventDescription: parsedUpdateEvent.eventDescription ?? null,
+          eventDateStart: parsedUpdateEvent.eventDateStart,
+          eventDateEnd: parsedUpdateEvent.eventDateEnd,
+          status: parsedUpdateEvent.status ?? existingEvent.status,
+          termsAccepted: parsedUpdateEvent.termsAccepted,
+          ...(imageUrls[0]
+            ? {
+                image: imageUrls[0],
+              }
+            : {}),
+        },
+      });
+
+      const existingVenue = existingEvent.venue[0];
+      if (existingVenue) {
+        await tx.venue.update({
+          where: {
+            id: existingVenue.id,
+          },
+          data: {
+            name: parsedUpdateEvent.venue.name,
+            addressLine: parsedUpdateEvent.venue.addressLine,
+            city: parsedUpdateEvent.venue.city,
+            region: parsedUpdateEvent.venue.region ?? null,
+            country: parsedUpdateEvent.venue.country,
+            latitude,
+            longitude,
+          },
+        });
+      } else {
+        await tx.venue.create({
+          data: {
+            eventId,
+            name: parsedUpdateEvent.venue.name,
+            addressLine: parsedUpdateEvent.venue.addressLine,
+            city: parsedUpdateEvent.venue.city,
+            region: parsedUpdateEvent.venue.region ?? null,
+            country: parsedUpdateEvent.venue.country,
+            latitude,
+            longitude,
+          },
+        });
+      }
+
+      for (const ticket of parsedUpdateEvent.ticketTypes) {
+        const ticketPayload = {
+          name: ticket.name,
+          price: normalizeTicketPrice(ticket.price, ticket.availability),
+          quota: Number(normalizeNumeric(ticket.capacity, "Ticket capacity")),
+          salesStartAt: parsedUpdateEvent.eventDateStart,
+          salesEndAt: parsedUpdateEvent.eventDateEnd,
+          status: "ACTIVE" as const,
+          contactPerson: parsedUpdateEvent.contactInfo.contactName,
+          emailContactPerson: parsedUpdateEvent.contactInfo.contactEmail,
+          phoneContactPerson: `${parsedUpdateEvent.contactInfo.countryCode} ${parsedUpdateEvent.contactInfo.phoneNumber}`,
+        };
+
+        if (ticket.id) {
+          const existingTicket = existingEvent.ticket.find(
+            (currentTicket) => currentTicket.id === ticket.id,
+          );
+
+          if (!existingTicket) {
+            throw new AppError("Ticket type not found", 404);
+          }
+
+          await tx.ticketType.update({
+            where: {
+              id: ticket.id,
+            },
+            data: ticketPayload,
+          });
+          continue;
+        }
+
+        await tx.ticketType.create({
+          data: {
+            eventId,
+            sold: 0,
+            reserved: 0,
+            ...ticketPayload,
+          },
+        });
+      }
+
+      const ticketIdsToHide = existingEvent.ticket
+        .filter((ticket) => !submittedTicketIds.includes(ticket.id))
+        .map((ticket) => ticket.id);
+
+      if (ticketIdsToHide.length > 0) {
+        await tx.ticketType.updateMany({
+          where: {
+            id: {
+              in: ticketIdsToHide,
+            },
+          },
+          data: {
+            status: "HIDDEN",
+          },
+        });
+      }
+
+      for (const promotion of parsedUpdateEvent.promotions) {
+        const promotionPayload = {
+          name: promotion.name,
+          code: promotion.code,
+          discountType: promotion.discountType,
+          discountValue: normalizeNumeric(
+            promotion.discountValue,
+            "Promotion discount value",
+          ),
+          maxDiscount: promotion.maxDiscount
+            ? normalizeNumeric(promotion.maxDiscount, "Promotion max discount")
+            : null,
+          minPurchase: promotion.minPurchase
+            ? normalizeNumeric(promotion.minPurchase, "Promotion min purchase")
+            : null,
+          quota: Number(normalizeNumeric(promotion.quota, "Promotion quota")),
+          startDate: promotion.startDate ? new Date(promotion.startDate) : null,
+          endDate: promotion.endDate ? new Date(promotion.endDate) : null,
+          deletedAt: null,
+        };
+
+        if (promotion.id) {
+          const existingPromotion = existingEvent.promotion.find(
+            (currentPromotion) => currentPromotion.id === promotion.id,
+          );
+
+          if (!existingPromotion) {
+            throw new AppError("Promotion not found", 404);
+          }
+
+          await tx.promotion.update({
+            where: {
+              id: promotion.id,
+            },
+            data: promotionPayload,
+          });
+          continue;
+        }
+
+        await tx.promotion.create({
+          data: {
+            eventId,
+            ...promotionPayload,
+          },
+        });
+      }
+
+      const promotionIdsToDelete = existingEvent.promotion
+        .filter((promotion) => !submittedPromotionIds.includes(promotion.id))
+        .map((promotion) => promotion.id);
+
+      if (promotionIdsToDelete.length > 0) {
+        await tx.promotion.updateMany({
+          where: {
+            id: {
+              in: promotionIdsToDelete,
+            },
+          },
+          data: {
+            deletedAt: new Date(),
+          },
+        });
+      }
+
+      if (imageUrls.length > 0) {
+        await tx.eventImage.updateMany({
+          where: {
+            eventId,
+            deletedAt: null,
+          },
+          data: {
+            deletedAt: new Date(),
+          },
+        });
+
+        await tx.eventImage.createMany({
+          data: imageUrls.map((imageUrl) => ({
+            eventId,
+            imageURL: imageUrl,
+          })),
+        });
+      }
+
+      return tx.event.findUnique({
+        where: {
+          id: eventId,
+        },
+        include: organizerManagedEventInclude,
+      });
+    });
+
+    await invalidateCacheTags([
+      cacheTags.eventsList,
+      cacheTags.event(eventId),
+      cacheTags.organizerDashboard(organizerId),
+      cacheTags.organizerScope(organizerId),
+    ]);
+
+    return updatedEvent;
+  } catch (error) {
+    if (uploadedPublicIds.length > 0) {
+      await Promise.all(
+        uploadedPublicIds.map((publicId) =>
+          cloudinary.uploader.destroy(publicId).catch(() => null),
+        ),
+      );
+    }
+
+    throw error;
+  } finally {
+    await Promise.all(
+      files.map(async (file) => {
+        try {
+          await fs.unlink(file.path);
+        } catch {
+          return null;
+        }
+      }),
+    );
+  }
+}
+
 export async function getEventList() {
   try {
     const events = await prisma.event.findMany({
       where: {
         deletedAt: null,
       },
-      include: {
-        venue: true,
-        ticket: true,
-        eventImage: true,
-      },
+      include: publicEventInclude,
       orderBy: {
         eventDateStart: "asc",
       },
@@ -198,16 +556,27 @@ export async function getUniqueEvent(id: number) {
       where: {
         id,
       },
-      include: {
-        venue: true,
-        ticket: true,
-        eventImage: true,
-      },
+      include: publicEventDetailInclude,
     });
     if (!event) {
       throw new AppError("Event not found", 404);
     }
-    return event;
+
+    const totalReviews = event.reviews.length;
+    const totalRating = event.reviews.reduce(
+      (sum, review) => sum + review.rating,
+      0,
+    );
+
+    return {
+      ...event,
+      reviewStats: {
+        totalReviews,
+        averageRating: totalReviews
+          ? Number((totalRating / totalReviews).toFixed(1))
+          : null,
+      },
+    };
   } catch (error) {
     throw new AppError("Failed to get unique event", 400);
   }

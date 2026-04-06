@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router";
+import { BrowserRouter, Route, Routes } from "react-router";
 import LoginPage from "./pages/LoginPage";
 import Home from "./pages/Home";
 import RootLayout from "./layouts/RootLayout";
@@ -11,36 +11,42 @@ import EventDetail from "./pages/EventDetail";
 import OrderStep1Page from "./pages/OrderStep1Page";
 import PaymentDetailPage from "./pages/PaymentDetailPage";
 import CustomerTransactionsPage from "./pages/CustomerTransactionsPage";
-import CustomerProfilePage from "./pages/Customer/CustomerProfilePage";
-import CustomerCouponsPage from "./pages/Customer/CustomerCouponsPage";
+// import CustomerProfilePage from "./pages/Customer/CustomerProfilePage";
+// import CustomerCouponsPage from "./pages/Customer/CustomerCouponsPage";
 import OrganizerTransactionsPage from "./pages/OrganizerTransactionsPage";
 import OrganizerDashboardPage from "./pages/OrganizerProfile/OrganizerDashboardPage";
+import OrganizerProfilePage from "./pages/OrganizerProfile/OrganizerProfilePage";
 import OrganizerStatisticsPage from "./pages/OrganizerProfile/OrganizerStatisticsPage";
 import OrganizerTransactionViewPage from "./pages/OrganizerProfile/OrganizerTransactionViewPage";
 import OrganizerAttendeesPage from "./pages/OrganizerProfile/OrganizerAttendeesPage";
 import OrganizerSettingPage from "./pages/OrganizerProfile/OrganizerSettingsPage";
 import AuthBootstrap from "./components/AuthBootstrap";
 import InfoPage from "./pages/InfoPage";
-import { useAuthStore } from "./store/auth-store";
-import type { ReactNode } from "react";
+import CustomerTickets from "./pages/CustomerProfile/CustomerTickets";
+import CustomerProfilePage from "./pages/CustomerProfile/CustomerProfilePage";
+import CustomerReviews from "./pages/CustomerProfile/CustomerReviews";
+import CustomerPoints from "./pages/CustomerProfile/CustomerPoints";
+import CustomerSettings from "./pages/CustomerProfile/CustomerSettings";
+// import { useAuthStore } from "./store/auth-store";
+// import type { ReactNode } from "react";
 
-function CustomerOnly({ children }: { children: ReactNode }) {
-  const { isReady, user } = useAuthStore();
+// function CustomerOnly({ children }: { children: ReactNode }) {
+//   const { isReady, user } = useAuthStore();
 
-  if (!isReady) {
-    return null;
-  }
+//   if (!isReady) {
+//     return null;
+//   }
 
-  if (!user) {
-    return <Navigate replace to="/auth/login" />;
-  }
+//   if (!user) {
+//     return <Navigate replace to="/auth/login" />;
+//   }
 
-  if (user.role !== "CUSTOMER") {
-    return <Navigate replace to="/" />;
-  }
+//   if (user.role !== "CUSTOMER") {
+//     return <Navigate replace to="/" />;
+//   }
 
-  return <>{children}</>;
-}
+//   return <>{children}</>;
+// }
 
 export default function App() {
   return (
@@ -75,15 +81,21 @@ export default function App() {
             <Route path="/auth/login" element={<LoginPage />}></Route>
             <Route path="/auth/register" element={<RegisterPage />}></Route>
           </Route>
-          {/* <Route element={<CustomerRoute />}>
+          <Route element={<CustomerRoute />}>
             <Route path="/customer/dashboard" element={<CustomerTickets />} />
+            <Route path="/customer/profile" element={<CustomerProfilePage />} />
             <Route path="/customer/reviews" element={<CustomerReviews />} />
             <Route path="/customer/points" element={<CustomerPoints />} />
-          </Route> */}
+            <Route path="/customer/settings" element={<CustomerSettings />} />
+          </Route>
           <Route element={<OrganizerRoute />}>
             <Route
               path="/organizer/dashboard"
               element={<OrganizerDashboardPage />}
+            />
+            <Route
+              path="/organizer/:id/profile"
+              element={<OrganizerProfilePage />}
             />
             <Route
               path="/organizer/:id/statistics"
@@ -103,6 +115,10 @@ export default function App() {
             />
             <Route
               path="/organizer/create-event"
+              element={<CreateEventPage />}
+            />
+            <Route
+              path="/organizer/events/:eventId/edit"
               element={<CreateEventPage />}
             />
             <Route

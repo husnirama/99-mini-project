@@ -1,446 +1,349 @@
+import { apiClient } from "@/api/clients";
+import { API_ENDPOINTS } from "@/api/endpoint";
 import SideNavigation from "@/components/customer/SideNavigation";
 import TopNavigation from "@/components/customer/TopNavigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+type PointsHistoryItem = {
+  id: number;
+  userId: number;
+  points: number;
+  discount: number | null;
+  source: string;
+  createdAt: string;
+  updatedAt: string | null;
+  expiresAt: string;
+  deletedAt: string | null;
+};
+
+type PointsData = {
+  totalPoints: {
+    _sum: {
+      points: number | null;
+    };
+    _max: {
+      expiresAt: string | null;
+    };
+  } | null;
+  pointsHistory: PointsHistoryItem[];
+  referralCode: string | null;
+};
+
+function formatDateLabel(value?: string | null) {
+  if (!value) {
+    return "-";
+  }
+
+  return new Date(value).toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function getPointsStatus(item: PointsHistoryItem) {
+  if (item.source === "PURCHASE" && item.points < 0) {
+    return item.deletedAt ? "Restored" : "Used";
+  }
+
+  if (item.deletedAt) {
+    return "Expired";
+  }
+
+  if (new Date(item.expiresAt).getTime() < Date.now()) {
+    return "Expired";
+  }
+
+  return "Active";
+}
+
+function getPointsStatusClass(status: string) {
+  if (status === "Expired") {
+    return "bg-rose-100 text-rose-700";
+  }
+
+  if (status === "Used") {
+    return "bg-amber-100 text-amber-700";
+  }
+
+  if (status === "Restored") {
+    return "bg-sky-100 text-sky-700";
+  }
+
+  return "bg-emerald-100 text-emerald-700";
+}
+
+function formatPointsSource(source: string) {
+  return source
+    .toLowerCase()
+    .split("_")
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(" ");
+}
+
+function formatPointsAmount(value: number) {
+  return value > 0 ? `+${value}` : String(value);
+}
 
 export default function CustomerPoints() {
+  const [points, setPoints] = useState<PointsData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchPoints() {
+      setIsLoading(true);
+      // setErrorMessage(null);
+
+      try {
+        const response = await apiClient.get(API_ENDPOINTS.CUSTOMERS.POINTS);
+
+        if (!isMounted) {
+          return;
+        }
+
+        setPoints(response.data.data as PointsData);
+      } catch (error) {
+        console.error("Failed to fetch points:", error);
+        if (isMounted) {
+          setPoints(null);
+          setErrorMessage("We couldn't load your points right now.");
+        }
+        toast.error("Failed to load your points. Please try again later.");
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchPoints();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const expiresAt = points?.totalPoints?._max.expiresAt;
+  const totalPoints = points?.totalPoints?._sum.points ?? 0;
+  const pointsHistory = points?.pointsHistory ?? [];
+  const referralHistory = pointsHistory.filter(
+    (item) => item.source === "REFERRAL",
+  );
+  const referralPoints = referralHistory.reduce(
+    (sum, item) => sum + (item.deletedAt ? 0 : item.points),
+    0,
+  );
+
+  function handleCopyCode() {
+    if (!points?.referralCode) {
+      return;
+    }
+
+    if (!navigator.clipboard) {
+      toast.error("Clipboard access is not available here.");
+      return;
+    }
+
+    navigator.clipboard
+      .writeText(points.referralCode)
+      .then(() => toast.success("Referral code copied."));
+  }
+
   return (
     <>
       <TopNavigation />
-      <div className="max-w-9xl flex gap-8 p-6 lg:p-5 mx-auto">
-        {/* side navigation */}
+      <div className="max-w-9xl mx-auto flex flex-col gap-6 p-4 sm:p-6 md:flex-row lg:p-5">
         <SideNavigation />
-        {/* main content */}
-        <main className="flex-1 p-8 bg-surface">
-          {/* <!-- Hero Summary Section --> */}
-          <div className="mb-10">
-            <h1 className="text-3xl font-extrabold tracking-tight text-on-surface mb-2">
-              Rewards Dashboard
-            </h1>
-            <p className="text-on-surface-variant mb-8">
-              Redeem points for premium upgrades and track your loyalty status.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* <!-- Total Points Card --> */}
-              <div className="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-primary transition-transform hover:scale-[1.02] duration-200">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-bold tracking-widest text-outline uppercase">
-                    Total Points
-                  </span>
-                  <div className="p-2 bg-primary-fixed rounded-lg text-on-primary-fixed-variant">
-                    <span
-                      className="material-symbols-outlined"
-                      data-icon="stars"
-                    >
-                      stars
-                    </span>
-                  </div>
-                </div>
-                <h3 className="text-3xl font-black text-on-surface tracking-tighter">
-                  12,450
-                </h3>
-                <p className="text-xs font-medium text-on-surface-variant mt-2 flex items-center gap-1">
-                  <span
-                    className="material-symbols-outlined text-sm"
-                    data-icon="event"
-                  >
-                    event
-                  </span>
-                  Valid until March 28, 2026
+        <main className="min-w-0 flex-1 bg-surface">
+          {isLoading ? (
+            <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              Loading your rewards...
+            </div>
+          ) : errorMessage ? (
+            <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              {errorMessage}
+            </div>
+          ) : (
+            <div className="space-y-10 p-4 sm:p-6 md:p-8">
+              <div className="mb-10">
+                <h1 className="mb-2 text-3xl font-extrabold tracking-tight text-on-surface">
+                  Rewards Dashboard
+                </h1>
+                <p className="mb-8 text-on-surface-variant">
+                  Track your current point balance and recent rewards activity.
                 </p>
-              </div>
-              {/* <!-- Active Coupons Card --> */}
-              <div className="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-tertiary transition-transform hover:scale-[1.02] duration-200">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-bold tracking-widest text-outline uppercase">
-                    Active Coupons
-                  </span>
-                  <div className="p-2 bg-tertiary-fixed rounded-lg text-on-tertiary-fixed-variant">
-                    <span
-                      className="material-symbols-outlined"
-                      data-icon="confirmation_number"
-                    >
-                      confirmation_number
-                    </span>
-                  </div>
-                </div>
-                <h3 className="text-3xl font-black text-on-surface tracking-tighter">
-                  3
-                </h3>
-                <p className="text-xs font-medium text-error mt-2 flex items-center gap-1">
-                  <span
-                    className="material-symbols-outlined text-sm"
-                    data-icon="alarm"
-                  >
-                    alarm
-                  </span>
-                  Earliest expires in 14 days
-                </p>
-              </div>
-              {/* <!-- Tier Progress (Contextual Bonus) --> */}
-              <div className="bg-surface-container-lowest p-6 rounded-xl shadow-sm col-span-1 md:col-span-2 relative overflow-hidden group">
-                <div className="flex flex-col h-full justify-between relative z-10">
-                  <div>
-                    <span className="text-[10px] font-bold tracking-widest text-outline uppercase">
-                      Membership Tier
-                    </span>
-                    <h3 className="text-xl font-bold text-primary mt-1">
-                      Silver Voyager
+                <div className="grid grid-cols-1 gap-6">
+                  <div className="rounded-xl border-l-4 border-primary bg-surface-container-lowest p-6 shadow-sm transition-transform duration-200 hover:scale-[1.02]">
+                    <div className="mb-4 flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-outline">
+                        Total Points
+                      </span>
+                      <div className="rounded-lg bg-primary-fixed p-2 text-on-primary-fixed-variant">
+                        <span className="material-symbols-outlined">stars</span>
+                      </div>
+                    </div>
+                    <h3 className="text-3xl font-black tracking-tighter text-on-surface">
+                      {totalPoints}
                     </h3>
-                  </div>
-                  <div className="mt-4">
-                    <div className="flex justify-between text-xs font-bold mb-1">
-                      <span>2,550 pts to Gold</span>
-                      <span>80%</span>
-                    </div>
-                    <div className="w-full bg-surface-container-high rounded-full h-2 overflow-hidden">
-                      <div className="bg-primary h-full rounded-full transition-all duration-1000 w-[80%]"></div>
-                    </div>
-                  </div>
-                </div>
-                <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                  <span
-                    className="material-symbols-outlined text-9xl"
-                    data-icon="military_tech"
-                  >
-                    military_tech
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* <!-- Referral & Coupon Section (Asymmetric Bento) --> */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
-            {/* <!-- Referral Program --> */}
-            <div className="lg:col-span-4 flex flex-col">
-              <div className="bg-primary p-8 rounded-xl text-on-primary flex flex-col justify-between h-full shadow-lg relative overflow-hidden">
-                <div className="relative z-10">
-                  <h2 className="text-xl font-extrabold mb-2">
-                    Referral Program
-                  </h2>
-                  <p className="text-on-primary-container/80 text-sm mb-6">
-                    Earn 10,000 points for every friend who joins using your
-                    unique code.
-                  </p>
-                  <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 border border-white/20 flex flex-col gap-1 items-center justify-center mb-6">
-                    <span className="text-[10px] font-bold tracking-widest opacity-70">
-                      YOUR REFERRAL CODE
-                    </span>
-                    <span className="text-2xl font-black tracking-widest">
-                      ALEX-REF-2024
-                    </span>
-                    <button className="mt-2 text-xs bg-white text-primary px-4 py-1.5 rounded-full font-bold active:scale-95 transition-transform">
-                      Copy Code
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-4 py-4 border-t border-white/10">
-                    <div className="text-center flex-1">
-                      <p className="text-2xl font-black">5</p>
-                      <p className="text-[10px] uppercase font-bold opacity-70">
-                        Users Joined
-                      </p>
-                    </div>
-                    <div className="w-[1px] h-8 bg-white/20"></div>
-                    <div className="text-center flex-1">
-                      <p className="text-2xl font-black">50k</p>
-                      <p className="text-[10px] uppercase font-bold opacity-70">
-                        Points Earned
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                {/* <!-- Background Pattern --> */}
-                <div className="absolute right-0 top-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
-                <div className="absolute left-0 bottom-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12"></div>
-              </div>
-            </div>
-            {/* <!-- Coupons Grid --> */}
-            <div className="lg:col-span-8">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold tracking-tight">
-                  Active Coupons
-                </h2>
-                <a
-                  className="text-primary text-sm font-semibold hover:underline"
-                  href="#"
-                >
-                  View Archived
-                </a>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* <!-- Coupon Card 1 --> */}
-                <div className="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/15 flex items-start gap-4 relative overflow-hidden">
-                  <div className="bg-primary-fixed w-16 h-16 rounded-lg flex flex-col items-center justify-center text-on-primary-fixed-variant flex-shrink-0">
-                    <span className="text-lg font-black">20%</span>
-                    <span className="text-[8px] font-bold uppercase">OFF</span>
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-sm mb-1">
-                      First-className Upgrade
-                    </h4>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[10px] bg-surface-container-high px-2 py-0.5 rounded font-mono text-outline">
-                        UPGRADE2024
+                    <p className="mt-2 flex items-center gap-1 text-xs font-medium text-on-surface-variant">
+                      <span className="material-symbols-outlined text-sm">
+                        event
                       </span>
-                      <button
-                        className="material-symbols-outlined text-sm text-primary"
-                        data-icon="content_copy"
-                      >
-                        content_copy
-                      </button>
-                    </div>
-                    <p className="text-[10px] text-on-surface-variant flex items-center gap-1">
-                      <span
-                        className="material-symbols-outlined text-[12px]"
-                        data-icon="history"
-                      >
-                        history
-                      </span>
-                      Expires Apr 12, 2024
+                      {expiresAt
+                        ? `Latest expiry on ${formatDateLabel(expiresAt)}`
+                        : "No points expiring soon"}
                     </p>
                   </div>
                 </div>
-                {/* <!-- Coupon Card 2 --> */}
-                <div className="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/15 flex items-start gap-4 relative overflow-hidden">
-                  <div className="bg-tertiary-fixed w-16 h-16 rounded-lg flex flex-col items-center justify-center text-on-tertiary-fixed-variant flex-shrink-0">
-                    <span className="text-lg font-black">$50</span>
-                    <span className="text-[8px] font-bold uppercase">OFF</span>
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-sm mb-1">Booking Discount</h4>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[10px] bg-surface-container-high px-2 py-0.5 rounded font-mono text-outline">
-                        SAVE50HUB
-                      </span>
-                      <button
-                        className="material-symbols-outlined text-sm text-primary"
-                        data-icon="content_copy"
-                      >
-                        content_copy
-                      </button>
+              </div>
+
+              <div className="mb-10 grid grid-cols-1 gap-8">
+                <div className="flex w-full flex-col">
+                  <div className="relative flex h-full flex-col justify-between overflow-hidden rounded-xl bg-primary p-8 text-on-primary shadow-lg">
+                    <div className="relative z-10">
+                      <h2 className="mb-2 text-xl font-extrabold">
+                        Referral Program
+                      </h2>
+                      <p className="mb-6 text-sm text-on-primary-container/80">
+                        Share your active referral code and track earned reward
+                        entries from the current backend data.
+                      </p>
+                      <div className="mb-6 flex flex-col items-center justify-center gap-1 rounded-lg border border-white/20 bg-white/10 p-4 backdrop-blur-md">
+                        <span className="text-[10px] font-bold tracking-widest opacity-70">
+                          YOUR REFERRAL CODE
+                        </span>
+                        <span className="text-2xl font-black tracking-widest">
+                          {points?.referralCode || "N/A"}
+                        </span>
+                        <button
+                          className="mt-2 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-primary transition-transform active:scale-95"
+                          onClick={handleCopyCode}
+                          type="button"
+                        >
+                          Copy Code
+                        </button>
+                      </div>
+                      <div className="flex flex-col gap-4 border-t border-white/10 py-4 sm:flex-row sm:items-center">
+                        <div className="flex-1 text-center">
+                          <p className="text-2xl font-black">
+                            {referralHistory.length}
+                          </p>
+                          <p className="text-[10px] font-bold uppercase opacity-70">
+                            Referral Entries
+                          </p>
+                        </div>
+                        <div className="hidden h-8 w-[1px] bg-white/20 sm:block" />
+                        <div className="flex-1 text-center">
+                          <p className="text-2xl font-black">
+                            {referralPoints}
+                          </p>
+                          <p className="text-[10px] font-bold uppercase opacity-70">
+                            Referral Points
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-[10px] text-error flex items-center gap-1">
-                      <span
-                        className="material-symbols-outlined text-[12px]"
-                        data-icon="alarm"
-                      >
-                        alarm
-                      </span>
-                      Expires in 14 days
+                    <div className="absolute right-0 top-0 h-32 w-32 -mr-16 -mt-16 rounded-full bg-white/5" />
+                    <div className="absolute bottom-0 left-0 h-24 w-24 -mb-12 -ml-12 rounded-full bg-white/5" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="overflow-hidden rounded-xl bg-surface-container-lowest shadow-sm">
+                <div className="border-b border-outline-variant/10 px-4 py-6 sm:px-8">
+                  <div>
+                    <h2 className="text-lg font-bold">Points Activity</h2>
+                    <p className="text-xs text-on-surface-variant">
+                      Recent reward entries from your account history.
                     </p>
                   </div>
                 </div>
-                {/* <!-- Coupon Card 3 --> */}
-                <div className="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/15 flex items-start gap-4 relative overflow-hidden">
-                  <div className="bg-secondary-fixed w-16 h-16 rounded-lg flex flex-col items-center justify-center text-on-secondary-fixed-variant flex-shrink-0">
-                    <span
-                      className="material-symbols-outlined text-2xl"
-                      data-icon="local_parking"
-                    >
-                      local_parking
-                    </span>
-                    <span className="text-[8px] font-bold uppercase">FREE</span>
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-sm mb-1">VIP Parking Pass</h4>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[10px] bg-surface-container-high px-2 py-0.5 rounded font-mono text-outline">
-                        PARKFREE24
-                      </span>
-                      <button
-                        className="material-symbols-outlined text-sm text-primary"
-                        data-icon="content_copy"
-                      >
-                        content_copy
-                      </button>
-                    </div>
-                    <p className="text-[10px] text-on-surface-variant flex items-center gap-1">
-                      <span
-                        className="material-symbols-outlined text-[12px]"
-                        data-icon="history"
-                      >
-                        history
-                      </span>
-                      Expires Jun 30, 2024
-                    </p>
-                  </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[640px] text-left">
+                    <thead>
+                      <tr className="bg-surface-container-low/50">
+                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-outline sm:px-8">
+                          Date
+                        </th>
+                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-outline sm:px-8">
+                          Source
+                        </th>
+                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-outline text-right sm:px-8">
+                          Amount
+                        </th>
+                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-outline text-right sm:px-8">
+                          Expires
+                        </th>
+                        <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-outline text-right sm:px-8">
+                          Status
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-outline-variant/10">
+                      {pointsHistory.length ? (
+                        pointsHistory.map((item) => {
+                          const status = getPointsStatus(item);
+
+                          return (
+                            <tr
+                              className="group transition-colors hover:bg-surface-container-low/30"
+                              key={item.id}
+                            >
+                              <td className="px-4 py-4 text-sm font-medium text-on-surface-variant sm:px-8">
+                                {formatDateLabel(item.createdAt)}
+                              </td>
+                              <td className="px-4 py-4 sm:px-8">
+                                <p className="text-sm font-bold">
+                                  {formatPointsSource(item.source)}
+                                </p>
+                                <p className="text-[10px] text-outline">
+                                  Record #{item.id}
+                                </p>
+                              </td>
+                              <td className="px-4 py-4 text-right sm:px-8">
+                                <span
+                                  className={`text-sm font-black ${
+                                    item.points < 0
+                                      ? "text-amber-600"
+                                      : "text-green-600"
+                                  }`}
+                                >
+                                  {formatPointsAmount(item.points)}
+                                </span>
+                              </td>
+                              <td className="px-4 py-4 text-right text-sm text-on-surface-variant sm:px-8">
+                                {formatDateLabel(item.expiresAt)}
+                              </td>
+                              <td className="px-4 py-4 text-right sm:px-8">
+                                <span
+                                  className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase ${getPointsStatusClass(status)}`}
+                                >
+                                  {status}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      ) : (
+                        <tr>
+                          <td
+                            className="px-4 py-8 text-sm text-on-surface-variant sm:px-8"
+                            colSpan={5}
+                          >
+                            No points activity is available yet.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
-                {/* <!-- Redeem More CTA --> */}
-                <div className="bg-surface-container-low p-5 rounded-xl border-2 border-dashed border-outline-variant flex items-center justify-center gap-3 cursor-pointer hover:bg-surface-variant/50 transition-colors">
-                  <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary">
-                    <span
-                      className="material-symbols-outlined text-sm"
-                      data-icon="add"
-                    >
-                      add
-                    </span>
-                  </div>
-                  <span className="text-sm font-bold text-primary">
-                    Redeem More Points
-                  </span>
-                </div>
               </div>
             </div>
-          </div>
-          {/* <!-- Transaction Activity Table --> */}
-          <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
-            <div className="px-8 py-6 border-b border-outline-variant/10 flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold">Points Activity</h2>
-                <p className="text-xs text-on-surface-variant">
-                  Recent transactions and point accruals
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button className="text-xs font-bold px-4 py-2 border border-outline-variant rounded-lg hover:bg-surface-container-low transition-colors">
-                  Export CSV
-                </button>
-                <button className="text-xs font-bold px-4 py-2 bg-primary text-on-primary rounded-lg shadow-md">
-                  Filter List
-                </button>
-              </div>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="bg-surface-container-low/50">
-                    <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-outline">
-                      Date
-                    </th>
-                    <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-outline">
-                      Description
-                    </th>
-                    <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-outline text-center">
-                      Type
-                    </th>
-                    <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-outline text-right">
-                      Amount
-                    </th>
-                    <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-outline text-right">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-outline-variant/10">
-                  {/* <!-- Row 1 --> */}
-                  <tr className="hover:bg-surface-container-low/30 transition-colors group">
-                    <td className="px-8 py-4 text-sm font-medium text-on-surface-variant">
-                      Mar 15, 2024
-                    </td>
-                    <td className="px-8 py-4">
-                      <p className="text-sm font-bold">Referral Bonus</p>
-                      <p className="text-[10px] text-outline">
-                        New user signup (ID: #4920)
-                      </p>
-                    </td>
-                    <td className="px-8 py-4 text-center">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700 uppercase">
-                        Earned
-                      </span>
-                    </td>
-                    <td className="px-8 py-4 text-right">
-                      <span className="text-sm font-black text-green-600">
-                        +10,000
-                      </span>
-                    </td>
-                    <td className="px-8 py-4 text-right">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-surface-container-high text-on-surface-variant uppercase">
-                        Completed
-                      </span>
-                    </td>
-                  </tr>
-                  {/* <!-- Row 2 --> */}
-                  <tr className="hover:bg-surface-container-low/30 transition-colors group">
-                    <td className="px-8 py-4 text-sm font-medium text-on-surface-variant">
-                      Mar 10, 2024
-                    </td>
-                    <td className="px-8 py-4">
-                      <p className="text-sm font-bold">
-                        Ticket Purchase Discount
-                      </p>
-                      <p className="text-[10px] text-outline">
-                        Redeemed for Booking #7712
-                      </p>
-                    </td>
-                    <td className="px-8 py-4 text-center">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 uppercase">
-                        Spent
-                      </span>
-                    </td>
-                    <td className="px-8 py-4 text-right">
-                      <span className="text-sm font-black text-on-surface">
-                        -2,500
-                      </span>
-                    </td>
-                    <td className="px-8 py-4 text-right">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-surface-container-high text-on-surface-variant uppercase">
-                        Applied
-                      </span>
-                    </td>
-                  </tr>
-                  {/* <!-- Row 3 --> */}
-                  <tr className="hover:bg-surface-container-low/30 transition-colors group">
-                    <td className="px-8 py-4 text-sm font-medium text-on-surface-variant">
-                      Mar 01, 2024
-                    </td>
-                    <td className="px-8 py-4">
-                      <p className="text-sm font-bold">
-                        Monthly Loyalty Reward
-                      </p>
-                      <p className="text-[10px] text-outline">
-                        Silver Tier Bonus
-                      </p>
-                    </td>
-                    <td className="px-8 py-4 text-center">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700 uppercase">
-                        Earned
-                      </span>
-                    </td>
-                    <td className="px-8 py-4 text-right">
-                      <span className="text-sm font-black text-green-600">
-                        +500
-                      </span>
-                    </td>
-                    <td className="px-8 py-4 text-right">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-surface-container-high text-on-surface-variant uppercase">
-                        Completed
-                      </span>
-                    </td>
-                  </tr>
-                  {/* <!-- Row 4 --> */}
-                  <tr className="hover:bg-surface-container-low/30 transition-colors group">
-                    <td className="px-8 py-4 text-sm font-medium text-on-surface-variant">
-                      Feb 28, 2024
-                    </td>
-                    <td className="px-8 py-4">
-                      <p className="text-sm font-bold">Points Expired</p>
-                      <p className="text-[10px] text-outline">
-                        Balance cleanup (Legacy system)
-                      </p>
-                    </td>
-                    <td className="px-8 py-4 text-center">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-error-container text-on-error-container uppercase">
-                        Expired
-                      </span>
-                    </td>
-                    <td className="px-8 py-4 text-right">
-                      <span className="text-sm font-black text-error">
-                        -120
-                      </span>
-                    </td>
-                    <td className="px-8 py-4 text-right">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-error-container text-on-error-container uppercase">
-                        Finalized
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div className="px-8 py-4 bg-surface-container-low/30 text-center">
-              <button className="text-sm font-bold text-primary hover:text-primary-container transition-colors">
-                Load More History
-              </button>
-            </div>
-          </div>
+          )}
         </main>
       </div>
     </>

@@ -6,6 +6,8 @@ import {
   getEvent,
   getEvents,
   handleCreateEvent,
+  handleGetOwnedEvent,
+  handleUpdateEvent,
 } from "../controllers/event.controller.js";
 import { upload } from "../middlewares/upload.middleware.js";
 
@@ -16,6 +18,31 @@ router.post(
   requireRole("EVENT_ORGANIZER"),
   upload.array("arrayImages", 10),
   handleCreateEvent,
+);
+router.get(
+  "/manage/:id",
+  requireAuth,
+  requireRole("EVENT_ORGANIZER"),
+  createGetCacheMiddleware({
+    namespace: "events:manage",
+    ttlSeconds: 60,
+    tags: (req) => {
+      const eventId = Number(req.params.id);
+      const organizerId = req.user?.userId ?? req.user?.id;
+
+      if (!Number.isFinite(eventId) || !organizerId) {
+        return [cacheTags.eventsList];
+      }
+
+      return [
+        cacheTags.eventsList,
+        cacheTags.event(eventId),
+        cacheTags.organizerDashboard(organizerId),
+        cacheTags.organizerScope(organizerId),
+      ];
+    },
+  }),
+  handleGetOwnedEvent,
 );
 router.get(
   "/event-list",
@@ -39,6 +66,13 @@ router.get(
     },
   }),
   getEvent,
+);
+router.patch(
+  "/:id",
+  requireAuth,
+  requireRole("EVENT_ORGANIZER"),
+  upload.array("arrayImages", 10),
+  handleUpdateEvent,
 );
 
 export default router;

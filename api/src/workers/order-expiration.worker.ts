@@ -1,4 +1,5 @@
 import { Worker } from "bullmq";
+import { cacheTags, invalidateCacheTags } from "../lib/cache.js";
 import { prisma } from "../lib/prisma.js";
 
 const redisUrl = process.env.REDIS_URL;
@@ -15,17 +16,24 @@ new Worker(
       transactionId: number;
     };
 
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-      select: {
-        id: true,
-        status: true,
-        expiresAt: true,
-        quantity: true,
-        ticketTypeId: true,
-        promotionId: true,
-      },
-    });
+      const order = await prisma.order.findUnique({
+        where: { id: orderId },
+        select: {
+          id: true,
+          customerId: true,
+          eventId: true,
+          status: true,
+          expiresAt: true,
+          quantity: true,
+          ticketTypeId: true,
+          promotionId: true,
+          event: {
+            select: {
+              organizeBy: true,
+            },
+          },
+        },
+      });
 
     if (!order) {
       return;
@@ -101,6 +109,20 @@ new Worker(
           }
         }
 
+        if (order.customerId) {
+          await tx.points.updateMany({
+            where: {
+              userId: order.customerId,
+              source: "PURCHASE",
+              discount: order.id,
+              deletedAt: null,
+            },
+            data: {
+              deletedAt: new Date(),
+            },
+          });
+        }
+
         await tx.order.update({
           where: { id: order.id },
           data: {
@@ -115,6 +137,22 @@ new Worker(
           },
         });
       });
+
+      await invalidateCacheTags([
+        cacheTags.eventsList,
+        cacheTags.event(order.eventId),
+        cacheTags.transactionsOrganizer(order.event.organizeBy),
+        cacheTags.organizerDashboard(order.event.organizeBy),
+        cacheTags.organizerScope(order.event.organizeBy),
+        ...(order.customerId
+          ? [
+              cacheTags.transactionsUser(order.customerId),
+              cacheTags.customerPoints(order.customerId),
+              cacheTags.customerProfile(order.customerId),
+              cacheTags.customerScope(order.customerId),
+            ]
+          : []),
+      ]);
 
       return;
     }
@@ -171,6 +209,20 @@ new Worker(
           }
         }
 
+        if (order.customerId) {
+          await tx.points.updateMany({
+            where: {
+              userId: order.customerId,
+              source: "PURCHASE",
+              discount: order.id,
+              deletedAt: null,
+            },
+            data: {
+              deletedAt: new Date(),
+            },
+          });
+        }
+
         await tx.order.update({
           where: { id: order.id },
           data: {
@@ -185,6 +237,22 @@ new Worker(
           },
         });
       });
+
+      await invalidateCacheTags([
+        cacheTags.eventsList,
+        cacheTags.event(order.eventId),
+        cacheTags.transactionsOrganizer(order.event.organizeBy),
+        cacheTags.organizerDashboard(order.event.organizeBy),
+        cacheTags.organizerScope(order.event.organizeBy),
+        ...(order.customerId
+          ? [
+              cacheTags.transactionsUser(order.customerId),
+              cacheTags.customerPoints(order.customerId),
+              cacheTags.customerProfile(order.customerId),
+              cacheTags.customerScope(order.customerId),
+            ]
+          : []),
+      ]);
     }
   },
   {
