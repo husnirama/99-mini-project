@@ -7,7 +7,7 @@ import {
   patchPersistedAuthState,
 } from "@/lib/auth-session";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8081"
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 type RetriableRequestConfig = {
   _retry?: boolean;
@@ -20,7 +20,6 @@ export const authClient = axios.create({
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
 });
-
 let refreshPromise: Promise<string | null> | null = null;
 
 export async function refreshAccessToken() {
